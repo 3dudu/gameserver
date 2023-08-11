@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+<style>
+    .w-e-text{background: rgb(25,29,37);}
+</style>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">帮助信息</a></li>
+    <li><a href="javascript:mgr.editHelpSys(1);">添加信息</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+
+    <div class="controls">
+    	<label  class="control-label" for="diffTypeInput">类型:</label>
+		<select id="diffTypeInput" name="diffTypeInput" class="input-medium" style="width:100px">
+
+	    </select>
+        <label  class="control-label" for="signTypeInput">标签:</label>
+        <select id="signTypeInput" name="signTypeInput" class="input-medium" style="width:100px">
+
+        </select>
+    	<!--<label for="userName">用户名:</label>
+        <input id="userName" name="userName" class="input-medium" type="text" value="" />&nbsp;-->
+        <label for="startDate">起始日期:</label>
+        <input id="startDate" name="startDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+		<label for="endDate">截止日期:</label>
+        <input id="endDate" name="endDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,20);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询从当前时间开始前七天的数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+    
+</form>
+<table id="helpSysListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">创建时间</th>
+        <!--<th class="header">操作用户</th>-->
+        <th class="header">标题</th>
+        <th class="header">描述</th>
+        <th class="header">类型</th>
+        <th class="header">标签</th>
+        <th class="header">排序</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+
+
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 1070px;margin-left: -590px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">编辑信息</h5>
+            </div>
+            <div class = "modal-body" style="max-height: 625px;">
+                <form id="editForm" class="form-horizontal" action="#" method="post">
+                    <input id="id" name="id" type="hidden" value=""/>
+                    <div class="control-group">
+                        <label  class="control-label" for="diffTypeInput">类型:</label>
+                        <select id="diffType" name="diffType" class="input-medium" style="width:100px;margin-left: 20px;">
+
+                        </select>
+                    </div>
+                    <div class="control-group" id="sign">
+                        <label  class="control-label" for="diffTypeInput">标签:</label>
+                        <select id="signType" name="signType" class="input-medium" style="width:100px;margin-left: 20px;">
+
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">标题:</label>
+                        <div class="controls">
+                            <input style="float:left" id="title" name="title" type="text" value="" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">描述:</label>
+                        <div class="controls">
+                            <input style="float:left" id="description" name="description" type="text" value="" />
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">排序:</label>
+                        <div class="controls">
+                            <input style="float:left" id="zan" name="zan" type="text" value="" />
+                            <i class="layer-tips" id="zanTips" tips="排序值:客户端展示的时候按照顺序值由大到小排序"></i>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">内容:</label>
+                        <div class="controls">
+                            <div id="context" name="context" style="width: 665px;"></div>
+                        </div>
+                    </div>
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/wangEditor/wangEditor.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#helpSysListTable").tablesorter();
+});
+$(function () {
+	mgr.getTypeList();
+	mgr.getSignList();
+
+    $(".modal").each(function(){
+        $(this).draggable({
+            handle: ".modal-header"   // 只能点击头部拖动
+        });
+        $(this).css("overflow", "hidden"); // 防止出现滚动条，出现的话，你会把滚动条一起拖着走的
+    });
+
+    $('#diffType').change(function(e){
+        var type = $("#diffType").find("option:selected").text();
+        $("#title").val("【" + type + "】");
+        $("#title").focus();
+    });
+});
+$(document).ready(function(){
+
+    mgr.getListPage(1,20);
+
+    $('#diffType').change(function(e){
+        var val = $(this).val();
+        switch(parseInt(val)){
+            case 1 : $("#sign").hide();break;
+            case 2 : $("#sign").show();break;
+        }
+    });
+});
+
+function isShowSign(diffName,signName){
+    return diffName == "官方" ? "" : signName;
+}
+
+var mgr ={
+		getTypeList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/helpsys/getDiffTypeList',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					//console.log(data);
+					var typeList = data;
+					var html = "<option value='0'>请选择</option>";
+					var htmlModal = '';
+					for(var i = 0 ; i < typeList.length ; i++){
+						html += '<option value="'+typeList[i].diffType+'">'+typeList[i].diffName+'</option>';
+                        htmlModal += '<option value="'+typeList[i].diffType+'">'+typeList[i].diffName+'</option>';
+					}
+					$('#diffTypeInput').html(html);
+					$('#diffType').html(htmlModal);
+
+                    $("#diffTypeInput").select2().change();
+                    $("#diffType").select2().change();
+				}
+			});
+	 	},
+        getSignList:function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsys/getSignTypeList',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    //console.log(data);
+                    var typeList = data;
+                    var html = "<option value='0'>请选择</option>";
+                    var htmlModal = '';
+                    for(var i = 0 ; i < typeList.length ; i++){
+                        html += '<option value="'+typeList[i].signType+'">'+typeList[i].signName+'</option>';
+                        htmlModal += '<option value="'+typeList[i].signType+'">'+typeList[i].signName+'</option>';
+                    }
+                    $('#signTypeInput').html(html);
+                    $('#signType').html(htmlModal);
+
+                    $("#signTypeInput").select2().change();
+                    $("#signType").select2().change();
+                }
+            });
+        },
+	 	getListPage : function(pageNo,pageSize){
+			var userName = $("#userName").val();
+			var diffType = $("#diffTypeInput").select2("val");
+			var signType = $("#signTypeInput").select2("val");
+
+			if(diffType == null){
+			    diffType = 0;
+            }
+            if(signType == null){
+                signType = 0;
+            }
+
+			var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/helpsys/getHelpSysList',
+				dataType:'json', 
+				data: {"userName":userName,"diffType":diffType,"signType":signType,"startDate":startDate,"endDate":endDate,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#helpSysListTable").trigger("update");
+					var dataList = data;
+					if(dataList != null && dataList.length > 1){
+						var htmlTable = "";
+						for(var i = 1 ; i < dataList.length ; i++){
+							htmlTable = htmlTable+"<tr>";							
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+dataList[i].createTime;
+							htmlTable = htmlTable+"</td>";	
+							/*htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+logList[i].userName;
+							htmlTable = htmlTable+"</td>";*/
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+dataList[i].title;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+dataList[i].description;
+							htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+dataList[i].diffName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+isShowSign(dataList[i].diffName,dataList[i].signName);
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+dataList[i].zan;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var editButton = "<a href='javascript:mgr.editHelpSys(2,"+dataList[i].id+")'>修改</a>";
+                            var delButton = "<a href='javascript:mgr.delHelpSys("+dataList[i].id+")'>删除</a>";
+                            var addButton = "<a href='javascript:mgr.editHelpSys(1)'>添加</a>";
+                            htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#helpSysListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#helpSysListTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+        editHelpSys : function(editFlag,id){
+            $("#editForm").validate({
+                rules: {
+                    title: {
+                        required: true
+                    },
+                    description :{
+                        required: true
+                    },
+                    zan: {
+                        required: true,
+                        digits:true,
+                        maxlength: 8
+                    }
+                },
+                messages: {
+                    title: {
+                        required: "请输入标题"
+                    },
+                    description: {
+                        required: "请输入描述信息"
+                    },
+                    zan: {
+                        required: "请输入类型",
+                        digits: "必须是整数",
+                        maxlength: "最大长度是8"
+                    }
+                } ,
+                submitHandler: function(form) {
+                    mgr.saveHelpSys(form);
+                }
+            });
+
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsys/gotoHelpSysEdit',
+                dataType:'json',
+                data: {"editFlag":editFlag,"id":id},
+                success:function(data){
+                    //console.log(data);
+                    var currentCreatTime = null;
+                    $("#editModal").modal("toggle");
+                    var helpSys = data;
+
+                    $("#id").val(helpSys.id);
+                    $("#diffType").val(helpSys.diffType).trigger("change");
+                    $("#signType").val(helpSys.signType).trigger("change");
+                    $("#title").val(editFlag == 1 ? "【官方】" :helpSys.title);
+                    $("#description").val(helpSys.description);
+                    $("#zan").val(editFlag == 1 ? 0 :helpSys.zan);
+                    editor.txt.html(editFlag == 1 ? "" :helpSys.context);
+                    $("#title").focus();
+                }
+            });
+        },
+        delHelpSys:function(id){
+            if(confirm("您确定要删除此条记录吗?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/helpsys/delHelpSys',
+                    dataType:'json',
+                    data: {"id":id},
+                    success:function(data){
+                        mgr.getListPage(1,20);
+                        alert(data.result);
+                    }
+                });
+            }
+        },
+        saveHelpSys: function(form){
+            var helpSys={};
+            var formObject = {};
+            var formArray =$("#editForm").serializeArray();
+            $.each(formArray, function(i, item){
+                formObject[item.name]=item.value;
+            });
+
+            // 内容校验
+            var context = editor.txt.html();
+
+            if(context.trim() == "<p><br></p>" || context.length == 0){
+                alert("请输入文本内容");
+                return false;
+            }
+
+            formObject["context"] = context;
+            helpSys = JSON.stringify(formObject);
+            // console.log(helpSys);
+            // console.log($("#context").html());
+            // return false;
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsys/saveHelpSys',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: helpSys,
+                success:function(data){
+                    $("#editModal").modal("hide");
+                    mgr.getListPage(1,20);
+                    alert(data.result);
+                }
+            });
+        }
+	};
+
+</script>
+<script>
+    // 富文本创建
+    var E = window.wangEditor;
+    var editor = new E('#context');
+    editor.create();
+</script>
+</body>
+</html>

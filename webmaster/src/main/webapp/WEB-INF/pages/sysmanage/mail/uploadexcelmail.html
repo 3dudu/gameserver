@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>配置表邮件发送页面</title>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit">
+    <style>
+        button.close {
+            -webkit-appearance: none;
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+        }
+        .modal-open {
+            overflow: hidden;
+        }
+
+
+
+        @keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+
+        @-webkit-keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+        .headerBox {
+            color: #fff;
+            /*padding: 10px;*/
+            font-size: 15px;
+            height: 60px;
+            animation: fade 600ms infinite;
+            -webkit-animation: fade 600ms infinite;
+        }
+        .size{
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: block;
+            float: left;
+            margin: 2px 5px 0 0;
+        }
+
+        .bgWait{
+            background: #999;
+        }
+
+        .bgProcessing{
+            background: #f0ad4e;
+        }
+
+        .bgSuccess{
+            background: #7CFC00;
+        }
+
+        .bgFailed{
+            background: #EE4000;
+        }
+        .text-bg {
+            color: #fff;
+            background: #109bd6;
+            padding: 3px 6px;
+            white-space: nowrap;
+            border-radius: 4px;
+        }
+
+        .textbg-1 {
+            background: #f34949;
+        }
+
+        .textbg-3 {
+            background: #2dc26c;
+        }
+
+        .textbg-4 {
+            background: #228B22;
+        }
+    </style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/xlsx.core.min.js" type="text/javascript"></script>
+<body onbeforeunload="checkLeave()">
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">配置表邮件</a></li>
+<!--    <li><a href="javascript:mgr.editRoleMail(1);">添加邮件</a></li>-->
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <input type="file" id="btn_file" style="display:none" onchange="mgr.importExcel(this);">
+        <input id="btnUploadExcel" class="btn btn-primary" type="button" value="上传表格" onclick = "mgr.uploadExcel();"/>
+        <input id="btnPushAllMail" class="btn btn-primary" type="button" value="一键发送" disabled="true" onclick = "mgr.pushAllMail();"/>
+        <input id="btnRePush" class="btn btn-primary" type="button" value="重新发送" disabled="true" onclick = "mgr.rePushMail();"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+    </div>
+
+</form>
+<table id="excelMailTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">ID</th>
+        <th class="header">区服ID</th>
+        <th class="header">角色ID</th>
+        <th class="header">邮件标题</th>
+        <th class="header">邮件内容</th>
+        <th class="header">奖励字段</th>
+        <th class="header">邮件创建时间</th>
+        <th class="header">邮件发送时间</th>
+        <th class="header">邮件状态</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td colspan='10' align='right'>没有查询到数据</td><tr>
+
+    </tbody>
+</table>
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var FAILEDSIZE = 0;
+    var ALLEXCELDATA=[];
+    var SENDALLMAILCLOCK;
+    var FAILEDDATA=[];
+    var SENDFAILEDMAILCLOCK;
+    var speed = 0;
+    var message=[];
+    var MESSAGECLOCK;
+    var FAILEDSIZEINDEX = 0;
+    $(document).ready(function(){
+        $("#excelMailTable").tablesorter();
+    });
+    $(function () {
+        // mgr.getListPage(1,18);
+        $('#serverIdInput').change(function(e){
+            var id = $("#serverIdInput").find("option:selected").val();
+            if(id == "选择所在区"){
+                alert("区服ID格式不正确，重新输入");
+                return false;
+            }
+            var _initValue = $("#sidPid").val();
+            _initValue += id+":";
+            $("#sidPid").val(_initValue);
+            $("#sidPid").focus();
+            //alert(id);
+        });
+    });
+    var mgr ={
+        uploadExcel : function(){
+            $("#btn_file").click();
+        },
+        importExcel : function(obj){
+            var finalExcelData = {};//最终需要的数据
+            var temp;//临时变量
+            if(!obj.files) {
+                return;
+            }
+            //这里可以自定义控制导入文件大小
+            var IMPORT_FILE_MAXSIZE = 2048;
+            var IMPORT_FILE_TYPE_ERROR = '导入的文件格式不正确!';
+            var IMPORT_FILE_SIZE_ERROR = '导入的表格文件不能大于2M';
+            var filename = "excelData";
+            var suffix = obj.files[0].name.split(".")[1];
+            //校验文件类型
+            if(suffix !=='xlsx'){
+                alert(IMPORT_FILE_TYPE_ERROR);
+                return
+            }
+            //检验文件大小
+            if(obj.files[0].size / 1024 > IMPORT_FILE_MAXSIZE){
+                alert(IMPORT_FILE_SIZE_ERROR);
+                return
+            }
+            var file = obj.files[0];
+            var reader = new FileReader();
+            reader.readAsBinaryString(file);
+            reader.onload = function(e) {
+                var data = e.target.result;
+                temp = XLSX.read(data, {
+                    type: 'binary'
+                });
+                // temp.SheetNames[0]是获取Sheets中第一个Sheet的名字
+                // temp.Sheets[Sheet名]获取第一个Sheet的数据
+                finalExcelData[filename] = XLSX.utils.sheet_to_json(temp.Sheets[temp.SheetNames[0]]);
+                mgr.saveExcelMail(finalExcelData);
+                var uploadButton = document.getElementById("btnUploadExcel");
+                uploadButton.setAttribute("disabled",true);
+                // uploadButton.style.backgroundColor = '#555555';
+            };
+        },
+        saveExcelMail : function(finalExcelData){
+            if (ALLEXCELDATA.length != 0){
+                alert("已存在配置表邮件")
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/excelmail/saveExcelMail',
+                dataType: 'json',
+                contentType :"application/json;charset=UTF-8",
+                data: JSON.stringify(finalExcelData),
+                success: function (result) {
+                    if (result.ret != "200"){
+                        alert(result.msg);
+                        return;
+                    }
+                    ALLEXCELDATA = result.data;
+                    mgr.loadExcelMail(result.data);
+                }
+            });
+        },
+        loadExcelMail : function(mailArray){
+            if(mailArray != null && mailArray.length > 0){
+                var htmlTable = "";
+                for(var i = 0;i< mailArray.length ; i++){
+                    htmlTable = htmlTable+"<tr>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+ mailArray[i].id;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].serverId;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].playerId;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].subject;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].content;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].awardStr;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+mailArray[i].createTime;
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    // htmlTable = htmlTable+(mailArray[i].syncTime==null?"":mailArray[i].syncTime);
+                    htmlTable = htmlTable+"<span id='mailSyncTime"+ mailArray[i].id+"'>";
+                    htmlTable = htmlTable+"";
+                    htmlTable = htmlTable+"</span>";
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"<td>";
+                    htmlTable = htmlTable+"<span id='mailStatus"+ mailArray[i].id+"' class='text-bg'>";
+                    htmlTable = htmlTable+"新加邮件";
+                    htmlTable = htmlTable+"</span>";
+                    htmlTable = htmlTable+"</td>";
+                    htmlTable = htmlTable+"</tr>";
+                }
+                $('#excelMailTable').find('tbody').html(htmlTable);
+            }else{
+                $('#excelMailTable').find('tbody').html("<tr><td colspan='10' align='right'>没有查询到数据</td><tr>");
+                $('#pageInfo').html("");
+            }
+            var btnPushAllMail = document.getElementById("btnPushAllMail");
+            btnPushAllMail.removeAttribute("disabled");
+        },
+        pushAllMail : function(){
+            if(confirm("是否确认一键发送邮件?")) {
+                SENDALLMAILCLOCK = setInterval("mgr.sendmail()",100);
+                var btnPushAllMail = document.getElementById("btnPushAllMail");
+                btnPushAllMail.setAttribute("disabled",true);
+            }
+        },
+        sendmail : function(){
+            if (ALLEXCELDATA.length == 0){
+                window.clearInterval(SENDALLMAILCLOCK);
+                alert("未找到需要发送的邮件")
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/excelmail/sendExcelMail',
+                async: false,
+                dataType: 'json',
+                data: {"mailId": ALLEXCELDATA[speed].id},
+                success: function (data) {
+                    if (data.ret == "201"){
+                        alert(data.msg);
+                        return;
+                    }
+                    var synctime = document.getElementById("mailSyncTime"+ALLEXCELDATA[speed].id);
+                    synctime.innerText = data.syncTime;
+                    switch (data.status) {
+                        case "0":
+                            var status = document.getElementById("mailStatus"+ALLEXCELDATA[speed].id);
+                            status.className = "text-bg textbg-3";
+                            status.innerText = "发送成功";
+                            mgr.scrollTop();
+                            break;
+                        case "1":
+                            var status = document.getElementById("mailStatus"+ALLEXCELDATA[speed].id);
+                            status.className = "text-bg textbg-1";
+                            status.innerText = "发送失败";
+                            FAILEDDATA.push(ALLEXCELDATA[speed].id);
+                            FAILEDSIZE = FAILEDDATA.length;
+                            FAILEDSIZEINDEX++;
+                            message.push(data);
+                            break;
+                    }
+                }
+            });
+            speed++;
+            if (speed >= ALLEXCELDATA.length){
+                FAILEDSIZEINDEX = 0;
+                window.clearInterval(SENDALLMAILCLOCK);
+                speed = 0;
+                var finalMessage;
+                if (FAILEDSIZE > 0){
+                    var btnRePush = document.getElementById("btnRePush");
+                    btnRePush.removeAttribute("disabled");
+                    finalMessage = "发送结果：" + "发送失败：" + FAILEDSIZE + "， 邮件总数：" + ALLEXCELDATA.length + "\n";
+                    finalMessage = finalMessage + ("发送失败邮件：" + "\n");
+                }else {
+                    finalMessage = "发送结果：" + "发送成功！ 邮件总数：" + ALLEXCELDATA.length + "\n";
+                }
+                for (var i=0; i < message.length; i++){
+                    var str = message[i].msg + "\n";
+                    finalMessage = finalMessage + str;
+                }
+                message = [];
+                MESSAGECLOCK = setTimeout(function () {
+                    mgr.alertMsg(finalMessage);
+                },100);
+            }
+        },
+        scrollTop : function(){
+            var scrollTab = document.getElementsByTagName('tbody')[0];
+            var trs=scrollTab.getElementsByTagName('tr');//每次都重新取出所有内容行
+            var newTr=trs[FAILEDSIZEINDEX].cloneNode(true);//复制行，得到新的行对象
+            scrollTab.removeChild(trs[FAILEDSIZEINDEX]);
+            scrollTab.appendChild(newTr);
+        },
+        rePushMail: function(){
+            if(confirm("是否确认重新发送失败邮件?")) {
+                SENDFAILEDMAILCLOCK = setInterval("mgr.sendfailedmail()",100);
+            }
+        },
+        sendfailedmail : function(){
+            if (FAILEDSIZE == 0){
+                window.clearInterval(SENDFAILEDMAILCLOCK);
+                alert("未找到发送失败的邮件")
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/excelmail/sendExcelMail',
+                async: false,
+                dataType: 'json',
+                data: {"mailId": FAILEDDATA[speed]},
+                success: function (data) {
+                    if (data.ret == "201"){
+                        alert(data.msg);
+                        return;
+                    }
+                    var synctime = document.getElementById("mailSyncTime"+FAILEDDATA[speed]);
+                    synctime.innerText = data.syncTime;
+                    switch (data.status) {
+                        case "3":
+                            var status = document.getElementById("mailStatus"+FAILEDDATA[speed]);
+                            status.className = "text-bg textbg-4";
+                            status.innerText = "重新发送成功";
+                            mgr.scrollTop();
+                            break;
+                        case "1":
+                            var status = document.getElementById("mailStatus"+FAILEDDATA[speed]);
+                            status.className = "text-bg textbg-1";
+                            status.innerText = "发送失败";
+                            FAILEDSIZEINDEX++;
+                            FAILEDDATA.push(FAILEDDATA[speed]);
+                            message.push(data);
+                            break;
+                    }
+                }
+            });
+            speed++;
+            if (speed >= FAILEDSIZE){
+                FAILEDSIZEINDEX = 0;
+                window.clearInterval(SENDFAILEDMAILCLOCK);
+                for (var i = 0 ; i <FAILEDSIZE ; i++){
+                    FAILEDDATA.shift();
+                }
+                FAILEDSIZE = FAILEDDATA.length;
+                var finalMessage;
+                if (FAILEDSIZE == 0){
+                    var btnRePush = document.getElementById("btnRePush");
+                    btnRePush.setAttribute("disabled",true);
+                    finalMessage = "发送结果：" + "发送成功！重新发送邮件总数：" + speed + "\n";
+                }else {
+                    finalMessage = "发送结果：" + "发送失败：" + FAILEDSIZE + "， 重新发送邮件总数: " + speed + "\n";
+                    finalMessage = finalMessage + ("重新发送失败邮件：" + "\n");
+                }
+                for (var i=0; i < message.length; i++){
+                    var str = message[i].msg + "\n";
+                    finalMessage = finalMessage + str;
+                }
+                message = [];
+                speed = 0;
+                MESSAGECLOCK = setTimeout(function () {
+                    mgr.alertMsg(finalMessage);
+                },100);
+            }
+        },
+        alertMsg :function (msg) {
+            alert(msg);
+            clearTimeout(MESSAGECLOCK);
+        }
+    }
+
+    /**
+     * 检查用户离开
+     */
+    function checkLeave(){
+        var e = window.event || e;
+        e.returnValue=("确定离开当前页面吗？");
+    }
+</script>
+</body>
+</html>

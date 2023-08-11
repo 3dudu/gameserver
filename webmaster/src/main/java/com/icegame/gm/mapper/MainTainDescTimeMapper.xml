@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.MainTainDescTimeMapper">
+	<select id="getMainTainDescTimeList" parameterType="mainTainDescTime" resultType="mainTainDescTime">
+		select `id`,`expect_start_time` as expectStartTime ,`expect_end_time` as expectEndTime from main_tain_desc_time
+	</select>
+
+	<select id="getMainTainDescTimeById" parameterType="java.lang.Long" resultType="mainTainDescTime">
+		select `id`,`expect_start_time` as expectStartTime ,`expect_end_time` as expectEndTime from main_tain_desc_time where id = #{id}
+	</select>
+	
+	<insert id="addMainTainDescTime" parameterType="mainTainDescTime">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO main_tain_desc_time(`expect_start_time`,`expect_end_time`)
+		VALUES (#{expectStartTime},#{expectEndTime})
+	</insert>
+	
+	<insert id="delMainTainDescTime" parameterType="java.lang.Long">
+		delete from main_tain_desc_time
+		<where>
+			id = #{id}
+		</where>
+	</insert>
+	
+	<update id="updateMainTainDescTime" parameterType="mainTainDescTime">
+		update main_tain_desc_time
+		<set>
+			<if test="expectStartTime != null and expectStartTime != '' ">
+				`expect_start_time` = #{expectStartTime},
+			</if>
+			<if test="expectEndTime != null and expectEndTime != '' ">
+				`expect_end_time` = #{expectEndTime},
+			</if>
+		</set>
+		where id = #{id}
+ 	</update>
+
+</mapper>

@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+
+    <style>
+        @media only screen and (max-width:1750px ) {
+            .nav > li{float: left;text-align: center;}
+            #proIdxInput {margin-bottom: 8px;}
+            #orderIdInput {margin-bottom: 8px;}
+        }
+    </style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">订单列表</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls" style="margin-bottom: 8px;">
+        <label for="orderIdInput">订单号:</label>
+        <input id="orderIdInput" name="orderIdInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="thirdTradeNoInput">第三方订单号:</label>
+        <input id="thirdTradeNoInput" name="thirdTradeNoInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="channelInput">渠道:</label>
+        <input id="channelInput" name="channelInput" class="input-medium" type="text" value=""  style="width: 100px;"/>&nbsp;
+        <label for="platformInput">平台:</label>
+        <input id="platformInput" name="platformInput" class="input-medium" type="text" value=""  style="width: 100px;"/>&nbsp;
+        <label for="userIdInput">用户ID:</label>
+        <input id="userIdInput" name="userIdInput" class="input-medium" type="text" value=""  style="width: 100px;"/>&nbsp;
+        <label for="pidInput">角色ID:</label>
+        <input id="pidInput" name="pidInput" class="input-medium" type="text" value=""  style="width: 70px;"/>&nbsp;
+        <label for="payPriceInput">支付金额:</label>
+        <input id="payPriceInput" name="payPriceInput" class="input-medium" type="text" value=""  style="width: 100px;"/>&nbsp;
+        <label for="sourceInput">资源:</label>
+        <input id="sourceInput" name="sourceInput" class="input-medium" type="text" value=""  style="width: 100px;"/>&nbsp;
+	</div>
+    <div class="controls">
+        <label for="proIdxInput">档位:</label>
+        <input id="proIdxInput" name="proIdxInput" class="input-medium" type="text" value=""  style="width: 20px;"/>&nbsp;
+        <label  class="control-label" for="statusInput">交易状态:</label>
+        <select id="statusInput" name="statusInput" class="input-medium">
+            <option value="">请选择</option>
+            <option value="0">待支付</option>
+            <option value="1">回调验证失败</option>
+            <option value="2">付款成功，元宝没到账</option>
+            <option value="3">支付失败</option>
+            <option value="4">支付成功</option>
+        </select>
+        <label for="sidInput">区服ID:</label>
+        <select id="sidInput" name="sidInput" style="width:190px">
+        </select>
+        <label>起始日期</label>
+        <input id="startTime" name="startTime" class="required Wdate" type="text" value="" style="width: 188px" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        <label>截止日期</label>
+        <input id="passTime" name="passTime" class="required Wdate" type="text" value="" style="width: 188px" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        &nbsp;
+        <input id="exportSelected" class="btn btn-primary" onclick="mgr.exportExcel(2)" value="导出选中项" type="button" />
+
+        <input id="exportOneMonth" class="btn btn-primary" onclick="mgr.exportExcelOneMonth()" value="导出近7天" type="button" />
+        &nbsp;
+        <!--<input id="exportAll" class="btn btn-primary" onclick="mgr.exportExcel(1)" value="导出全部" type="button" />-->
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+    </div>
+
+</form>
+
+<form>
+    <table id="payListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th style="text-align:center;width:19px;"><input id="checkAll" type="checkbox" value="" /></th>
+            <th class="header">订单号</th>
+            <th class="header">第三方订单号</th>
+            <th class="header">创建时间</th>
+            <th class="header">玩家ID</th>
+            <th class="header">区服ID</th>
+            <th class="header">角色ID</th>
+            <th class="header">支付金额</th>
+            <th class="header">档位</th>
+            <th class="header">平台</th>
+            <th class="header">渠道</th>
+            <th class="header">资源</th>
+            <th class="header">交易状态</th>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        </tbody>
+    </table>
+</form>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#payListTable").tablesorter({headers:{0:{sorter:false}}});
+});
+
+
+function chkInit() {
+    $(":checkbox[name='paylist']").change(function(e) {
+        $('#checkAll').prop("checked",true);
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='paylist']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAll').prop("checked",false);
+            }
+        }
+    });
+}
+
+function exportFinish(){
+    $("#exportOneMonth").attr('disabled',false);
+    top.$.jBox.closeTip();
+}
+
+$(function () {
+
+    mgr.getAllChannelServerList();
+
+	mgr.getListPage(1,18);
+    $('#checkAll').click(function(){
+        $(":checkbox[name='paylist']").is(":checked")?$(":checkbox[name='paylist']").attr("checked",false):$(":checkbox[name='paylist']").attr("checked",true);
+    });
+
+    chkInit();
+});
+var mgr ={
+        getAllChannelServerList : function (){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/getAllChannelServerListNoPage',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    //console.log(data);
+                    var serverList = data;
+                    var array = new Array();
+                    if(serverList!=null&&serverList.length>0){
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择区服</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+                        // var html = '<option value="">选择所在区</option>';
+                        // for(var i=0;i<serverList.length;i++){
+                        //     if(serverList[i].channel != "company"){
+                        //         html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+                        //     }
+                        // }
+                        $('#sidInput').html(html);
+                    }
+                }
+            });
+        },
+        exportExcel:function (flag){
+            var checkObj="";
+            var playerIdArray = $("input[name='paylist']:checked").serializeArray();
+            $.each(playerIdArray, function(i, item){
+                checkObj += item.value;
+                checkObj += ",";
+            });
+            /*if(JSON.stringify(player["playerIds"]) === "{}"){
+                alert("请先选择需要导出的数据");
+                return false;
+            }*/
+            if(flag == 2 && checkObj.length == 0) {
+                alert("请先选择需要导出的数据");
+                return false;
+            }
+            if(flag == 1){
+                alert("不允许导出所有数据");
+                return false;
+            }
+            checkObj=checkObj.substring(0,checkObj.length-1);
+            window.location.href=''+$ctx+'/sysmgr/paylist/exportTable?flag='+flag+'&playerIds='+checkObj;
+        },
+
+        exportExcelOneMonth:function (){
+            var orderId = $("#orderIdInput").val();
+            var thirdTradeNo = $("#thirdTradeNoInput").val();
+            var channel = $("#channelInput").val();
+            var platform = $("#platformInput").val();
+            var userId = $("#userIdInput").val();
+            var pid = $("#pidInput").val();
+            var payPrice = $("#payPriceInput").val();
+            var source = $("#sourceInput").val();
+            var proIdx = $("#proIdxInput").val();
+            var status = $("#statusInput").val();
+            var sid = $("#sidInput").val();
+
+            var noFormatStartTime = $("#startTime").val();
+            var noFormatPassTime = $("#passTime").val();
+
+            var startTime = new Date(noFormatStartTime).getTime();
+            var passTime = new Date(noFormatPassTime).getTime();
+
+            if($("#startTime").val() == '' || $("#passTime").val() == ''){
+                alert("请输入起始和截止日期");
+                return false;
+            }
+
+            if(startTime > passTime){
+                alert("起始日期必须小于截止日期");
+                return false;
+            }
+
+            // 计算时间差
+            var time = passTime - startTime;
+
+            var montyMills = 7 * 86400 * 1000;
+
+            // 如果时间差大于一个月，就不给导出
+            if(time > montyMills){
+                alert("只允许导出7天的数据");
+                return false;
+            }
+
+            loading('正在导出，请稍等...');
+
+            $("#exportOneMonth").attr('disabled',true);
+
+            setTimeout( exportFinish, 8000);
+
+            window.location.href=''+$ctx+'/sysmgr/paylist/exportTableOneMonth?orderId='+orderId+'&thirdTradeNo='+thirdTradeNo
+                +'&channel='+channel+'&platform='+platform+'&userId='+userId+'&pid='+pid
+                +'&payPrice='+payPrice+'&source='+source+'&proIdx='+proIdx+'&status='+status+'&sid='+sid+'&startTime='+noFormatStartTime+'&passTime='+noFormatPassTime;
+        },
+	 	getListPage : function(pageNo,pageSize){
+	 		var orderId = $("#orderIdInput").val();
+	 		var thirdTradeNo = $("#thirdTradeNoInput").val();
+	 		var channel = $("#channelInput").val();
+	 		var platform = $("#platformInput").val();
+	 		var pid = $("#pidInput").val();
+	 		var proIdx = $("#proIdxInput").val();
+	 		var payPrice = $("#payPriceInput").val();
+	 		var sid = $("#sidInput").val();
+	 		var userId = $("#userIdInput").val();
+	 		var source = $("#sourceInput").val();
+	 		var status = $("#statusInput").val();
+	 		var startTime = $("#startTime").val();
+			var passTime = $("#passTime").val();
+
+            var noFormatStartTime = $("#startTime").val();
+            var noFormatPassTime = $("#passTime").val();
+
+            var startTimeCheck = new Date(noFormatStartTime).getTime();
+            var passTimeCheck = new Date(noFormatPassTime).getTime();
+
+            // 由于数据太多，查询操作每次只允许查询一个月的数据
+            if(startTimeCheck != '' || passTimeCheck != ''){
+                if(startTimeCheck > passTimeCheck){
+                    alert("起始日期必须小于截止日期");
+                    return false;
+                }
+
+                // 计算时间差
+                var time = passTimeCheck - startTimeCheck;
+
+                var montyMills = 31 * 86400 * 1000;
+
+                // 如果时间差大于一个月，就不给导出
+                if(time > montyMills){
+                    alert("只允许导出7天的数据");
+                    return false;
+                }
+
+            }
+
+
+
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/paylist/getPayList',
+				dataType:'json',
+				data: {"orderId":orderId,"thirdTradeNo":thirdTradeNo,"proIdx":proIdx,"channel":channel,"platform":platform,
+                    "platform":platform,"pid":pid,"sid":sid,"userId":userId,"source":source,"status":status,"startTime":startTime,"passTime":passTime,
+                    "payPrice":payPrice,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+                    $("#exportOneMonth").attr('disabled',false);
+                    top.$.jBox.closeTip();
+                    $('#checkAll').prop("checked",false);
+					$("#payListTable").trigger("update");
+                    var typeName = "";
+					var payList = data;
+					if(payList!=null&&payList.length>1){
+							var htmlTable = "";
+							for(var i=1;i<payList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+                                htmlTable = htmlTable+"<td style='text-align:center;width:19px;'>";
+                                var closeButton = "<input type='checkbox' name='paylist' value='"+payList[i].id+"'/>";
+                                htmlTable = htmlTable+closeButton;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+payList[i].orderId;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].thirdTradeNo;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+payList[i].strCreateTime;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+payList[i].userId;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].sid;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+payList[i].pid;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].payPrice;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].proIdx;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].platform;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+payList[i].channel;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+payList[i].source;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                var statusStr = "";
+                                switch (parseInt(payList[i].status)){
+                                    case 0 : statusStr = "待支付";break;
+                                    case 1 : statusStr = "待支付";break;
+                                    case 2 : statusStr = "待支付";break;
+                                    case 3 : statusStr = "待支付";break;
+                                    case 4 : statusStr = "支付成功";break;
+                                }
+                                htmlTable = htmlTable+statusStr;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#payListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);
+	 				} else{
+						$('#payListTable').find('tbody').html("<tr><td colspan='13' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");
+	 				}
+                    chkInit();
+				}
+			});
+	 	}
+}
+</script>
+</body>
+</html>

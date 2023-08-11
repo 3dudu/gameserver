@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">修改用户密码</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+
+    <div class="controls">
+    	<label  class="control-label" for="groupName">所属用户组:</label>
+		<select id="groupName" name="groupName" class="input-medium">
+            <option value="">选择用户组</option>
+	    </select>  
+		<label for="userNameInput">用户名称:</label>
+        <input id="userNameInput" name="userNameInput" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,16);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。"></i>
+	</div>
+    <div id="userDeptContent"  style="display:none; position: absolute; background: #f0f6e4;">
+		<ul id="userDeptTree" class="ztree" style="margin-top:0; width:260px;"></ul>
+	</div>
+    
+</form>
+<table id="userListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">用户名称</th>
+        <th class="header">登陆名称</th>
+        <th class="header">所属用户组</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal default-model" id = "editModal" style="display:none">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">重置用户密码</h5>
+                </div>
+                <div class = "modal-body">
+					<form id="userChangePwdForm" class="form-horizontal" action="#" method="post">
+						<input type="hidden" name="userId" id="userId">
+						<div class="control-group">
+							<label class="control-label" for="newPassword">新密码:</label>
+							<div class="controls">
+								<input style="float:left" id="newPassword" name="newPassword" type="password" value=""  minlength="3" class="required"/>
+								<i id="layer-tips" tips="密码提示"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="confirmNewPassword">确认新密码:</label>
+							<div class="controls">
+								<input id="confirmNewPassword" name="confirmNewPassword" type="password" value=""  minlength="3" class="required" equalTo="#newPassword"/>
+							</div>
+						</div>
+						<div class = "modal-footer model-bot">
+							<button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+							<input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+						</div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "userPageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#userListTable").tablesorter();  
+});
+$().ready(function() {
+    $("#userChangePwdForm").validate({
+        rules: {
+            //oldPassword: "required",
+            newPassword: "required",
+            confirmNewPassword: {
+                required: true,
+                equalTo: "#newPassword"
+            }
+        },
+        messages: {
+            //oldPassword: "请输入原密码",
+            newPassword: "请输入新密码",
+            confirmNewPassword: {
+                required: "请确认新密码",
+                equalTo: "两次密码输入不一致"
+            }
+        } ,
+        submitHandler: function(form) {
+            mgr.saveChangePwd(form);
+        }
+    });
+});
+</script>
+<script type="text/javascript">
+$(function () {
+	mgr.getListPage(1,16);
+	mgr.getGroupName(1,20);
+	$('body').on('hidden.bs.modal', '.modal', function () {
+	    $(this).removeData('bs.modal');
+	});	
+});
+var mgr ={
+		getGroupName:function(pageNo,pageSize){
+			var groupName = $("#groupName").val(); 
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getGroupList',
+				dataType:'json',
+				data: {"groupName":"","pageNo":pageNo,"pageSize":pageSize},			
+				success:function(data){
+					var group = data;
+					var html = $('#groupName').html();
+					for(var i = 1 ; i < group.length ; i++){
+						html += '<option value="'+group[i].groupId+'">'+group[i].groupName+'</option>';
+					}
+					$('#groupName').html(html);
+				}
+			});
+	 	},
+	 	
+	 	getListPage : function(pageNo,pageSize){
+			var userName = $("#userNameInput").val();
+			var groupName = $("#groupName").find("option:selected").text();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/user/getUserList',
+				dataType:'json', 
+				data: {"groupName":groupName,"userName":userName,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+				    //console.log(data);
+					$("#userListTable").trigger("update");
+					var userList = data;
+					if(userList!=null&&userList.length>0){				
+							var htmlTable = "";
+							for(var i=1;i<userList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+userList[i].userName;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+userList[i].loginName;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+userList[i].groupName;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editPwd("+userList[i].userId+")'>修改</a>";
+								htmlTable = htmlTable+editButton;
+								htmlTable = htmlTable+"</td>";					
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#userListTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#userPageInfo').html(pageStr);
+	 				} else{
+						$('#userListTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#userPageInfo').html("");		
+	 				}
+				}
+			});	
+	 	},
+		editPwd : function (userId) {
+            $("#editModal").modal("toggle");
+            $("#userId").val(userId);
+        },
+		saveChangePwd: function(form){
+			//var oldPassword = $("#oldPassword").val();
+			var confirmNewPassword = $("#confirmNewPassword").val();
+			var newPassword = $("#newPassword").val();
+			var userId = $("#userId").val();
+
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/userpwd/saveChangeUserPwd',
+				dataType:'json',
+				data: {"userId":userId,"newPassword":newPassword},
+				//data: {"userId":userId,"oldPassword":oldPassword,"newPassword":newPassword},
+				success:function(data){
+					$("#editModal").modal("hide");
+					alert(data.result);
+				}
+			});
+		}
+	}; 
+
+</script>
+</body>
+</html>

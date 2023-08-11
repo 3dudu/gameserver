@@ -1,0 +1,20 @@
+﻿#----------------------结构介绍-----------------------
+根目录
+|--src
+   |--com.xuegao.core 常用工具类
+   |--com.xuegao.slg  游戏代码
+|--config
+   |--config.properties     系统配置
+   |--proxool.properties    数据库连接池配置
+   |--redis.properties      redis连接配置
+   |--log4j.xml             日志配置
+|--tools  游戏开发过程中需要使用的外部工具
+|--lib    外部jar包
+|--logs   日志文件夹
+|--deploy 项目发布文件夹
+|build.xml 项目发布脚本
+|pom.xml   maven配置
+|startup.sh   linux启动脚本
+|shutdown.sh  linux关闭脚本
+|startup.cmd  windows启动脚本
+

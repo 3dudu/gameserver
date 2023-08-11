@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">同步情况列表</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+	<!-- <ul class="ul-form">
+		<li>
+			<label>登录名：</label>
+			<input id="loginName" name="loginName" class="input-medium" type="text" value="" >
+		</li>
+		<li class="clearfix"></li>
+		<li>
+			<label>姓&nbsp;&nbsp;&nbsp;名：</label>
+			<input id="name" name="name" class="input-medium" type="text" value="" >
+		</li>
+		<li class="btns">
+			<input id="btnSubmit" class="btn btn-primary" type="submit" value="查询" onclick="return page();">
+		</li>
+		<li class="clearfix"></li>
+	</ul> -->
+    <div class="controls">
+    	<label  class="control-label" for="opclType">同步类型:</label>
+		<select id="opclType" name="opclType" class="input-medium">
+			<option value="">选择同步类型</option>
+			<option value="1">开服</option>
+			<option value="2">维护</option>
+			<option value="3">删除</option>
+	    </select>
+		<label  class="control-label" for="opclStatus">同步状态:</label>
+		<select id="opclStatus" name="opclStatus" class="input-medium">
+			<option value="">选择同步状态</option>
+	    </select>
+        <label for="startDate">起始日期:</label>
+        <input id="startDate" name="startDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+		<label for="endDate">截止日期:</label>
+        <input id="endDate" name="endDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+    
+</form>
+<table id="opclStatusTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">同步时间</th>
+    	<th class="header">目标主机</th>
+    	<th class="header">同步类型</th>
+        <th class="header">同步状态</th>
+        <th class="header">服务器ID</th>
+        <th class="header">失败操作</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#opclStatusTable").tablesorter();  
+});
+$(function () {
+	mgr.getStatusList();
+	mgr.getListPage(1,18);
+});
+var mgr ={
+		getStatusList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/opcl/getStatusListOpcl', 
+				dataType:'json',
+				data: {},			
+				success:function(data){
+					//console.log(data);
+					var statusList = data;
+					var html = document.getElementById("opclStatus").innerHTML;
+					for(var i = 0 ; i < statusList.length ; i++){
+						html += '<option value="'+i+'">'+statusList[i].status+'</option>';
+					}
+					$('#opclStatus').html(html);
+				}
+			});
+	 	},
+	 	reSyncOpcl:function(id){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/opcl/reSyncOpcl', 
+				dataType:'json',
+				data: {"id":id},			
+				success:function(data){
+					//console.log(data.result);
+					alert(data.result);
+					mgr.getListPage(1,18);
+				}
+			});
+	 	},
+	 	getListPage : function(pageNo,pageSize){
+	 		var status = $("#opclStatus").find("option:selected").text();
+	 		var type = $("#opclType").find("option:selected").text();
+	 		var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/opcl/getOpclServerList', 
+				dataType:'json', 
+				data: {"status":status,"type":type,"startDate":startDate,"endDate":endDate,"pageNo":pageNo,"pageSize":pageSize},		
+				success:function(data){
+					$("#opclStatusTable").trigger("update");
+					//console.log(data);
+					var opclStatusList = data;
+					if(opclStatusList!=null&&opclStatusList.length>1){				
+						var htmlTable = "";
+						var flag = "success";
+						for(var i=1;i<opclStatusList.length;i++){
+							htmlTable = htmlTable+"<tr>";							
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+opclStatusList[i].createTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+opclStatusList[i].hosts;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+opclStatusList[i].type;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+opclStatusList[i].status;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+opclStatusList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							var lastOP = "";
+							switch(opclStatusList[i].lastOperate){
+								case "0" :  lastOP = "添加"; break;
+								case "1" :  lastOP = "维护"; break;
+								case "2" :  lastOP = "删除"; break;
+							}
+							htmlTable = htmlTable+lastOP;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							//if(opclStatusList[i].status.indexOf(flag)==-1){
+							if(opclStatusList[i].status=="失败" || opclStatusList[i].status.indexOf("timeout")> -1){	
+								htmlTable = htmlTable+"<a href='javascript:mgr.reSyncOpcl("+opclStatusList[i].id+")'>重新同步</a>";
+							}
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#opclStatusTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#opclStatusTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	}
+}
+</script>
+</body>
+</html>

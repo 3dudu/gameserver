@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">节点列表</a></li>
+    <li><a href="javascript:mgr.editServerNodes(1)">节点添加</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+		<label for="nodeNames">节点名称:</label>
+        <input id="nodeNames" name="nodeNames" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+	</div>
+    
+</form>
+<table id="serverNodesTable" class="table tablesorter tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">网关节点名称</th>
+        <th class="header">协议</th>
+        <th class="header">IP地址</th>
+        <th class="header">端口号</th>
+        <th class="header">接口</th>
+        <th class="header">重载接口</th>
+        <th class="header">区分</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">修改网关节点</h5>
+                </div>
+                <div class = "modal-body">
+                   <form id="userEditForm" class="form-horizontal" action="#" method="post">
+						<input id="id" name="id" type="hidden" value=""/>
+						<div class="control-group">
+							<label class="control-label" for="name">网关节点名称:</label>
+							<div class="controls">
+								<input id="name" name="name" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="ip">IP地址:</label>
+							<div class="controls">
+								<input id="ip" name="ip" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="port">端口号:</label>
+							<div class="controls">
+								<input id="port" name="port" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="protocol">协议:</label>
+							<div class="controls">
+								<input id="protocol" name="protocol" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="interfaceName">接口:</label>
+							<div class="controls">
+								<input id="interfaceName" name="interfaceName" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="reInterfaceName">重载接口:</label>
+							<div class="controls">
+								<input style="width: 300px;" id="reInterfaceName" name="reInterfaceName" type="text" value="" maxlength="2000"/>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="diff">区分:</label>
+							<div class="controls">
+								<input style="float:left" id="diff" name="diff" type="text" value="" />
+								<i class="layer-tips" id="serverTips" tips=" 1 为登录服, 2 为支付服"></i>
+							</div>
+						</div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                </div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#serverNodesTable").tablesorter();  
+});
+$().ready(function() {
+	$("#userEditForm").validate({
+		rules: {
+			name: {
+				required: true,
+				maxlength: 20
+			},
+			ip: {
+				required: true,
+				maxlength: 100
+			},
+			port: {
+				//required: true,
+				digits: true,
+				maxlength: 5
+				
+			},
+			protocol: {
+				required: true,
+				maxlength: 8
+			},
+			interfaceName: {
+				//required: true,
+				maxlength: 100
+			},
+			reInterfaceName: {
+				required: true,
+				maxlength: 100
+			},
+			diff: {
+				required: true,
+				maxlength: 1
+			}
+		},
+		messages: {
+			name: {
+				required: "请输入网关节点名称",
+				maxlength: "最大长度为20"
+			},
+			ip: {
+				required: "请输入ip地址",
+				maxlength: "最大长度为100"
+			},
+			port: {
+				//required: "请输入端口",
+				digits: "端口为正整数",
+				maxlength: "最大长度为5"
+			},
+			protocol: {
+				required: "请输入协议",
+				maxlength: "最大长度为8"
+			},
+			interfaceName: {
+				//required: "请输入接口",
+				maxlength: "最大长度为100"
+			},
+			reInterfaceName: {
+				required: "请输入重载接口",
+				maxlength: "最大长度为100"
+			},
+			diff: {
+				required: "请输入区分",
+				maxlength: "最大长度为1"
+			}
+		} ,
+		submitHandler: function(form){      
+		    mgr.saveServerNodes(form);     
+		} 
+	});
+});
+</script>
+<script type="text/javascript">
+$(function () {
+	mgr.getListPage(1,20);
+	$('#checkAll').click(function(){   
+		 $(":checkbox[name='nodesIds']").is(":checked")?$(":checkbox[name='nodesIds']").attr("checked",false):$(":checkbox[name='nodesIds']").attr("checked",true);
+	});
+});
+var mgr ={
+	 	getListPage : function(pageNo,pageSize){
+			var nodeNames = $("#nodeNames").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/server/getServerNodesList', 
+				dataType:'json', 
+				data: {"nodeNames":nodeNames,"pageNo":pageNo,"pageSize":pageSize},		
+				success:function(data){
+					$("#serverNodesTable").trigger("update");
+					//console.log(data);
+					var serverNodesList = data;
+					if(serverNodesList!=null&&serverNodesList.length>1){				
+						var htmlTable = "";
+						for(var i=1;i<serverNodesList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].name;
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].protocol;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].ip;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].port;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].interfaceName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].reInterfaceName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverNodesList[i].diff;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+ 			    			var editButton = "<a href='javascript:mgr.editServerNodes(2,"+serverNodesList[i].id+")'>修改</a>";
+							var delButton = "<a href='javascript:mgr.delServerNodes("+serverNodesList[i].id+")'>删除</a>";
+							var addButton = "<a href='javascript:mgr.editServerNodes(1)'>添加</a>";
+							htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+							htmlTable = htmlTable+"</td>";					
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#serverNodesTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#serverNodesTable').find('tbody').html("<tr><td colspan='8' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	} ,
+	 	editServerNodes:function(editFlag,id){
+			 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/server/gotoServerNodesEdit', 
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},			
+				success:function(data){
+					//console.log(data);
+					$("#editModal").modal("toggle");
+					var serverList = data;
+					$("#id").val(serverList.id);
+					$("#name").val(serverList.name);
+					$("#ip").val(serverList.ip);
+					$("#port").val(serverList.port);
+					$("#protocol").val(serverList.protocol);
+					$("#interfaceName").val(serverList.interfaceName);
+					$("#reInterfaceName").val(serverList.reInterfaceName);
+					$("#diff").val(serverList.diff);
+				}
+			});
+	 	},
+	 	delServerNodes:function(id){	
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/server/delServerNodes', 
+					dataType:'json', 
+					data: {"id":id},				
+					success:function(data){
+						mgr.getListPage(1,18);					
+					}
+				});
+			}
+	 	},
+	 	saveServerNodes: function(form){
+	 		var serverList={};
+			var formObject = {};
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+			serverList = JSON.stringify(formObject);
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/server/saveServerNodes', 
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: serverList,					
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,18);
+ 				}
+			});
+		},
+		syncServer:function(){
+	 		var ServerNodesVo = {};
+	 		var nodesCheckObj={};
+	 		var nodesIdArray = $("input[name='nodesIds']:checked").serializeArray();
+ 			$.each(nodesIdArray, function(i, item){
+ 				nodesCheckObj[item.value]=item.value;
+			 });
+ 			ServerNodesVo["nodesIds"]=nodesCheckObj;
+ 			if(JSON.stringify(ServerNodesVo["nodesIds"]) === "{}" ){
+	 			alert("请先选择需要同步的节点");
+	 			return;
+	 		}
+ 			//console.log(JSON.stringify(nodes));
+ 			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/server/syncServer', 
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: JSON.stringify(ServerNodesVo),				
+				success:function(data){
+					conosle.log(data);					
+				}
+			});
+	 	}
+	}; 
+
+</script>
+</body>
+</html>

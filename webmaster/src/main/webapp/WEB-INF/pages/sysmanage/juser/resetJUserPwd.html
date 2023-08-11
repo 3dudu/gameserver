@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">玩家列表</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls" style="margin-bottom: 8px;">
+        <!--<label for="flagInput">查询依据</label>
+        <select id="flagInput" name="flagInput" class="input-medium" style="width:140px">
+            <option value="0">订单</option>
+            <option value="1">第三方订单</option>
+            <option value="2">角色ID</option>
+            <option value="3">账号</option>
+        </select>-->
+        <!--        <label for="sidInput">区服ID:</label>-->
+        <!--        <input id="sidInput" name="sidInput" class="input-medium" type="text" value=""  style="width: 70px;"/>&nbsp;-->
+        <label for="serverIdInput">所在区:</label>
+        <select id="serverIdInput" name="serverIdInput" style="width:190px">
+            <option value="">选择所在区</option>
+            <option value="10">十区</option>
+            <option value="13">十三区</option>
+            <option value="14">十四区</option>
+            <option value="15">十五区</option>
+            <option value="16">十六区</option>
+        </select>
+        <label for="pidInput">角色ID:</label>
+        <input id="pidInput" name="pidInput" class="input-medium" type="text" value=""  style="width: 70px;"/>&nbsp;
+        <label for="playerNameInput">角色名:</label>
+        <input id="playerNameInput" name="playerNameInput" class="input-medium" type="text" value=""  style="width: 70px;"/>&nbsp;
+        <label for="usernameInput">账号:</label>
+        <input id="usernameInput" name="usernameInput" class="input-medium" type="text" value=""  style="width: 70px;"/>&nbsp;
+        <label for="orderIdInput">订单号:</label>
+        <input id="orderIdInput" name="orderIdInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="thirdTradeNoInput">第三方订单号:</label>
+        <input id="thirdTradeNoInput" name="thirdTradeNoInput" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+	</div>
+    
+</form>
+
+<div class = "modal fade modal default-model" id = "editModal" style="display:none">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">重置玩家密码</h5>
+            </div>
+            <div class = "modal-body">
+                <form id="resetJUserPwdForm" class="form-horizontal" action="#" method="post">
+                    <input id="pubUserId" name="pubUserId" type="hidden" value="1"/>
+                    <input id="pubUsername" name="pubUsername" type="hidden" value="18"/>
+                    <div class="control-group">
+                        <label class="control-label" for="newPassword">新密码:</label>
+                        <div class="controls">
+                            <input style="float:left" id="newPassword" name="newPassword" type="text" value=""  minlength="3" class="required"/>
+                            <i class="layer-tabs" id="contextTabs" title="随机密码"></i>
+                        </div>
+                    </div>
+                    <!--<div class="control-group">
+                        <label class="control-label" for="confirmNewPassword">确认新密码:</label>
+                        <div class="controls">
+                            <input id="confirmNewPassword" name="confirmNewPassword" type="password" value=""  minlength="3" class="required" equalTo="#newPassword"/>
+                        </div>
+                    </div>-->
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form>
+    <table id="payListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th class="header">账号ID</th>
+            <th class="header">账号</th>
+            <th class="header">创建时间</th>
+            <th class="header">平台账号</th>
+            <th class="header">所属平台</th>
+            <th class="header">邮箱账号</th>
+            <th class="header">绑定邮箱时间</th>
+            <th class="header">角色ID</th>
+            <th class="header">角色名</th>
+            <th class="header">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        </tbody>
+    </table>
+</form>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#payListTable").tablesorter({headers:{0:{sorter:false}}});
+});
+
+function chkInit() {
+    $(":checkbox[name='paylist']").change(function(e) {
+        $('#checkAll').prop("checked",true);
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='paylist']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAll').prop("checked",false);
+            }
+        }
+    });
+}
+$(".layer-tabs").click(function(){
+    $.ajax({
+        type:'post',
+        url:''+$ctx+'/sysmgr/juser/getRandomPwd',
+        dataType:'json',
+        data: {},
+        success:function(data){
+            //console.log(data);
+            $("#newPassword").val(data.msg);
+        }
+    });
+});
+$().ready(function() {
+    $("#resetJUserPwdForm").validate({
+        rules: {
+            newPassword: "required"/*,
+            confirmNewPassword: {
+                required: true,
+                equalTo: "#newPassword"
+            }*/
+        },
+        messages: {
+            newPassword: "请输入新密码"/*,
+            confirmNewPassword: {
+                required: "请确认新密码",
+                equalTo: "两次密码输入不一致"
+            }*/
+        } ,
+        submitHandler: function(form) {
+            mgr.resetJUserPwd(form);
+        }
+    });
+});
+
+$(function () {
+    mgr.getAllChannelServerList();
+	mgr.getListPage(1,18);
+    $('#checkAll').click(function(){
+        $(":checkbox[name='paylist']").is(":checked")?$(":checkbox[name='paylist']").attr("checked",false):$(":checkbox[name='paylist']").attr("checked",true);
+    });
+
+    chkInit();
+});
+var mgr ={
+        getAllChannelServerList : function (){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/getAllChannelServerListNoPage',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    //console.log(data);
+                    var serverList = data;
+                    var array = new Array();
+                    if(serverList!=null&&serverList.length>0){
+
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+
+
+                        /*var html = '<option value="">选择所在区</option>';
+                        for(var i=0;i<serverList.length;i++){
+                            if(serverList[i].channel != "company"){
+                                html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+                            }
+                        }*/
+                        $('#serverIdInput').html(html);
+                    }
+                }
+            });
+        },
+	 	getListPage : function(pageNo,pageSize){
+	 		var orderId = $("#orderIdInput").val();
+	 		var thirdTradeNo = $("#thirdTradeNoInput").val();
+	 		var username = $("#usernameInput").val();
+	 		var pid = $("#pidInput").val();
+            var serverId = $("#serverIdInput").val();
+            var playerName = $("#playerNameInput").val();
+	 		var flag = $("#flagInput").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/juser/getPayList',
+				dataType:'json', 
+				data: {/*"flag":flag,*/"orderId":orderId,"thirdTradeNo":thirdTradeNo,"pid":pid,"username":username,"sid":serverId,"playerName":playerName,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+                    $('#checkAll').prop("checked",false);
+					$("#payListTable").trigger("update");
+					var juserList = data;
+					if(juserList!=null&&juserList.length>1){
+							var htmlTable = "";
+							for(var i=1;i<juserList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+juserList[i].strId;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+juserList[i].userName;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+juserList[i].createTime;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+juserList[i].pfUser;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+juserList[i].pf;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+juserList[i].mailUser;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+juserList[i].bindTime;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+juserList[i].pid;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+juserList[i].playerName;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                var resetButton = "<a href='javascript:mgr.showResetModel(\""+juserList[i].strId+"\",\""+juserList[i].userName+"\")'>重置密码</a>";
+                                htmlTable = htmlTable+resetButton;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#payListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#payListTable').find('tbody').html("<tr><td colspan='13' align='right'>没有检索到玩家</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+                    chkInit();
+				}
+			});	
+	 	},
+        showResetModel : function (userId,username){
+            $("#editModal").modal("toggle");
+            $("#pubUserId").val(userId);
+            $("#pubUsername").val(username);
+        },
+        resetJUserPwd : function (){
+            var userId = $("#pubUserId").val();
+            var username = $("#pubUsername").val();
+            var newPassword = $("#newPassword").val();
+            if(confirm("友情提示：请在修改前仔细核对 玩家姓名、玩家ID等信息，确认无误再进行修改。\n是否确认修改?")) {
+                $.ajax({
+                    type: 'post',
+                    url: '' + $ctx + '/sysmgr/juser/resetJUserPwd',
+                    dataType: 'json',
+                    data: {"userId": userId, "username": username, "passwd": newPassword},
+                    success: function (data) {
+                        //console.log(data);
+                        if(data.ret == 0){
+                            alert("重置成功");
+                        }else{
+                            alert("重置失败");
+                        }
+                        $("#editModal").modal("hide");
+                    }
+                });
+            }
+        }
+}
+</script>
+</body>
+</html>

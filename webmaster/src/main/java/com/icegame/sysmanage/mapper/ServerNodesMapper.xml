@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.ServerNodesMapper">
+	
+	<select id="getServerNodes" parameterType="serverNodes" resultType="serverNodes">
+		select `id`,`name`,`ip`,`port`,`protocol`,`interfaceName`,`reInterfaceName`,`diff` from server_nodes
+		where name like concat("%",#{name},"%")
+	</select>
+	
+	<select id="getServerNodesSync" parameterType="serverNodes" resultType="serverNodes">
+		select `id`,`name`,`ip`,`port`,`protocol`,`interfaceName`,`reInterfaceName`,`diff` from server_nodes
+	</select>
+
+	<select id="getServerNodesById" parameterType="java.lang.Long" resultType="serverNodes">
+		select `id`,`name`,`ip`,`port`,`protocol`,`interfaceName`,`reInterfaceName`,`diff` from server_nodes
+		where id = #{id}
+	</select>
+	
+	<insert id="addServerNodes" parameterType="serverNodes">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO server_nodes(`name`,`ip`,`port`,`protocol`,`interfaceName`,`reInterfaceName`,`diff`)
+		VALUES (#{name},#{ip},#{port},#{protocol},#{interfaceName},#{reInterfaceName},#{diff})
+	</insert>
+	
+	<delete id="delServerNodes" parameterType="java.lang.Long">
+		DELETE FROM server_nodes
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateServerNodes" parameterType="serverNodes">
+		UPDATE server_nodes  set
+           `name` = #{name},
+           `ip` = #{ip},
+           `port` = #{port},
+           `protocol` = #{protocol},
+           `interfaceName` = #{interfaceName},
+           `reInterfaceName` = #{reInterfaceName},
+           `diff` = #{diff}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

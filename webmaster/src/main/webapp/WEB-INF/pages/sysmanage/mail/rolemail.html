@@ -1,0 +1,390 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">个人邮件</a></li>
+    <li><a href="javascript:mgr.editRoleMail(1);">添加邮件</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <label>起始日期</label>
+        <input id="startDate" name="startDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+		<label>截止日期</label>
+        <input id="endDate" name="endDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+
+</form>
+<table id="roleMailTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">时间</th>
+    	<th class="header">标题</th>
+    	<th class="header">服务器ID:角色ID</th>
+        <th class="header">邮件内容</th>
+        <th class="header">奖励物品</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">修改邮件</h5>
+                </div>
+                <div class = "modal-body"  style="max-height: 585px;">
+                   <form id="userEditForm" class="form-horizontal" action="#" method="post">
+						<input id="id" name="id" type="hidden" value=""/>
+						<input id="status" name="status" type="hidden" value=""/>
+						<div class="control-group">
+							<label class="control-label">时间:</label>
+							<div class="controls">
+								<input style="float:left" id="createTime" readonly = "readonly" name="createTime" type="text" value="" />
+								<i class="layer-tips" id="timeTips" tips="时间由系统自动生成，不可修改"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">标题:</label>
+							<div class="controls">
+								<input style="float:left" id="subject" name="subject" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">选择区服:</label>
+							<div class="controls">
+						    	<select id="serverIdInput" name="serverIdInput" style="width:190px">
+							    </select>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">服务器ID:角色ID:</label>
+							<div class="controls">
+								<textarea id="sidPid" name="sidPid" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="服务器ID:角色ID">
+								</textarea>
+								<i class="layer-tips" id="sidPidTips" tips="格式：区服ID:角色ID。例如：5区的20号玩家，可以写为 5:20  如果还有其他玩家。请换行之后输入"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">邮件内容:</label>
+							<div class="controls">
+								<!-- <input id="protocol" name="protocol" type="text" value="" /> -->
+								<textarea id="context" name="context" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="邮件内容">
+								</textarea>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">奖励物品:</label>
+							<div class="controls">
+								<!-- <input id="protocol" name="protocol" type="text" value="" /> -->
+								<textarea id="awardStr" name="awardStr" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="奖励物品">
+								</textarea>
+								<i class="layer-tips" id="contextTips" tips="奖励物品包括金币 元宝  卡牌  法宝 道具 和文字提示"></i>
+								<!-- <i class="layer-tabs" id="contextTabs" title="添加模板"></i> -->
+							</div>
+						</div>
+						<!-- <div class="control-group">
+							<div class="controls">
+								<input id="preview" class ="btn btn-primary" name="preview" type="button" value="预览" onclick="" />
+							</div>
+						</div> -->
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                </div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#roleMailTable").tablesorter();
+});
+$().ready(function() {
+	$("#userEditForm").validate({
+		rules: {
+			sidPid: {
+				required: true,
+				maxlength: 800
+			},
+			context: {
+				required: true,
+				maxlength: 800
+			},
+			awardStr: {
+				required: true,
+				maxlength: 800
+			}
+		},
+		messages: {
+			sidPid: {
+				required: "请输入服务器ID:角色ID",
+				maxlength: "最大长度为800"
+			},
+			context: {
+				required: "请输入邮件内容",
+				maxlength: "最大长度为800"
+			},
+			awardStr: {
+				required: "请输入奖励内容",
+				maxlength: "最大长度为800"
+			}
+		} ,
+		submitHandler: function(form) {
+	        mgr.saveRoleMail(form);
+	    }
+	});
+});
+$(function () {
+	mgr.getListPage(1,18);
+	$('#serverIdInput').change(function(e){
+		var id = $("#serverIdInput").find("option:selected").val();
+		if(id == "选择所在区"){
+			alert("区服ID格式不正确，重新输入");
+			return false;
+		}
+		var _initValue = $("#sidPid").val();
+		_initValue += id+":";
+		$("#sidPid").val(_initValue);
+		$("#sidPid").focus();
+		//alert(id);
+    });
+});
+var mgr ={
+		getAllChannelServerList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					var serverList = data;
+                    var array = new Array();
+					if(serverList!=null&&serverList.length>0){
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+						$('#serverIdInput').html(html);
+					}
+				}
+			});
+		},
+	 	getListPage : function(pageNo,pageSize){
+	 		var serverNodeIp = $("#serverNodeIp").val();
+	 		var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/rolemail/getRoleMailList',
+				dataType:'json',
+				data: {"startDate":startDate,"endDate":endDate,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#roleMailTable").trigger("update");
+					var roleMailList = data;
+					if(roleMailList!=null&&roleMailList.length>1){
+							var htmlTable = "";
+							for(var i=1;i<roleMailList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+roleMailList[i].createTime;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+roleMailList[i].subject;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+roleMailList[i].sidPid;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+roleMailList[i].context;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+roleMailList[i].awardStr;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editRoleMail(2,"+roleMailList[i].id+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delRoleMail("+roleMailList[i].id+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editRoleMail(1)'>添加</a>";
+                                if(roleMailList[i].status == "1"){
+                                    var sendButton = "<a href='javascript:mgr.sendRoleMail("+roleMailList[i].id+","+roleMailList[i].status+")'>重新发送</a>";
+                                }else if(roleMailList[i].status == "2"){
+                                    var sendButton = "<a href='javascript:mgr.sendRoleMail("+roleMailList[i].id+","+roleMailList[i].status+")'>发送</a>";
+                                }else{
+                                    var sendButton = "";
+                                }
+								if(roleMailList[i].status != "0"){
+									htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+sendButton;
+								}else{
+									htmlTable = htmlTable + "";
+								}
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#roleMailTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);
+	 				} else{
+						$('#roleMailTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");
+	 				}
+
+				}
+			});
+	 	},
+	 	editRoleMail : function(editFlag,id){
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/rolemail/gotoRoleMailEdit',
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},
+				success:function(data){
+					//console.log(data);
+					var currentCreatTime = null;
+					$("#editModal").modal("toggle");
+					mgr.getAllChannelServerList();
+					var roleMailList = data;
+					if(JSON.stringify(roleMailList)=="{}"){
+						currentCreatTime="";
+					}else{
+						currentCreatTime=roleMailList.createTime;
+					}
+					$("#id").val(roleMailList.id);
+					$("#createTime").val(currentCreatTime);
+					$("#subject").val(roleMailList.subject);
+					$("#sidPid").val(roleMailList.sidPid);
+					$("#context").val(roleMailList.context);
+					$("#awardStr").val(roleMailList.awardStr);
+					$("#status").val(roleMailList.status);
+				}
+			});
+	 	},
+	 	sendRoleMail:function(id,status){
+
+			if(confirm("友情提示：请在发送前仔细检查奖励物品数量、格式等信息，确认无误再进行发送。\n是否确认发送?")) {
+				$.ajax({
+					type: 'post',
+					url: '' + $ctx + '/sysmgr/rolemail/sendRoleMail',
+					dataType: 'json',
+					data: {"id": id},
+					success: function (data) {
+						alert(data.msg);
+					}
+				});
+			}
+	 	},
+	 	delRoleMail:function(id){
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/rolemail/delRoleMail',
+					dataType:'json',
+					data: {"id":id},
+					success:function(data){
+						mgr.getListPage(1,18);
+					}
+				});
+			}
+	 	},
+	 	roleMailPreview: function(form){
+	 		var roleMail={};
+			var formObject = {};
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+			roleMail = JSON.stringify(formObject);
+			//console.log(roleMail);
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/rolemail/roleMailPreview',
+				dataType:'json',
+				contentType :"application/json;charset=UTF-8",
+				data: roleMail,
+				success:function(data){
+					console.log(data);
+ 				}
+			});
+		},
+	 	saveRoleMail: function(form){
+	 		var roleMail={};
+			var formObject = {};
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+			roleMail = JSON.stringify(formObject);
+			//console.log(roleMail);
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/rolemail/saveRoleMail',
+				dataType:'json',
+				contentType :"application/json;charset=UTF-8",
+				data: roleMail,
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,18);
+ 				}
+			});
+		}
+}
+</script>
+<script>
+
+function getValueSidSelect(){
+	var o = document.getElementById("#sidSelect") ;
+    var intvalue="";
+    for(i=0;i<o.length;i++){
+        if(o.options[i].selected){
+            intvalue+=o.options[i].value+",";
+        }
+    }
+    $("#sidContext").html(intvalue);
+}
+</script>
+</body>
+</html>

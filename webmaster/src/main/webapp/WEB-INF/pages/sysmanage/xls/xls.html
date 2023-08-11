@@ -1,0 +1,576 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>配置表上传</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+    <style>
+        .processBar{    padding-left: 0;width: 500px;display: inline-block;margin-top: -15px;}
+    </style>
+</head>
+
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap-fileinput/4.5.1/css/fileinput.min.css">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap-fileinput/4.5.1/css/fileinput-rtl.min.css">
+<link rel="stylesheet" href = "http://gamescom.xuegaogame.com/master/static/bootstrap-processbar/all-krajee.min.css" rossorigin ="anonymous">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap-switch/3.3.4/css/bootstrap2/bootstrap-switch.min.css" rel="stylesheet">
+
+<style>
+
+    button.close {
+        -webkit-appearance: none;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        border: 0;
+    }
+    .modal-open {
+        overflow: hidden;
+    }
+    .modal {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1050;
+        display: none;
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        outline: 0;
+    }
+    .wi188{
+        width: 188px;
+    }
+
+    .text-bg{color: #fff;background: #2dc26c;padding: 3px 6px;white-space: nowrap;border-radius: 4px;}
+
+    .text-bgno{background:#f34949;}
+
+
+    @keyframes fade {
+        from {
+            opacity: 1.0;
+        }
+        50% {
+            opacity: 0.4;
+        }
+        to {
+            opacity: 1.0;
+        }
+    }
+
+    @-webkit-keyframes fade {
+        from {
+            opacity: 1.0;
+        }
+        50% {
+            opacity: 0.4;
+        }
+        to {
+            opacity: 1.0;
+        }
+    }
+    .headerBox {
+        color: #fff;
+        /*padding: 10px;*/
+        font-size: 15px;
+        height: 60px;
+        animation: fade 600ms infinite;
+        -webkit-animation: fade 600ms infinite;
+    }
+    .size{
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: block;
+        float: left;
+        margin: 2px 5px 0 0;
+    }
+    
+    .bgWait{
+        background: #999;
+    }
+
+    .bgProcessing{
+        background: #f0ad4e;
+    }
+
+    .bgSuccess{
+        background: #5bc0de;
+    }
+
+
+</style>
+
+<body  style="padding-top:0" >
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">更新配置表</a></li>
+</ul>
+
+<form action="#" class="breadcrumb form-search">
+    <div class="controls">
+        <label for="ip">选择服务器:</label>
+        <select id="ip" name="ip" class="input-medium" style="width:220px">
+
+        </select>
+
+        <label for="language">语言版本:</label>
+        <input id="language" name="language" class="input-medium" type="text" value="" />
+
+        <label for="openMd5">MD5验证:</label>
+        <input type="checkbox" id="openMd5" name="openMd5" checked>
+
+        <label for="uploadTime">更新时间:</label>
+        <input id="uploadTime" name="uploadTime" class="required Wdate wi188" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+
+
+        <i class="layer-tips right" id="selectTips" tips="选择要更新的节点(不选默认更新所有服务器)，输入语言版本，如zh_CN。MD5验证默认打开，打开状态下，会对要上传的文件进行逐一比对，只替换MD5不同(有修改)的表；关闭状态下，上传什么表，就会替换什么表；上传时间必须要在当前时间的5分钟后"></i>
+    </div>
+</form>
+
+<form id="xlsForm"  enctype="multipart/form-data" class="breadcrumb form-search" action="#" method="post">
+
+    <label class="control-label">选择文件</label>
+
+    <div class="file-loading">
+        <input id="xlsUpload" name="xlsUpload[]" type="file" multiple>
+    </div>
+    <!--<br />-->
+    <input type="button" class="btn btn-primary" value="上传" onclick="mgr.upload()" style="margin-top: 5px"/>
+    <br /><!--<br />-->
+    <div id="processBar" class="container-fluid processBar" style="padding-left: 0;display: none;margin-bottom: 0;margin-top: 6px;">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="progress progress-striped active progress-info" style="margin-bottom: 0">
+                    <div id="bar" class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<form action="#" class="breadcrumb form-search">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="10"/>
+    <div class="controls">
+        <label for="state">当前状态:</label>
+        <select id="state" name="state" class="input-medium" style="width:100px">
+            <option value="1">正在执行</option>
+            <option value="">所有</option>
+            <option value="0">等待中</option>
+            <option value="2">已经完成</option>
+        </select>
+
+        <label for="result">更新结果:</label>
+        <select id="result" name="result" class="input-medium" style="width:100px">
+            <option value="">所有</option>
+            <option value="0">失败</option>
+            <option value="1">成功</option>
+        </select>
+
+        <label for="startTime">起始时间:</label>
+        <input id="startTime" name="startTime" class="required Wdate wi188" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <label for="endTime">截止时间:</label>
+        <input id="endTime" name="endTime" class="required Wdate wi188" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+
+        &nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getAllProcess(1,10);"/>
+
+        <i class="layer-tips right" id="checkTips" tips="起始时间和截止时间只是对更新时间进行筛选。如果发现某个文件上传的有问题，可以删除当前任务。然后新建一个上传任务。"></i>
+    </div>
+</form>
+
+<table id="uploadProcess" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">任务ID</th>
+        <th class="header">用户姓名</th>
+        <th class="header">创建时间</th>
+        <th class="header">更新时间</th>
+        <th class="header">远程主机</th>
+        <th class="header">语言版本</th>
+        <th class="header">MD5验证</th>
+        <th class="header">状态</th>
+        <th class="header">结果</th>
+        <th class="header">详细信息</th>
+        <th class="header">上传文件</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+</table>
+
+<div class = "modal fade modal default-model" id = "resultModal" style="display:none;max-height: 300px;margin-left: 500px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">更新结果详情</h5>
+            </div>
+            <div class = "modal-body" id="updateResult" style="font-size: 16px;">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/bootstrap/2.3.1/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/jquery-select2/3.4/select2.min.js" type="text/javascript"></script>
+
+<script src="http://gamescom.xuegaogame.com/master/static/common/common.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/util/util.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+
+<script src="http://gamescom.xuegaogame.com/master/static/md5/spark-md5.js" type="text/javascript"></script>
+<script src="https://cdn.bootcss.com/bootstrap-fileinput/4.5.1/js/fileinput.min.js" type="text/javascript"></script>
+<!--<script src="https://cdn.bootcss.com/bootstrap-fileinput/4.5.1/js/plugins/piexif.min.js" type="text/javascript"></script>
+<script src="https://cdn.bootcss.com/bootstrap-fileinput/4.5.1/js/plugins/purify.min.js" type="text/javascript"></script>-->
+<script src="http://gamescom.xuegaogame.com/master/static/layer/layer.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/bootstrap-switch/bootstrap-switch.min.js"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/util/util.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/jquery-tablesorter/jquery.tablesorter.min.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    var _state = true;
+
+    $("#openMd5").bootstrapSwitch({
+        'onText':'开启',
+        'offText':'关闭',
+        'state':true,
+        'onColor':'primary',
+        'offColor':'danger',
+        onSwitchChange:function(event,state){
+            _state = state;
+        }
+    });
+
+
+$(document).on('ready', function() {
+    $("#xlsUpload").fileinput({
+        showCaption: false,
+        dropZoneEnabled: false,
+        showUpload: false
+    });
+});
+
+$(document).ready(function(){
+    $("#uploadProcess").tablesorter();
+    mgr.getSlaveNodesList();
+    mgr.getAllProcess(1,10);
+});
+
+$(window).load(function(){
+    function refreshMsg(pageNo,pageSize){
+        return function(){
+            mgr.getAllProcess(pageNo,pageSize);
+        }
+    }
+    setInterval(refreshMsg(1,10),5000);
+});
+
+function calculate(func){
+    var files = document.getElementById("xlsUpload").files;
+    var array = new Array();
+    var c=0;
+    for(var i = 0 ; i < files.length ; i++){
+        var fileReader = new FileReader(),
+            blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice,
+            file = files[i],
+            chunkSize = 2097152,
+            // read in chunks of 2MB
+            chunks = Math.ceil(file.size / chunkSize),
+            currentChunk = 0,
+            spark = new SparkMD5();
+        fileReader.file=file;
+        fileReader.onload = function(e) {
+            //console.log("read chunk nr", currentChunk + 1, "of", chunks);
+            spark.appendBinary(e.target.result); // append binary string
+            //console.log(e);
+            currentChunk++;
+
+            if (currentChunk < chunks) {
+                loadNext();
+            }
+            else {
+                var obj = new Object();
+                obj['name'] = e.target.file.name;
+                obj['md5'] = spark.end();
+                array.push(obj);
+                c++;
+                if(c>=files.length){
+                    func(array);
+                }
+            }
+        };
+
+        function loadNext() {
+            var start = currentChunk * chunkSize,
+                end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+
+            fileReader.readAsBinaryString(blobSlice.call(file, start, end));
+        };
+
+        loadNext();
+    }
+
+}
+
+function reset() {
+    $('#bar').html("");
+    $("#bar").width(0);
+}
+var mgr ={
+        getSlaveNodesList:function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/slavenodes/getSlaveNodesListNoPage',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    //console.log(data);
+                    var slaveNodesList = data;
+                    var html = '<option value="allserver">所有服务器</option>';
+                    for(var i = 0 ; i < slaveNodesList.length ; i++){
+                        html += '<option value="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+                    }
+                    $('#ip').html(html);
+                }
+            });
+        },
+        getAllProcess:function(pageNo,pageSize){
+            var state = $("#state").find("option:selected").val();
+            var result = $("#result").find("option:selected").val();
+            var startTime = $("#startTime").val();
+            var endTime = $("#endTime").val();
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/xls/getAllProcessList',
+                dataType:'json',
+                data: {"pageNo":pageNo,"pageSize":pageSize,"state":state,"result":result,"startTime":startTime,"endTime":endTime},
+                success:function(data){
+                    $("#uploadProcess").trigger("update");
+                    var processList = data;
+                    //console.log(data);
+                    if(processList!=null&&processList.length>1){
+                        var htmlTable = "";
+                        for(var i=1;i<processList.length;i++){
+                            htmlTable = htmlTable+"<tr>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].id;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].userName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].createTime;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].uploadTime;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].targetServerName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+processList[i].language;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            if(parseInt(processList[i].openMd5) == 0){
+                                htmlTable = htmlTable + "关闭";
+                            }else if(parseInt(processList[i].openMd5) == 1){
+                                htmlTable = htmlTable + "开启";
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            switch(parseInt(processList[i].state)){
+                                case 0 :
+                                    htmlTable = htmlTable+"<span class='headerBox size bgWait'>";
+                                    htmlTable = htmlTable+"</span>";
+                                    htmlTable = htmlTable+"等待中";
+                                    break;
+                                case 1 :
+                                    htmlTable = htmlTable+"<span class='headerBox size bgProcessing'>";
+                                    htmlTable = htmlTable+"</span>";
+                                    htmlTable = htmlTable+"正在执行";
+                                    break;
+                                case 2 :
+                                    htmlTable = htmlTable+"<span class='headerBox size bgSuccess'>";
+                                    htmlTable = htmlTable+"</span>";
+                                    htmlTable = htmlTable+"已完成";
+                                    break;
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            switch(parseInt(processList[i].result)){
+                                case 0 :
+                                    htmlTable = htmlTable+"<span class='text-bg text-bgno'>";
+                                    htmlTable = htmlTable+"失败";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                                case 1 :
+                                    htmlTable = htmlTable+"<span class='text-bg'>";
+                                    htmlTable = htmlTable+"成功";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            if(parseInt(processList[i].result) == 1){
+                                var checkDetail = "<a href='javascript:mgr.checkDetail("+ processList[i].id +")'>查看</a>";
+                                htmlTable = htmlTable+checkDetail;
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var download = "<a href='javascript:mgr.downloadZip("+ processList[i].id +")'>下载</a>";
+                            htmlTable = htmlTable+download;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            if(processList[i].state == 0){
+                                var deleteProcess = "<a href='javascript:mgr.deleteProcess("+ processList[i].id +")'>删除</a>";
+                                htmlTable = htmlTable+deleteProcess;
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"</tr>";
+                        }
+                        var pageStr = data[0];
+                        $('#uploadProcess').find('tbody').html(htmlTable);
+                        //取出分页条代码
+                        $('#pageInfo').html(pageStr);
+                    } else{
+                        $('#uploadProcess').find('tbody').html("<tr><td colspan='12' align='right'>当前没有正在进行的上传任务</td><tr>");
+                        $('#pageInfo').html("");
+                    }
+                }
+            });
+        },
+        downloadZip:function (processId) {
+            //此处根据任务ID 下载对应的文件
+            console.log(processId);
+            window.location.href=''+$ctx+'/sysmgr/xls/downloadZip?processId='+processId;
+        },
+        checkDetail:function (processId) {
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/xls/checkDetail',
+                dataType:'json',
+                data: {"id":processId},
+                success:function(data){
+                    $("#resultModal").modal("toggle");
+                    $("#updateResult").html(data.msg);
+                    //console.log(data);
+                }
+            });
+        },
+        deleteProcess:function (processId) {
+            if(confirm("您确定要删除此上传任务吗?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/xls/deleteProcess',
+                    dataType:'json',
+                    data: {"id":processId},
+                    success:function(data){
+                        alert(data.msg);
+                        mgr.getAllProcess(1,10);
+                    }
+                });
+            }
+        },
+        upload:function(){
+            $("#processBar").show();
+            reset();
+            var formData = new FormData($( "#xlsForm" )[0]);
+
+            var ip = $("#ip option:checked").val();
+            if(null == ip || ip == ""){
+                alert("请选择服务器");
+                return false;
+            }
+
+            var language = $("#language").val();
+            if( null == language || language == ""){
+                alert("请输入语言版本");
+                return false;
+            }
+
+            var uploadTime = $("#uploadTime").val();
+            var uploadTimeStamp = parseInt(Date.parse(new Date(uploadTime)));
+            var curTimeStamp = parseInt(new Date().getTime());
+            if(uploadTimeStamp - curTimeStamp < 60 * 1000 * 5){
+                alert("上传时间必须要在当前时间的5分钟后");
+                return false;
+            }
+
+            calculate(function(array){
+                //console.log("array:"+ JSON.stringify(array));
+
+                var result = "";
+
+                formData.append("array",JSON.stringify(array));
+                formData.append("language",language);
+                formData.append("ip",ip);
+                formData.append("openMd5",_state);
+                formData.append("uploadTimeStamp",uploadTimeStamp);
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/xls/xlsUpload',
+                    dataType:'json',
+                    contentType : false,    //必须false才会自动加上正确的Content-Type
+                    processData : false,    //必须false才会避开jQuery对 formdata 的默认处理,XMLHttpRequest会对 formdata 进行正确的处理
+                    data: formData,
+                    xhr: function(){
+                        myXhr = $.ajaxSettings.xhr();          //获取ajaxSettings中的xhr对象，为它的upload属性绑定progress事件的处理函数
+                        if(myXhr.upload){            //绑定progress事件的回调函数
+                            myXhr.upload.addEventListener('progress',function(e) {
+                                if (e.lengthComputable) {
+                                    $('#bar').attr({ value: e.loaded, max: e.total }); //更新数据到进度条
+                                    var percent = Math.round(e.loaded / e.total * 100) + "%";
+                                    $('#bar').html(percent);
+                                    $("#bar").width(percent);
+                                }
+                            }, false);
+                        }    //xhr对象返回给jQuery使用
+                        return myXhr;
+                    },
+                    success:function(data){
+                        /*if(data == true){
+                            alert("上传成功");
+                        }else{
+                            alert("上传失败");
+                        }*/
+                        console.log(data);
+                        alert(data.msg);
+                        mgr.getAllProcess(1,10);
+                    }
+                });
+                /*function progressHandlingFunction(e) {
+                    if (e.lengthComputable) {
+                        $('#bar').attr({ value: e.loaded, max: e.total }); //更新数据到进度条
+                        var percent = Math.round(e.loaded / e.total * 100) + "%";
+                        $('#bar').html(percent);
+                        $("#bar").width(percent);
+                    }
+                }*/
+            });
+
+        }
+	};
+
+</script>
+</body>
+</html>

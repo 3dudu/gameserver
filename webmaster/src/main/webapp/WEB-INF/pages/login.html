@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!-- saved from url=(0075)http://localhost:8080/login;JSESSIONID=8c063142-ef1d-4b1d-ab15-fb0ecf1e6488 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>achieve-sd-master</title>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit">
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/login/login.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+<div id="loginForm" class="form-signin" style="width: 500px;height: 300px;">
+	<h3 id="projectName" class="form-signin-heading" style="font-size: 22px">欢迎使用 achieve-sd-master</h3>
+	<!--<p></p>-->
+	<!--<p id="version"></p>-->
+	<p><input type="text" id="loginName" name="loginName" class="input-block-level" value="" placeholder="账号"></p>
+	<p><input type="password" id="password" name="password" class="input-block-level" placeholder="密码"></p>
+	<p><input type="text" id="verifycode" name="verifycode" class="input-block-level verifycode" placeholder="验证码">
+	<img id="img" class="img" src="/master/checkImg"></p>
+	<p class="online-p"><input type="checkbox" id="online" name="online" value="1"> <label for="online">记住登录账号</label></p>
+	<label><input class="btn-default btn btn-primary" type="submit" value="登 录" id="submit">&nbsp;&nbsp;
+	<input class="btn-default btn btn-warning" type="reset" value="重 置" id="reset">&nbsp;&nbsp;</label>
+	<span id="tips" style="color:red;font-size:16px;margin-left: 100px;"></span>
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+if(window !=top){  
+    top.location.href = location.href;  
+}
+$(window).load(function(){
+	$.ajax({
+        type:'post',
+        url: ''+$ctx+'/getCookie', 
+        data:{},
+        dataType:"json",
+        contentType :"application/json;charset=UTF-8",
+        success:function(data){ 
+        	//console.log(data);
+            $("#loginName").val(data.loginName);
+            $("#password").val(data.password);
+            $("#online").attr("checked",true);
+        }
+    });
+	
+	$("#loginName").focus();
+	 
+	/*设置按下回车之后执行ajax提交事件*/
+  	$("body").keydown(function() {
+        if (event.keyCode == "13") {//keyCode=13是回车键
+            $('#submit').click();
+        }
+   	});
+	/*刷新验证码*/
+  	$("#img").click(function(){  
+	    var url = ""+$ctx+"/checkImg?number="+Math.random();  
+	    $("#img").attr("src",url);  
+	});
+	/*登录操作*/
+	$("#submit").click(function(){
+		var formObj={
+			loginName : $("#loginName").val(),
+			password : $("#password").val(),
+			verifycode : $("#verifycode").val(),
+			online:$("input[type='checkbox']").is(':checked')
+		};
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/login.do',   
+			async: false,
+			dataType:'json',
+			contentType :"application/json;charset=UTF-8",
+			data: JSON.stringify(formObj),					
+			success:function(data){
+				//console.log(data.status);
+				switch(parseInt(data.status)){
+				case 0:
+					$('#tips').html("验证码错误");
+				  	break;
+				case 1:
+					$('#tips').html("请输入信息");
+				  	break;
+				case 2:
+					$('#tips').html("用户密码错误");
+					break;
+				case 3:
+					window.location.href=$ctx+'/main?r='+Math.random();
+					//$(window).attr('location',''+$ctx+'/main');
+				}
+			}
+		});
+	});
+	//清空表单
+	$('input:reset').click(function(){
+	    $('#loginName').val("");
+	    $('#password').val("");
+	    $('#verifycode').val("");
+	});
+    mgr.getProjectName();
+    //mgr.getVersion();
+});
+
+var mgr = {
+
+    getProjectName:function(){
+        $.ajax({
+            type:'post',
+            url:''+$ctx+'/getProjectName',
+            dataType:'json',
+            data: {},
+            success:function(data){
+                console.log(data.name);
+                $("#projectName").html(data.name);
+            }
+        });
+    },
+    getVersion:function(){
+        var footer_info = "V";
+        $.ajax({
+            type:'post',
+            url:''+$ctx+'/getVersion',
+            dataType:'json',
+            data: {},
+            success:function(data){
+                //console.log(data);
+                footer_info += data.version;
+                $("#version").html(footer_info);
+            }
+        });
+    }
+}
+
+</script>
+</body>
+</html>

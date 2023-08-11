@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JQuestionnaireMapper">
+	<select id="getJQuestionnaireList" parameterType="jquestionnaire" resultType="jquestionnaire">
+		select `id`,`playerId`,`playerName`,`question1`,`question2`,`question3`,`question4`,`question5`,`question6`,`question7`,`question8`,`question9`,`question10`
+		from jquestionnaire
+		<where>
+			<if test=" playerId != null and playerId != '' ">
+				and playerId=#{playerId}
+			</if>
+		</where>
+	</select>
+
+	<select id="getJQuestionnaireById" parameterType="java.lang.Long" resultType="jquestionnaire">
+		select `id`,`playerId`,`playerName`,`question1`,`question2`,`question3`,`question4`,`question5`,`question6`,`question7`,`question8`,`question9`,`question10`
+		from jquestionnaire where `id` =  #{id}
+	</select>
+
+	<select id="exportAll" parameterType="jquestionnaire" resultType="jquestionnaire">
+		select `id`,`playerId`,`playerName`,`question1`,`question2`,`question3`,`question4`,`question5`,`question6`,`question7`,`question8`,`question9`,`question10`
+		from jquestionnaire
+	</select>
+
+    <select id="exportSelected" resultType="jquestionnaire">
+        select `id`,`playerId`,`playerName`,`question1`,`question2`,`question3`,`question4`,`question5`,`question6`,`question7`,`question8`,`question9`,`question10`
+        from jquestionnaire where playerId in
+        <foreach collection="array" item="ids" index="index" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </select>
+
+    <select id="getJQuestionnairePlayerId" parameterType="jquestionnaire" resultType="jquestionnaire">
+         select `playerId`,`playerName` from jquestionnaire
+    </select>
+
+    <select id="getJQuestionnairePlayerName" parameterType="jquestionnaire" resultType="jquestionnaire">
+        select distinct(`playerName`) from jquestionnaire
+    </select>
+
+	<select id="exists" parameterType="jquestionnaire" resultType="jquestionnaire">
+		select playerId from jquestionnaire where playerId = #{playerId}
+	</select>
+
+	<select id="exists9" parameterType="jquestionnaire" resultType="jquestionnaire">
+		select question9 from jquestionnaire where playerId = #{playerId}
+	</select>
+	
+	<insert id="addJQuestionnaire" parameterType="jquestionnaire">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jquestionnaire(`playerId`,`playerName`,`question1`,`question2`,`question3`,`question4`,`question5`,`question6`,`question7`,`question8`,`question9`,`question10`)
+		VALUES (#{playerId},#{playerName},#{question1},#{question2},#{question3},#{question4},#{question5},#{question6},#{question7},#{question8},#{question9},#{question10})
+	</insert>
+
+	<!--修改信息-->
+	<update id="updateJQuestionnaire" parameterType="jquestionnaire">
+		UPDATE jquestionnaire set ${key} = #{value}
+		WHERE playerId = #{playerId}
+	</update>
+
+</mapper>

@@ -1,0 +1,1 @@
+ps -ef|grep -v grep |grep -e 'LoginServer.jar' |awk '{print $2}'|xargs kill -TERM

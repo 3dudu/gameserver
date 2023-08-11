@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>用户查询页面</title>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">公众号</a></li>
+<!--    <li><a href="javascript:mgr.editQQ(1);">添加QQ</a></li>-->
+</ul>
+
+<form id="statusForm" class="breadcrumb form-search" action="#" method="post">
+    <div class="controls" style="margin-bottom: 15px">
+        <label for="status">功能开关: </label>
+        <select id="status" name="status" style="width:80px">
+            <option value="1">开启</option>
+            <option value="0">关闭</option>
+        </select>
+    </div>
+    <div class="controls" style="margin-bottom: 15px">
+        <label for="name">公&nbsp;&nbsp;众&nbsp;&nbsp;号: </label>
+        <input id="name" name="name" class="input-medium" type="text" value="" readonly="readonly" placeholder="公众号"/>
+    </div>
+    <div class="controls" style="margin-left: 10px;">
+        <input id="saveSubmit" class="btn btn-warning" type="button" value="保存" onclick = "mgr.saveStatusName();"/>
+        <i class="layer-tips right" id="nameTips" tips="双击公众号输入框可以修改公众号"></i>
+    </div>
+</form>
+
+
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(function () {
+        mgr.getStatusName();
+        $("#name").dblclick(function(){
+           $(this).attr("readonly",false);
+        });
+
+        $("#name").blur(function(){
+            $(this).attr("readonly",true);
+        })
+    });
+    var mgr ={
+        getStatusName : function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/wechat/getNameStatus',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: {},
+                success:function(data){
+                    $("#name").val(data.name);
+                    $("#status").val(data.isOpen).trigger("change");
+                }
+            });
+        },
+        saveStatusName: function(){
+            var status = $("#status").val();
+            var name = $("#name").val();
+            if(name == ""){
+                alert("请\"双击\"输入框，输入公众号名称");
+                return false;
+            }
+
+            var wx={};
+            wx['isOpen'] = status;
+            wx['name'] = name;
+
+            var tips = "确定设置开关为" + (status == 1 ? "\"开启\"" : "\"关闭\"") + "状态，公众号名称为\"" + name + "\"吗？";
+            if(confirm(tips)){
+                if(confirm("确定真的要设置？此操作不可逆！")){
+                    $.ajax({
+                        type:'post',
+                        url:''+$ctx+'/sysmgr/wechat/saveNameStatus',
+                        dataType:'json',
+                        contentType :"application/json;charset=UTF-8",
+                        data: JSON.stringify(wx),
+                        success:function(data){
+                            alert(data.result);
+                            mgr.getStatusName();
+                        }
+                    });
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

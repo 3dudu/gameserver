@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.UploadQueueMapper">
+	<select id="getAllProcess" parameterType="uploadQueue" resultType="uploadQueue">
+		select `id`,`userId`,`userName`,`createTime`,`uploadTime`,`targetServer`,`targetServerName`,`language`,`openMd5`,`state`,`result`,`file`,`detail` from update_queue
+		<where>
+			<if test=" state != null  and state != '' ">
+				 and state = #{state}
+			</if>
+			<if test=" result != null  and result != '' ">
+				and result = #{result}
+			</if>
+			<if test=" startTime != null  and startTime != '' ">
+	        	<![CDATA[ and uploadTime >= #{startTime} ]]>
+	        </if>
+			<if test=" endTime != null  and endTime != '' ">
+				<![CDATA[ and uploadTime < #{endTime}  ]]>
+			</if>
+		</where>
+		order by `createTime` desc
+	</select>
+
+	<select id="getInProcess" parameterType="uploadQueue" resultType="uploadQueue">
+		select `id`,`userId`,`userName`,`createTime`,`uploadTime`,`targetServer`,`targetServerName`,`language`,`openMd5`,`state`,`result`,`file`,`detail` from update_queue
+		where `state` = 1
+	</select>
+
+	<select id="getNextProcess" parameterType="uploadQueue" resultType="uploadQueue">
+		select `id`,`userId`,`userName`,`createTime`,`uploadTime`,`targetServer`,`targetServerName`,`language`,`openMd5`,`state`,`result`,`file`,`detail`
+		from update_queue where `state`=0 order by uploadTime asc
+	</select>
+
+	<select id="getProcessById" parameterType="java.lang.Long" resultType="uploadQueue">
+		select `id`,`userId`,`userName`,`createTime`,`uploadTime`,`targetServer`,`targetServerName`,`language`,`openMd5`,`state`,`result`,`file`,`detail` from update_queue
+		where id = #{id}
+	</select>
+	
+	<insert id="addProcess" parameterType="uploadQueue">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO update_queue(`userId`,`userName`,`createTime`,`uploadTime`,`targetServer`,`targetServerName`,`language`,`openMd5`,`state`,`file`,`detail`)
+		VALUES (#{userId},#{userName},#{createTime},#{uploadTime},#{targetServer},#{targetServerName},#{language},#{openMd5},#{state},#{file},#{detail})
+	</insert>
+	
+	<delete id="delProcess" parameterType="java.lang.Long">
+		DELETE FROM update_queue
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="changeToUploading" parameterType="uploadQueue">
+		UPDATE update_queue  set
+           `state` = 1
+		WHERE id = #{id}
+ 	</update>
+
+	<update id="changeToFinished" parameterType="uploadQueue">
+		UPDATE update_queue  set
+		`state` = 2,
+		`result` = #{result},
+		`detail` = #{detail}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

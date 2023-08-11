@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>用户查询页面</title>
+    <meta charset="utf-8"/>
+    <meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet"/>
+<style>
+    #mergeForm h5 {
+        display: inline-block;
+    }
+
+    .modelInput {
+        width: 90px;
+    }
+
+    .input-table{
+        width: 50px !important;
+        margin: 0 !important;
+    }
+
+</style>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">问卷调查</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="16"/>
+    <input id="npcIdHidden" name="npcIdHidden" type="hidden" value=""/>
+    <div class="controls">
+        <label for="playerId">选择玩家:</label>
+        <select id="playerId" name="playerId" style="width:180px">
+
+        </select>
+        &nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick="mgr.searchMessage(1,16);"/>
+        &nbsp;
+        <input id="exportSelected" class="btn btn-primary" onclick="mgr.exportExcel(2)" value="导出选中项" type="button" />
+        &nbsp;
+        <input id="exportAll" class="btn btn-primary" onclick="mgr.exportExcel(1)" value="导出全部" type="button" />
+    </div>
+</form>
+<form>
+    <table id="messageListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th style="text-align:center;width:19px;"><input id="checkAll" type="checkbox" value="" /></th>
+            <th class="header">玩家ID</th>
+            <th class="header">玩家姓名</th>
+            <th class="header">问题1</th>
+            <th class="header">问题2</th>
+            <th class="header">问题3</th>
+            <th class="header">问题4</th>
+            <th class="header">问题5</th>
+            <th class="header">问题6</th>
+            <th class="header">问题7</th>
+            <th class="header">问题8</th>
+            <th class="header">问题9</th>
+            <th class="header">问题10</th>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        </tbody>
+    </table>
+</form>
+
+<div class="pagination" id="pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function () {
+        $("#messageListTable").tablesorter({headers:{0:{sorter:false}}});
+    });
+
+    $(function () {
+        mgr.getJQuestionnairePlayerId();
+        mgr.searchMessage(1, 16);
+        $('#checkAll').click(function(){
+            $(":checkbox[name='checkQuestion']").is(":checked")?$(":checkbox[name='checkQuestion']").attr("checked",false):$(":checkbox[name='checkQuestion']").attr("checked",true);
+        });
+        chkInit();
+    });
+
+    function chkInit() {
+        $(":checkbox[name='checkQuestion']").change(function(e) {
+            $('#checkAll').prop("checked",true);
+            var checked = $(this).prop("checked");
+            var flag = false;
+            if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+                $(":checkbox[name='checkQuestion']").each(function(){
+                    if($(this).is(':checked'))flag = true;
+                });
+                if(!flag){
+                    $('#checkAll').prop("checked",false);
+                }
+            }
+        });
+    }
+
+    var mgr = {
+        getJQuestionnairePlayerId : function () {
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getJQuestionnairePlayerId',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    if(data!=null&&data.length>0){
+                        var html = '<option value="">选择玩家</option>';
+                        for(var i=0;i<data.length;i++){
+                            html += "<option value='"+data[i].playerId+"'>"+data[i].playerId+"."+data[i].playerName+"</option>";
+                        }
+                        $('#playerId').html(html);
+                    }
+                }
+            });
+        },
+        exportExcel:function (flag){
+            var checkObj="";
+            var playerIdArray = $("input[name='checkQuestion']:checked").serializeArray();
+            $.each(playerIdArray, function(i, item){
+                checkObj += item.value;
+                checkObj += ",";
+            });
+            /*if(JSON.stringify(player["playerIds"]) === "{}"){
+                alert("请先选择需要导出的数据");
+                return false;
+            }*/
+            if(flag == 2 && checkObj.length == 0) {
+                alert("请先选择需要导出的数据");
+                return false;
+            }
+            checkObj=checkObj.substring(0,checkObj.length-1);
+            window.location.href=''+$ctx+'/sysmgr/cs/exportTable?flag='+flag+'&playerIds='+checkObj;
+
+            /*$.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/cs/exportTable',
+                dataType:'application/octet-stream;charset=UTF-8',
+                contentType :"application/json;charset=UTF-8",
+                data: JSON.stringify(player),
+                success:function(data){
+                    console.log("success");
+                }
+            });*/
+        },
+        searchMessage: function (pageNo, pageSize) {
+            var playerId = $("#playerId option:selected").val();
+            var playerName = "";
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getQuestionnaireList',
+                dataType: 'json',
+                data: {"playerId": playerId, "playerName": playerName, "pageNo": pageNo, "pageSize": pageSize},
+                success: function (data) {
+                    //console.log(data);
+                    $('#checkAll').prop("checked",false);
+                    $("#messageListTable").trigger("update");
+                    var messageList = data;
+                    if (messageList != null && messageList.length > 1) {
+                        var htmlTable = "";
+                        for(var i=1;i<messageList.length;i++){
+                            htmlTable = htmlTable+"<tr>";
+                            htmlTable += "<td>";
+                            var check = "<input type='checkbox' name='checkQuestion' value='"+messageList[i].playerId+"'/>";
+                            htmlTable += check;
+                            htmlTable += "</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].playerId;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].playerName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question1;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question2;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question3;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question4;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question5;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question6;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question7;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question8;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question9;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].question10;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"</tr>";
+                        }
+
+                        var pageStr = data[0];
+                        $('#pageInfo').html(pageStr);
+                        chkInit();
+                    } else {
+                        htmlTable = "<tr><td colspan='15' align='right'>没有查询到数据</td><tr>";
+                        $('#pageInfo').html("");
+                    }
+                    $('#messageListTable').find('tbody').html(htmlTable);
+                    chkInit();
+                }
+            });
+
+        }
+    }
+</script>
+</body>
+</html>

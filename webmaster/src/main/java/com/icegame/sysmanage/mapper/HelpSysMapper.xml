@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.HelpSysMapper">
+	<select id="getHelpSysList" parameterType="helpSys" resultType="helpSys">
+
+		select t1.`id`,t1.`user_name`,t1.`create_time`,t1.`title`,t1.`description`,t1.`context`,t1.`diff_type`,t1.`zan`,t1.`sign_type`,t3.`sign_name` as signName ,t2.`diff_name` as diffName from help_sys t1,help_sys_type t2,help_sys_sign t3
+		<where>
+			<if test="userName != null and userName != '' ">
+				and t1.user_name like concat("%",#{userName},"%")
+			</if>
+			<if test="diffType != null and diffType != '' and diffType != '0' ">
+				and t1.diff_type = #{diffType}
+			</if>
+			<if test="signType != null and signType != '' and signType != '0' ">
+				and t1.sign_type = #{signType}
+			</if>
+			<if test="startTime != null and endTime != null ">
+				and t1.`create_time` <![CDATA[ >=  ]]> #{startTime} and t1.`create_time` <![CDATA[ < ]]> #{endTime}
+			</if>
+			and t1.`diff_type` = t2.`diff_type`
+			and t1.`sign_type` = t3.`sign_type`
+		</where>
+		order by t1.`create_time` desc
+	</select>
+
+	<!-- 获取所有【官方】文章 -->
+	<select id="getAllOfficalList" parameterType="helpSys" resultType="helpSys">
+
+		select `id`,`user_name`,`create_time`,`title`,`description`,`context`,`diff_type`,`zan`,`sign_type` from help_sys
+		<where>
+			`diff_type` = 1
+		</where>
+		order by `zan` desc
+	</select>
+
+	<!-- 获取所有【攻略】文章 -->
+	<select id="getAllStrategyList" parameterType="helpSys" resultType="helpSys">
+
+		select `id`,`user_name`,`create_time`,`title`,`description`,`context`,`diff_type`,`zan`,`sign_type` from help_sys
+		<where>
+			`diff_type` = 2
+		</where>
+		order by `zan` desc
+	</select>
+
+	<select id="getHelpSysById" parameterType="java.lang.Long" resultType="helpSys">
+		select `id`,`user_name`,`create_time`,`title`,`description`,`context`,`diff_type`,`zan`,`sign_type` from help_sys
+		where id = #{id}
+	</select>
+	
+	<insert id="addHelpSys" parameterType="helpSys">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               select LAST_INSERT_ID() as id
+        </selectKey>
+		insert into help_sys(`user_name`,`create_time`,`title`,`description`,`context`,`diff_type`,`zan`,`sign_type`)
+		values (#{userName},#{createTime},#{title},#{description},#{context},#{diffType},#{zan},#{signType})
+	</insert>
+	
+	<delete id="delHelpSys" parameterType="java.lang.Long">
+		delete from help_sys
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+	
+	<update id="updateHelpSys" parameterType="helpSys">
+		update help_sys
+		<set>
+			<if test="title != null and title != '' ">
+				`title` = #{title},
+			</if>
+			<if test="description != null and description != '' ">
+				`description` = #{description},
+			</if>
+			<if test="context != null and context != '' ">
+				`context` = #{context},
+			</if>
+			<if test="diffType != null and diffType != '' ">
+				`diff_type` = #{diffType},
+			</if>
+			<if test="zan != null and zan != '' ">
+				`zan` = #{zan},
+			</if>
+			<if test="signType != null and signType != '' ">
+				`sign_type` = #{signType},
+			</if>
+		</set>
+		where id = #{id}
+ 	</update>
+
+	<update id="clickZan" parameterType="java.lang.Long">
+		update help_sys
+		set `zan` = `zan` + 1
+		where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+<style>
+	#mergeForm h5{display: inline-block;}
+	.modelInput{width: 90px;}
+</style>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">武将重生记录</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+	<input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="16"/>	
+	<ul class="ul-form">
+		<li>
+		    <label for="serverId">所在区:</label>
+	    	<select id="serverId" name="serverId" style="width:190px">
+				<option value="">选择所在区</option>
+				<option value="10">十区</option>
+				<option value="13">十三区</option>
+				<option value="29">二十九区</option>
+				<option value="30">三十区</option>
+				<option value="16">十六区</option>
+		    </select>
+		    <label for="playerId">玩家ID:</label>
+        	<input id="playerId" name="playerId" class="input-medium" type="text" value=""/>&nbsp;
+        	<label for="playerName">玩家姓名:</label>
+        	<input id="playerName" name="playerName" class="input-medium" type="text" value=""/>&nbsp;
+		</li>
+		<li class="clearfix"></li>
+		<li>
+			<label for="startDate">起始日期:</label>
+        	<input id="startDate" name="startDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        	&nbsp;
+			<label for="endDate">截止日期:</label>
+        	<input id="endDate" name="endDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+		</li>
+		<li class="btns">
+			<input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.searchMessage(1,16);"/>
+		</li>
+		<li class="clearfix"></li>
+	</ul>
+</form>
+<form>
+	<table id="messageListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	    <thead>
+	    <tr>
+	    	<th class="header">时间</th>
+	        <th class="header">玩家ID</th>
+	        <th class="header">玩家姓名</th>
+	        <th class="header">区服ID</th>
+	        <th class="header">区服名称</th>
+	        <th class="header">返还物品</th>
+	        <th class="header">武将ID</th>
+	        <th class="header">武将姓名</th>
+	        <th class="header">升阶次数</th>
+	        <th class="header">晋升次数</th>
+	        <th class="header">法宝等级</th>
+	        <th class="header">法宝经验</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	     
+	    
+	    </tbody>
+	</table>
+</form>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#messageListTable").tablesorter(); 
+});
+$(function () {
+	mgr.getAllChannelServerList();
+	mgr.searchMessage(1,16);
+});
+$(window).load(function(){ 
+	function refreshMsg(pageNo,pageSize){
+	    return function(){
+	    	mgr.searchMessage(pageNo,pageSize);
+	    }
+	}
+	//setInterval(refreshMsg(1,16),5000);
+});
+var mgr ={
+		getAllChannelServerList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var serverList = data;
+					var array = new Array();
+					if(serverList!=null&&serverList.length>0){
+
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+
+						/*var html = '<option value="">选择所在区</option>';
+						for(var i=0;i<serverList.length;i++){
+							html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+						}*/
+						$('#serverId').html(html);		
+					}
+				}
+			});
+		},
+	 	searchMessage:function(pageNo,pageSize){
+	 		var serverId = $("#serverId").val();
+	 		var playerId = $("#playerId").val();
+			var playerName = $("#playerName").val();
+	 		var startDate = $("#startDate").val();
+	 		var endDate = $("#endDate").val();
+	 		var content = $("#content").val();
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getReduceLogList', 
+				dataType:'json', 
+				data: {"playerId":playerId,"serverId":serverId,"startDate":startDate,"endDate":endDate,"playerName":playerName,"pageNo":pageNo,"pageSize":pageSize},				
+				success:function(data){
+					$("#messageListTable").trigger("update");
+					//console.log(data);
+					var reduceLog = data;
+					
+					if(reduceLog != null && reduceLog.length>1){		
+						var htmlTable = "";
+						for(var i=1;i<reduceLog.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].strCreateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].playerId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].playerName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].serverName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].items;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].npcId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].npcName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].potential;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].evolveLevel;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].level;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+reduceLog[i].exp;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#pageInfo').html(pageStr);
+					}else{
+						htmlTable="<tr><td colspan='10' align='right'>没有查询到数据</td><tr>";
+						$('#pageInfo').html("");
+					}
+					$('#messageListTable').find('tbody').html(htmlTable);
+				}
+			});
+	 	}
+	}
+</script>
+</body>
+</html>

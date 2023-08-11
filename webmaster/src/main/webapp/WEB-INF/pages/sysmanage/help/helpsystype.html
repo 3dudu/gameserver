@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">类型列表</a></li>
+    <li><a href="javascript:mgr.editHelpSysType(1);">添加类型</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+
+    <div class="controls">
+    	<label  class="control-label" for="diffNameInput">类型:</label>
+        <input id="diffNameInput" name="diffNameInput" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,20);"/>
+	</div>
+    
+</form>
+<table id="helpSysTypeListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">编号</th>
+        <th class="header">类型</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 590px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">修改类型</h5>
+            </div>
+            <div class = "modal-body" style="max-height: 500px;">
+                <form id="editForm" class="form-horizontal" action="#" method="post">
+                    <input id="id" name="id" type="hidden" value=""/>
+                    <div class="control-group">
+                        <label class="control-label">编号:</label>
+                        <div class="controls">
+                            <input style="float:left" id="diffType" name="diffType" type="text" value="" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">类型:</label>
+                        <div class="controls">
+                            <input style="float:left" id="diffName" name="diffName" type="text" value="" />
+                        </div>
+                    </div>
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#helpSysTypeListTable").tablesorter();
+});
+
+$(document).ready(function(){
+    mgr.getListPage(1,20);
+});
+
+
+var mgr ={
+	 	getListPage : function(pageNo,pageSize){
+	 	    var diffName = $("#diffNameInput").val();
+	 		$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/helpsystype/getHelpSysTypeList',
+				dataType:'json', 
+				data: {"diffName":diffName,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#helpSysTypeListTable").trigger("update");
+					var dataList = data;
+					if(dataList != null && dataList.length > 1){
+						var htmlTable = "";
+						for(var i = 1 ; i < dataList.length ; i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+dataList[i].diffType;
+							htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+dataList[i].diffName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var editButton = "<a href='javascript:mgr.editHelpSysType(2,"+dataList[i].id+")'>修改</a>";
+                            var delButton = "<a href='javascript:mgr.delHelpSysType("+dataList[i].id+")'>删除</a>";
+                            var addButton = "<a href='javascript:mgr.editHelpSysType(1)'>添加</a>";
+                            htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#helpSysTypeListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#helpSysTypeListTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+        editHelpSysType : function(editFlag,id){
+	 	    if(editFlag == 1){
+                $("#editForm").validate({
+                    rules: {
+                        diffType: {
+                            required: true,
+                            digits:true,
+                            remote:{
+                                type:'post',
+                                url:''+$ctx+'/sysmgr/helpsystype/checkExistDiffType',
+                                dataType:'html',
+                                data: {"editFlag":"add"},
+                                dataFilter: function(data,type){
+                                    return data == "0"?true:false;
+                                }
+                            }
+                        },
+                        diffName :{
+                            required: true
+                        }
+                    },
+                    messages: {
+                        diffType: {
+                            required: "请输入编号",
+                            digits: "必须是正整数",
+                            remote: "编号已存在"
+                        },
+                        diffName: {
+                            required: "请输入类型"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveHelpSysType(form);
+                    }
+                });
+                $("#diffType").attr("readonly",false);
+            }else if(editFlag == 2){
+                $("#editForm").validate({
+                    rules: {
+                        diffType: {
+                            required: true,
+                            digits:true
+                        },
+                        diffName :{
+                            required: true
+                        }
+                    },
+                    messages: {
+                        diffType: {
+                            required: "请输入编号",
+                            digits: "必须是正整数",
+                        },
+                        diffName: {
+                            required: "请输入类型"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveHelpSysType(form);
+                    }
+                });
+                $("#diffType").attr("readonly",true);
+            }
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsystype/gotoHelpSysTypeEdit',
+                dataType:'json',
+                data: {"editFlag":editFlag,"id":id},
+                success:function(data){
+                    //console.log(data);
+                    $("#editModal").modal("toggle");
+                    var helpSysType = data;
+
+                    $("#id").val(helpSysType.id);
+                    $("#diffType").val(helpSysType.diffType);
+                    $("#diffName").val(helpSysType.diffName);
+                }
+            });
+        },
+        delHelpSysType : function(id){
+            if(confirm("您确定要删除此条记录吗?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/helpsystype/delHelpSysType',
+                    dataType:'json',
+                    data: {"id":id},
+                    success:function(data){
+                        mgr.getListPage(1,18);
+                    }
+                });
+            }
+        },
+        saveHelpSysType : function(form){
+            var helpSysType={};
+            var formObject = {};
+            var formArray =$("#editForm").serializeArray();
+            $.each(formArray, function(i, item){
+                formObject[item.name]=item.value;
+            });
+            helpSysType = JSON.stringify(formObject);
+            // console.log(helpSysType);
+            // return false;
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsystype/saveHelpSysType',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: helpSysType,
+                success:function(data){
+                    $("#editModal").modal("hide");
+                    mgr.getListPage(1,18);
+                }
+            });
+        }
+	}; 
+
+</script>
+</body>
+</html>

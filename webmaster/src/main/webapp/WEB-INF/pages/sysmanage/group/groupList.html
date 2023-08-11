@@ -1,0 +1,568 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户组</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs" id="navTab">
+    <li class="active"><a href="javascript:void(0);">用户组列表</a></li>
+    <li><a href="javascript:mgr.editGroup(1)">用户组添加</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+	<input id="finalGroupId" name="finalGroupId" type="hidden" value=""/>
+    <div class="controls">
+		<label for="groupNameInput">用户组名称:</label>
+        <input id="groupNameInput" name="groupNameInput" class="input-medium" type="text" value=""/>&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,16);"/>
+	</div>
+</form>
+<table id="userListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">用户组名称</th>
+        <th class="header">Channel授权</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal default-model" id = "editModal" style="display:none;top:2%">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">编辑用户组</h5>
+                </div>
+                <div class = "modal-body" style="max-height:614px">
+                   <form id="groupEditForm" class="form-horizontal" action="#" method="post">
+						<input id="groupId" name="groupId" type="hidden" value=""/>
+						<div class="control-group">
+							<label class="control-label" for="groupName">用户组名:</label>
+							<div class="controls">
+								<input style="float:left;width: 190px;" id="groupName" name="groupName" class="input-medium" type="text" value=""/>
+								<i id="layer-tips" tips="密码提示"></i>
+							</div>
+						</div>
+					   <div class="control-group" id="channelSelectGroup">
+						   <label class="control-label" for="hasChannel">Channel授权:</label>
+						   <div class="controls">
+							   <textarea id="hasChannel" name="hasChannel" style=" float:left;width: 189px;height: 50px;resize:none" placeholder="用户组可见Channel，不填写默认可见所有Channel">
+								</textarea>
+							   <i class="layer-tips" id="channelTips" tips="不填写默认可查看所有Channel，填写之后此用户组的用户只能查看已填写的Channel的区服信息，多个Channel请换行输入"></i>
+						   </div>
+					   </div>
+						<div class="control-group">
+							<label class="control-label" for="menuTree">用户组授权:</label>
+							<div class="controls">
+								<div id="menuTree" class="ztree" style="margin-top:3px;float:left;"></div>
+				 			</div>
+						</div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                 </div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class = "modal fade modal default-model" id = "groupDetailModel" style="display:none;top:2%;width: 700px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">修改组内成员</h5>
+                </div>
+                <div class = "modal-body">
+                <ul class="nav nav-tabs">
+				    <li class="active"><a href="javascript:void(0);">组内成员</a></li>
+				    <li><a href="javascript:mgr.addUserToGroup(1,7);">成员添加</a></li>
+				</ul>
+                   <form id="groupStatusForm" class="breadcrumb form-search" action="#" method="post">
+					    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+					    <input id="pageSize" name="pageSize" type="hidden" value="20"/>
+					    <input id="groupIdAddModel" name="groupIdAddModel" class="input-medium" type="hidden" value="" />	
+					    <input id="groupNameAddModel" name="groupNameAddModel" class="input-medium" type="hidden" value="" />	
+					    <div class="controls">
+							<label for="userNameAddModel">用户名称:</label>
+					        <input id="userNameAddModel" name="userNameAddModel" class="input-medium" type="text" value="" />&nbsp;
+					        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.groupStatus(null,null,1,7);"/>
+					        &nbsp;&nbsp;
+					        <input class="btn btn-primary" type="button" value="删除" onclick = "mgr.delUserFromGroup();"/>
+					        &nbsp;&nbsp;
+        					<input class="btn btn-primary" type="button" value="添加" onclick = "mgr.saveUserToGroup();"/>
+						</div>
+					</form>
+					<table id="groupListTableDetail" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+					    <thead>
+					    <tr>
+					    	<th style="text-align:center;width:37px;"><input id="checkAll" type="checkbox" value="" /></th>
+					        <th class="header">用户名称</th>
+					        <th class="header">登陆名称</th>
+					        <th class="header">所属用户组</th>
+					    </tr>
+					    </thead>
+					    <tbody>
+					     
+					    
+					    </tbody>
+					</table>
+					<div class="pagination" id = "addUserPageInfoModel">
+				
+					</div>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "userPageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#userListTable").tablesorter();  
+    $("#groupListTableDetail").tablesorter({headers:{0:{sorter:false}}});  
+});
+</script>
+<script type="text/javascript">
+
+var _pubGroupId ;
+
+$(function () {
+	// mgr.getAllChannel();
+	mgr.getListPage(1,16);
+	$('#checkAll').click(function(){   
+		 $(":checkbox[name='userId']").is(":checked")?$(":checkbox[name='userId']").attr("checked",false):$(":checkbox[name='userId']").attr("checked",true);
+	});
+    chkInit();
+});
+
+function chkInit() {
+    $(":checkbox[name='userId']").change(function(e) {
+        $('#checkAll').prop("checked",true);
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='userId']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAll').prop("checked",false);
+            }
+        }
+    });
+}
+
+$("#groupDetailModel .nav-tabs li").click(function(){
+    $(this).addClass('active');
+    $(this).siblings('li').removeClass('active');
+
+	if($(this).prev().find('a').length > 0){
+        $(this).prev().find('a').attr('href','javascript:mgr.groupStatus('+_pubGroupId+',"",1,7)');
+	}
+
+});
+var omenuNodes = {};
+var omenuTree = null;
+var mgr ={
+		// getAllChannel : function (){
+		// 	$.ajax({
+		// 		type:'post',
+		// 		url:''+$ctx+'/sysmgr/allsrvmail/getAllChannel',
+		// 		dataType:'json',
+		// 		data: {},
+		// 		success:function(data){
+		// 			var serverList = data;
+		// 			if(serverList!=null && serverList.length > 0){
+		// 				var html = '';
+		// 				for(var i = 0 ; i < serverList.length ; i++){
+		// 					html += "<option value='"+ serverList[i].channel +"'>"+serverList[i].channel+"</option>";
+		// 				}
+		// 				$('#hasChannel').html(html);
+		// 			}
+		// 		}
+		// 	});
+		// },
+		getListPage : function(pageNo,pageSize){
+			var groupName = $("#groupNameInput").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getGroupList', 
+				dataType:'json', 
+				data: {"groupName":groupName,"pageNo":pageNo,"pageSize":pageSize},					
+				success:function(data){
+					$("#userListTable").trigger("update");
+					//var jsonObj =  $.parseJSON(data.jsonObj);
+					var groupList = data;	
+					if(groupList!=null&&groupList.length>0){
+							var htmlTable = "";
+							var tempGroupName = "";
+							for(var i=1;i<groupList.length;i++){
+								tempGroupName = groupList[i].groupName;
+								htmlTable = htmlTable+"<tr>";							
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+"<a href='javascript:mgr.showGroupStatusModel("+groupList[i].groupId+",\""+tempGroupName+"\",1,7)'>"+groupList[i].groupName+"</a>";
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+groupList[i].hasChannel;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton ="<a href='javascript:mgr.editGroup(2,"+groupList[i].groupId+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delGroup("+groupList[i].groupId+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editGroup(1)'>添加</a>";
+ 								htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+								htmlTable = htmlTable+"</td>";					
+								htmlTable = htmlTable+"</tr>";
+						}
+						$('#userListTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						var pageStr = data[0];
+						$('#userPageInfo').html(pageStr);
+	 				} else{
+						$('#userListTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#userPageInfo').html("");		
+	 				}
+				}
+
+			});	
+	 	} ,
+	 	editGroup:function(editFlag,groupId){
+	 		if(editFlag == 1){
+	 			$("#groupEditForm").validate({
+	 				rules: {
+	 					groupName: {
+	 						required: true,
+	 						maxlength: 8,
+	 						remote:{
+	 							type:'post',
+	 							url:''+$ctx+'/sysmgr/group/checkExistGroup', 
+	 							dataType:'html',
+	 							dataFilter: function(data,type){
+	 								return data == "0"?true:false;
+	 							}
+	 						}
+	 					},
+	 					menuTree: "required"
+	 				},
+	 				messages: {
+	 					groupName: {
+	 						required: "请输入用户组名称",
+	 						maxlength: "最大长度为8",
+	 						remote: "用户组已存在"
+	 					},
+	 					menuTree: "请选择用户组权限"
+	 				} ,
+	 				submitHandler: function(form){      
+	 				    mgr.saveGroup(form);     
+	 				} 
+	 			});
+	 		}else{
+	 			$("#groupEditForm").validate({
+	 				rules: {
+	 					groupName: {
+	 						required: true,
+	 						maxlength: 8
+	 					},
+	 					menuTree: "required"
+	 				},
+	 				messages: {
+	 					groupName: {
+	 						required: "请输入用户组名称",
+	 						maxlength: "最大长度为8"
+	 					},
+	 					menuTree: "请选择用户组权限"
+	 				} ,
+	 				submitHandler: function(form){      
+	 				    mgr.saveGroup(form);     
+	 				} 
+	 			});
+	 		}
+			 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/gotoGroupEdit', 
+				dataType:'json',
+				data: {"editFlag":editFlag,"groupId":groupId},			
+				success:function(data){
+					var groupMenuList = data[0];
+					var group = data[1];
+					$("#editModal").modal("toggle");
+					$("#groupId").val(group.groupId);
+					$("#groupName").val(group.groupName);
+					$("#hasChannel").val(group.hasChannel);
+
+					var menuList = new Array();
+					if(editFlag == 2){
+						for(var i = 0 ; i <data.length ; i++){
+							if( i == 0 || i == 1)
+								continue;
+							menuList.push(data[i]);
+						}
+					}else{
+						for(var i = 0 ; i <data.length ; i++){
+							menuList.push(data[i]);
+						}
+					}
+					//菜单资源树
+					var menuSetting = {check:{enable:true,nocheckInherit:true},view:{selectedMulti:false},
+							data:{simpleData:{enable:true}},callback:{beforeClick:function(id, node){
+								menuTree.checkNode(node, !node.checked, true, true);
+								return false;
+							}}};
+					
+					// 用户-菜单
+					var imenuNodes = new Array();
+					menuList.forEach(function(menu) {
+						imenuNodes.push({id: menu.id,pId: menu.parentId,name: menu.name});
+					})
+					var menuZNodes=imenuNodes; 
+					omenuNodes = imenuNodes;
+					// 初始化树结构
+					var menuTree = $.fn.zTree.init($("#menuTree"), menuSetting, menuZNodes);
+					omenuTree = menuTree;
+					//进入修改页面的时候 ，选中已经拥有资源的节点	
+					for(var i = 0 ; i < groupMenuList.length ; i++ ){
+						var node = menuTree.getNodeByParam("id",groupMenuList[i].menuId);
+						menuTree.checkNode(node,true,false);
+					}
+					//默认展开全部节点
+					menuTree.expandAll(true);
+					mgr.getListPage(1,16);					
+				}
+			});
+	 	},
+	 	delGroup:function(groupId){		
+	 		if(confirm("您确定要删除此用户组吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/group/delGroup', 
+					dataType:'json', 
+					data: {"groupId":groupId},				
+					success:function(data){
+						mgr.getListPage(1,16);					
+					}
+				});
+			}
+	 	},
+	 	showGroupStatusModel : function(groupId,groupName,pageNo,pageSize){
+            _pubGroupId = groupId;
+	 		$("#groupDetailModel").modal("toggle");
+	 		mgr.groupStatus(groupId,groupName,pageNo,pageSize);
+	 	},
+	 	groupStatus :function(groupId,groupName,pageNo,pageSize){
+	 		if(typeof groupName == "string"){
+	 			$("#finalGroupId").val(groupId);
+	 		}else if(typeof groupName == "number"){
+	 			pageNo = groupId;
+	 			pageSize = groupName;
+	 			groupId = $("#finalGroupId").val();
+	 		}
+	 		else if(typeof groupName == "object"){
+	 			groupId = $("#finalGroupId").val();
+	 			//groupId = $("#groupIdAddModel").val();
+	 		}
+	 		$("#groupIdAddModel").val(groupId);
+	 		groupId = $("#finalGroupId").val();
+	 		var userName = $("#userNameAddModel").val();
+			 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getUserInGroup', 
+				dataType:'json', 
+				data: {"groupId":groupId,"userName":userName,"pageNo":pageNo,"pageSize":pageSize},				
+				success:function(data){
+					$("#groupListTableDetail").trigger("update");
+					$("#checkAll").attr("checked",false);
+					var userList = data;	
+					if(userList!=null&&userList.length>1){				
+						var htmlTable = "";
+						for(var i=1;i<userList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td style='text-align:center;width:37px;'>";
+							var delButton = "<input type='checkbox' name='userId' value='"+userList[i].userId+"'/>";
+							htmlTable = htmlTable+delButton;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+userList[i].userName;
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+userList[i].loginName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+userList[i].groupName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						$('#groupListTableDetail').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						var pageStr = data[0];
+						$('#addUserPageInfoModel').html(pageStr);							
+	 				}else if(userList.length === 1){
+	 					//console.log(1);
+						$('#groupListTableDetail').find('tbody').html("<tr><td colspan='4' align='right'>没有查询到数据</td><tr>");
+						$('#addUserPageInfoModel').html("");		
+	 				}
+					//mgr.getListPage(1,20);
+                    chkInit();
+				}
+			});
+	 	},
+	 	saveGroup: function(form){
+			//获取字典修改后的信息数据,组装成json字符串
+			var formObject = {};
+			var formArray =$("#groupEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+			
+			var groupDto = {};
+			groupDto["group"]=formObject;
+		 	//获取菜单树被选中的节点
+		 	var menuObj = {};
+		 	var menuNodes = omenuTree.getCheckedNodes(true);
+		 	//console.log("menuNodes"+menuNodes);
+		 	$.each(menuNodes, function(i, item){
+		 		menuObj[item.id]=item.id;
+			 });
+		 	var menuIds = JSON.stringify(menuObj);
+		 	//console.log("menuIds"+menuIds);
+		 	groupDto["menuIds"]=menuObj;
+			var groupObj = JSON.stringify(groupDto);
+			//alert(groupObj);
+			if(groupObj == "{}"){
+				alert("请先输入数据");
+				return false;
+			}
+
+			var hasChannel = $("#hasChannel").val();
+			if(hasChannel.indexOf(",") > -1 || hasChannel.indexOf("，") > -1){
+				alert("Channel格式错误，多个Channel请换行分隔！");
+				return false;
+			}
+
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/saveGroup', 
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: groupObj,			
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,16);
+ 				}
+			});
+		},
+	 	delUserFromGroup:function(){
+	 		var groupId = $("#groupIdAddModel").val();
+	 		var group = {};
+	 		var groupCheckObj={};
+	 		var groupIdArray = $("input[name='userId']:checked").serializeArray();
+ 			$.each(groupIdArray, function(i, item){
+ 				groupCheckObj[item.value]=item.value;
+			 });
+ 			group["userIds"]=groupCheckObj;
+ 			group["groupId"]=groupId;
+	 		if(JSON.stringify(group["userIds"]) === "{}" ){
+	 			alert("请先选择用户");
+	 			return;
+	 		}
+	 		//console.log(JSON.stringify(group));
+	 		if(confirm("您确定要从此用户组删除该用户吗?")){
+		 		$.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/group/delUserFromGroup', 
+					dataType:'json', 
+					contentType :"application/json;charset=UTF-8",
+					data: JSON.stringify(group),			
+					success:function(data){
+						alert("删除成功");
+						mgr.groupStatus(groupId,null,1,7);
+						//$("#groupDetailModel").modal("toggle");
+					}
+				});
+			}
+	 	},
+	 	addUserToGroup : function(pageNo,pageSize){
+	 	 var userName = $("#userNameAddModel").val();
+		 var groupId = $("#groupIdAddModel").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getUserNotInGroup', 
+				dataType:'json', 
+				data: {"groupId":groupId,"userName":userName,"pageNo":pageNo,"pageSize":pageSize},					
+				success:function(data){
+					//console.log(data);
+					var userList = data;
+					if(userList!=null&&userList.length>1){				
+						var htmlTable = "";
+						for(var i=1;i<userList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td style='text-align:center;width:37px'>";
+							htmlTable = htmlTable+"<input type='checkbox' name='userId' value='"+userList[i].userId+"'/>";
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+userList[i].loginName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+userList[i].userName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+" ";
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						$('#groupListTableDetail').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						var pageStr = data[0];
+						$('#addUserPageInfoModel').html(pageStr);							
+	 				} else{
+						$('#groupListTableDetail').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#addUserPageInfoModel').html("");		
+	 				}	
+				}
+			});	
+	 	},
+	 	saveUserToGroup : function(){
+	 		var groupId = $("#groupIdAddModel").val();
+	 		var group = {};
+	 		var groupCheckObj={};
+	 		var groupIdArray = $("input[name='userId']:checked").serializeArray();
+ 			$.each(groupIdArray, function(i, item){
+ 				groupCheckObj[item.value]=item.value;
+			 });
+ 			group["userIds"]=groupCheckObj;
+ 			group["groupId"]=groupId;
+ 			if(JSON.stringify(group["userIds"]) === "{}" ){
+	 			alert("请先选择用户");
+	 			return;
+	 		}
+	 		$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/addUserToGroup', 
+				dataType:'json',
+				contentType :"application/json;charset=UTF-8",
+				data: JSON.stringify(group),			
+				success:function(data){
+					alert("添加成功");
+					mgr.addUserToGroup(1,7);
+					//$("#groupDetailModel").modal("toggle");
+				}
+			});
+	 	}
+	};
+</script>
+</body>
+</html>

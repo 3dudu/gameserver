@@ -1,0 +1,790 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+<style>
+.text-bg{color: #fff;background: #2dc26c;padding: 3px 6px;white-space: nowrap;border-radius: 4px;}
+.text-bgno{background:#f34949;}
+.blue{color:#2fa4e7;}
+/*客服标签颜色*/
+.cs0-bg{background: #2dc26c !important;}
+.cs0-tri{border-left:15px solid #2dc26c !important;}
+
+.cs1-bg{background: #45BF17 !important;}
+.cs1-tri{border-left:15px solid #45BF17 !important;}
+
+.cs2-bg{background: #D25C46 !important;}
+.cs2-tri{border-left:15px solid #D25C46 !important;}
+
+.cs3-bg{background: #46b091 !important;}
+.cs3-tri{border-left:15px solid #46b091 !important;}
+
+.cs4-bg{background: #f07c3d !important;}
+.cs4-tri{border-left:15px solid #f07c3d !important;}
+
+.cs5-bg{background: #414141 !important;}
+.cs5-tri{border-left:15px solid #414141 !important;}
+
+.cs6-bg{background: #ea9085 !important;}
+.cs6-tri{border-left:15px solid #ea9085 !important;}
+
+.cs7-bg{background: #db3951 !important;}
+.cs7-tri{border-left:15px solid #db3951 !important;}
+
+.cs8-bg{background: #409d9b !important;}
+.cs8-tri{border-left:15px solid #409d9b !important;}
+
+.cs9-bg{background: #239d60 !important;}
+.cs9-tri{border-left:15px solid #239d60 !important;}
+
+#chattingDetailModalBody{max-height:480px;}
+#chattingDetailModalBody .tag{position:relative;margin-right:25px;max-width: 200px;float:left}
+#chattingDetailModalBody .tag .tag-bg{color: #fff;border-radius: 5px 0 0 5px;float: left;padding: 2px 4px;font-style: normal;background:#087ABA}
+#chattingDetailModalBody .tag .tag-triangle{right: -15px;position:absolute;content: '';display: block;width: 0;height: 0;border-top: 12px solid transparent;border-left: 15px solid #087ABA;border-bottom: 12px solid transparent;top: 0;}
+#chattingDetailModalBody .tag .tag-circle{width: 5px;height: 5px;display: block;background: #fff;z-index: 999;margin: 0;position: absolute;top: 9px;right: -8px;border-radius: 50%;}
+#chattingDetailModalBody .content{line-height: 25px;font-size: 16px;margin:0;}
+#chattingDetailModalBody .message-list{margin-bottom:10px;}
+
+</style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">反馈问题</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+	<input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="16"/>	
+    
+    <ul class="ul-form">
+		<li>
+		    <label for="csNameSearch">指派给:</label>
+	     	<select id="csNameSearch" name="csNameSearch" style="width:160px">
+				<option value="">选择客服</option>
+		    </select>
+		    <label for="serverIdSearch">选择区服:</label>
+	     	<select id="serverIdSearch" name="serverIdSearch" style="width:180px">
+				<option value="">选择区服</option>
+		    </select>
+		    <label for="playerIdSearch">玩家ID:</label>
+	       	<input id="playerIdSearch" name="playerIdSearch" class="input-medium" type="text" value=""/>
+	       	<label for="playerNameSearch">玩家姓名:</label>
+	       	<input id="playerNameSearch" name="playerNameSearch" class="input-medium" type="text" value=""/>
+	       	&nbsp;
+		</li>
+		<li class="clearfix"></li>
+		<li>
+			<label for="statusSearch">当前状态:</label>
+	     	<select id="statusSearch" name="statusSearch" style="width:160px">
+				<option value="1">未解决</option>
+				<option value="0">所有</option>
+		    </select>
+			<label for="startDateSearch">起始日期:</label>
+	       	<input id="startDateSearch" name="startDateSearch" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+	       	&nbsp;
+			<label for="endDateSearch">截止日期:</label>
+	       	<input id="endDateSearch" name="endDateSearch" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+			&nbsp;
+			<!--<label for="refresh" style="width: 100px;">页面刷新:</label>-->
+			<!--<input type="checkbox" id="refresh" name="refresh" checked value="true" onclick="isRefresh(this)">-->
+			<input id="clearInterval" class="btn btn-primary" type="button" value="停止刷新" onclick = "clsInterval();"/>
+		</li>
+		<li class="btns">
+			<input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,16);"/>
+			<input id="quikClaim" class="btn btn-primary" type="button" value="一键分配" onclick = "mgr.quickClaim();"/>
+		</li>
+		<li class="clearfix"></li>
+	</ul>
+	
+     <!-- <div class="controls">
+     	<label for="csNameSearch">指派给:</label>
+     	<select id="csNameSearch" name="csNameSearch" style="width:160px">
+			<option value="">选择客服</option>
+	    </select>
+	    <label for="serverIdSearch">选择区服:</label>
+     	<select id="serverIdSearch" name="serverIdSearch" style="width:180px">
+			<option value="">选择区服</option>
+	    </select>
+	    <label for="playerIdSearch">玩家ID:</label>
+       	<input id="playerId" name="playerId" class="input-medium" type="text" value=""/>
+       	<label for="playerIdSearch">玩家姓名:</label>
+       	<input id="playerName" name="playerName" class="input-medium" type="text" value=""/>
+       	&nbsp;
+		<label for="startDateSearch">起始日期:</label>
+       	<input id="startDateSearch" name="startDateSearch" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+       	&nbsp;
+		<label for="endDateSearch">截止日期:</label>
+       	<input id="endDateSearch" name="endDateSearch" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+       	<input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,16);"/>
+     </div> -->
+</form>
+<form>
+	<table id="questionListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	    <thead>
+	    <tr>
+	    	<th class="header">记录ID</th>
+	        <!-- <th class="header">标题</th> -->
+	        <th class="header">状态</th>
+	        <th class="header">区服ID</th>
+	        <th class="header">区服名称</th>
+	        <th class="header">玩家ID</th>
+	        <th class="header">玩家姓名</th>
+	        <th class="header">指派给</th>
+	        <th class="header">创建时间</th>
+	        <th class="header">修改时间</th>
+	        <th class="header">操作</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	     
+	    
+	    </tbody>
+	</table>
+</form>
+<div class = "modal fade modal default-model" id = "questionDetailModal" style="display:none;width:900px">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">编辑</h5>
+               </div>
+               <div class = "modal-body" style="max-height: none;">
+                 <form id="questionDetailForm" class="form-horizontal" action="#" method="post">
+                 	<input id="idInput" name="idInput" type="hidden" value=""/>
+					<div class="control-group">
+						<label class="control-label" for="status">当前状态:</label>
+						<div class="controls">
+							<span id="status" name="status" class="text-bg"></span>
+							<!-- <input id="status" name="status" type="text" value="" readonly = "readonly" class="required"/> -->
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="serverName">区服名称:</label>
+						<div class="controls">
+							<input id="serverName" name="serverName" type="text" readonly = "readonly" value="" class="required"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="playerName">玩家姓名:</label>
+						<div class="controls">
+							<input id="playerName" name="playerName" type="text" readonly = "readonly" value="" class="required"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="createTime">创建时间:</label>
+						<div class="controls">
+							<input id="createTime" name="createTime" type="text" readonly = "readonly" value="" class="required"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="updateTime">修改时间:</label>
+						<div class="controls">
+							<input id="updateTime" name="updateTime" type="text" readonly = "readonly" value="" class="required"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="chattingDetailBtn">反馈内容:</label>
+						<div class="controls">
+						<button id ="chattingDetailBtn" class ="btn btn-primary" type="button" onclick="mgr.showChattingDetail()">详情</button>
+						<!-- <input id ="chattingDetailBtn" class ="btn btn-primary" type="submit" value="详情" onclick="mgr.showChattingDetail()"> -->
+							<!-- <textarea id="title" readonly = "readonly" name="title" style=" float:left;width: 520px;height: 200px;resize:none">
+							</textarea> -->
+						</div>
+					</div>
+				</form>
+               </div>
+               <div class = "modal-footer" id="questionDetailModalFooter">
+                    <button id ="myQuestionBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+               </div>
+           </div>
+       </div>
+</div>
+<div class = "modal fade modal default-model" id = "chattingDetailModal" style="display:none;width:900px">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">反馈处理详情</h5>
+               </div>
+               <div id="chattingDetailModalBody" class = "modal-body">
+               
+               </div>
+               <div class = "modal-footer">
+                    <button id ="myQuestionBtnClose1" class ="btn btn-primary" type="button" onclick="mgr.reShowChattingDetail()">退出</button>
+               </div>
+           </div>
+       </div>
+</div>
+<div class = "modal fade modal default-model" id = "sendModal" style="display:none;">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">指派</h5>
+               </div>
+               <div class = "modal-body" style="max-height: none;">
+                 <form id="sendForm" class="form-horizontal" action="#" method="post">
+					<div class="control-group">
+						<label class="control-label" for="csName">指派给:</label>
+						<div class="controls">
+							<select id="csName" name="csName" style="width:220px">
+								<option value="">选择客服</option>
+								<option value="1">客服1</option>
+								<option value="2">客服2</option>
+								<option value="3">客服3</option>
+								<option value="4">客服4</option>
+								<option value="5">客服5</option>
+						    </select>
+						</div>
+					</div>
+				</form>
+               </div>
+               <div class = "modal-footer">
+               		<input id ="sendSubmit" class ="btn btn-primary" type="submit" onclick="mgr.send()" value="指派">
+                    <button id ="myQuestionBtnClose2" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+               </div>
+           </div>
+       </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+var _pubCsId = null ,
+ 	_pubCsName = null ,
+ 	_pubQuestionId = null ,
+ 	_pubPlayerId = null ,
+ 	_pubServerId = null ,
+ 	_pubMsgId = null ,
+ 	_pubIsAdmin = null ,
+ 	_pubStatusId = null ,
+ 	_pubSendOpenFlag ;
+$(document).ready(function(){ 
+    $("#questionListTable").tablesorter(); 
+});
+function getNum(num){
+	num = String(num);
+	if(num.length == 1){
+		return parseInt(num);
+	}else{
+		return parseInt(num.substr(num.length-1,1));
+	}
+}
+$(function () {
+	mgr.getCsInfoForSearch();
+	mgr.getServerInfoForSearch();
+	mgr.getListPage(1,16);
+	mgr.getCurrentInfo();
+	mgr.quickCliamBtn();
+	//mgr.getButtonListByUserId();
+
+});
+$(window).load(function(){ 
+	/*function refreshMsg(pageNo,pageSize){
+	    return function(){
+	    	mgr.getListPage(pageNo,pageSize);
+	    }
+	}*/
+	//var refresh = setInterval(refreshMsg(1,16),5000);
+
+});
+function refreshMsg(pageNo,pageSize){
+	return function(){
+		mgr.getListPage(pageNo,pageSize);
+	}
+}
+var refresh = setInterval(refreshMsg(1,16),5000);
+function clsInterval(){
+	clearInterval(refresh);
+}
+var mgr ={
+		getCurrentInfo:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/api/sys/getCurrentInfo', 
+				dataType:'json', 
+				data: {},				
+				success:function(data){	
+					//console.log(data);
+					_pubCsId = data.csId;
+					_pubCsName = data.csName;
+					_pubIsAdmin = data.isAdmin;
+				}
+			});
+	 	},
+	 	getCsInfoForSearch : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getCsInfoForSearch',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var csList = data;
+					if(csList!=null&&csList.length>0){				
+						var html = '<option value="">选择客服</option>';
+						for(var i=0;i<csList.length;i++){
+							html += "<option value='"+csList[i].csId+"'>"+csList[i].csName+"</option>";
+						}
+						$('#csNameSearch').html(html);		
+					}
+				}
+			});
+		},
+		getServerInfoForSearch : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var serverList = data;
+					var array = new Array();
+					if(serverList!=null&&serverList.length>0){
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择区服</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+                        /*
+						var html = '<option value="">选择区服</option>';
+						for(var i=0;i<serverList.length;i++){
+							html += "<option value='"+serverList[i].serverId+"'>"+serverList[i].serverId+"."+serverList[i].serverName+"</option>";
+						}*/
+						$('#serverIdSearch').html(html);		
+					}
+				}
+			});
+		},
+		getCsList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getCsList',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var csList = data;
+					if(csList!=null&&csList.length>0){
+						var html = '<option value="">选择客服</option>';
+						for(var i=0;i<csList.length;i++){
+							html += "<option value='"+csList[i].userId+"'>"+csList[i].userName+"</option>";
+						}
+						$('#csName').html(html);		
+					}
+				}
+			});
+		},
+    	getCsMgrList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getCsMgrList',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					//console.log(data);
+					var csList = data;
+					if(csList!=null&&csList.length>0){
+						var html = '<option value="">选择客服</option>';
+						for(var i=0;i<csList.length;i++){
+							html += "<option value='"+csList[i].userId+"'>"+csList[i].userName+"</option>";
+						}
+						$('#csName').html(html);
+					}
+				}
+			});
+		},
+		getButtonListByUserId:function(){
+	 		var parentId = 48;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getButtonListByUserId', 
+				dataType:'json', 
+				data: {"parentId":parentId},				
+				success:function(data){
+					//console.log(data);
+					var btnList = data;
+					if(null != btnList && btnList.length > 0){
+						var initHtml = $('#questionDetailModal').find('.modal-footer').html();
+						var html = "";
+						var isEditer = false;
+						for(var i = 0 ; i < btnList.length ; i++){
+							html += "<input id='btn"+i+"' class='btn btn-primary' type='button' value='"+btnList[i].name+"' onclick = '"+btnList[i].todo+"'/>&nbsp;";
+						}
+						html += initHtml;
+						$('#questionDetailModal').find('.modal-footer').html(html);
+					}
+				}
+			});
+	 	},
+	 	getJCsMessageById : function(id){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getJCsMessageById',
+				dataType:'json', 
+				data: {"id":id},		
+				success:function(data){
+					//console.log(data);
+					var jcmList = data;
+					var _this = jcmList.length-1;
+                    var buttonHtml="";
+                    if(jcmList[_this].status == "1"){	//判断此消息订单是否已完成  0:完成  :1未完成
+                    	if(jcmList[_this].csId == null || jcmList[_this].csName == ""){ //判断此消息订单是否被认领   csId和csName为空是 未认领/指派状态
+                    		if(_pubIsAdmin == "on"){	//判断是否是客服管理员  on:是  off:不是
+                    			buttonHtml += '<input id ="finishSubmit" class ="btn btn-primary" type="submit" onclick="mgr.finish('+jcmList[_this].id+')" value="完成">';
+                                buttonHtml += '<input id ="sendModelSubmit" class ="btn btn-primary" type="submit" onclick="mgr.sendModel('+jcmList[_this].msgId+',0,null)" value="指派">';
+                    		}
+                    	}else{ //说明已经认领了
+                    		if(jcmList[_this].csId == _pubCsId || _pubIsAdmin == "on"){	//判断是不是被指派给当前在线的客服   如果是才给她完成和指派功能
+                                buttonHtml += '<input id ="finishSubmit" class ="btn btn-primary" type="submit" onclick="mgr.finish('+jcmList[_this].id+')" value="完成">';
+                                buttonHtml += '<input id ="sendModelSubmit" class ="btn btn-primary" type="submit" onclick="mgr.sendModel('+jcmList[_this].msgId+',0,null)" value="指派">';
+                            }
+                    	}
+                    }else{	//完成了消息订单
+                    	if(jcmList[_this].csId == _pubCsId){	//判断是不是被指派给当前在线的客服   如果是才给她完成和指派功能
+                            buttonHtml += '<input id ="openSubmit" class ="btn btn-primary" type="submit" onclick="mgr.open('+jcmList[_this].id+')" value="打开">';
+                        }else if(_pubIsAdmin == "on"){
+                        	buttonHtml += '<input id ="againSendModelSubmit" class ="btn btn-primary" type="submit" onclick="mgr.sendModel('+jcmList[_this].msgId+',1,'+jcmList[_this].id+')" value="指派">';
+                        }
+                    }
+                    buttonHtml += '<input id ="chattingSubmit" class ="btn btn-primary" type="submit" onclick="mgr.chatting()" value="聊天">';
+                    buttonHtml += '<button id ="myQuestionBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>';
+                    $('#questionDetailModalFooter').html(buttonHtml);
+                    
+					$("#questionDetailModal").modal("toggle");
+					
+					var html = "";
+					/* for(var i = 0 ; i < jcmList.length ; i++){
+						if(jcmList[i].flag == 0){
+							html += "["+jcmList[i].serverId+"-"+jcmList[i].serverName+"]("+jcmList[i].playerName+")：" + jcmList[i].content + "\r";
+						}else{
+							html += jcmList[i].thisCsName+"："+jcmList[i].content + "\r";
+						}
+					}
+					 */
+	           		html = "";
+	           		var lastId = null;
+					for(var i = 0 ; i < jcmList.length ; i++){
+						
+						if(jcmList[i].flag == 0){
+							html += '<div class="message-list">';
+							html += '<div class="tag">';
+							html += '<span class="tag-bg">['+jcmList[i].serverId+'-'+jcmList[i].serverName+']('+jcmList[i].playerName+')</span>';
+							html += '<i class="tag-triangle"></i>';
+							html += '<b class="tag-circle"></b>';
+							html += '</div>';
+							html += '<p class="content">'+jcmList[i].content+'</p>';
+							html += '</div>';
+						}else{
+							lastId = getNum(jcmList[i].thisCsId);
+							html += '<div class="message-list">';
+							html += '<div class="tag">';
+							switch(lastId){
+								case 0 :
+									html += '<span class="tag-bg cs0-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs0-tri"></i>';
+								case 1 :
+									html += '<span class="tag-bg cs1-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs1-tri"></i>';
+									break;
+								case 2 :
+									html += '<span class="tag-bg cs2-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs2-tri"></i>';
+									break;
+								case 3 :
+									html += '<span class="tag-bg cs3-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs3-tri"></i>';
+									break;
+								case 4 :
+									html += '<span class="tag-bg cs4-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs4-tri"></i>';
+									break;
+								case 5 :
+									html += '<span class="tag-bg cs5-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs5-tri"></i>';
+									break;
+								case 6 :
+									html += '<span class="tag-bg cs6-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs6-tri"></i>';
+									break;
+								case 7 :
+									html += '<span class="tag-bg cs7-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs7-tri"></i>';
+									break;
+								case 8 :
+									html += '<span class="tag-bg cs8-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs8-tri"></i>';
+									break;
+								case 9 :
+									html += '<span class="tag-bg cs9-bg">'+jcmList[i].thisCsName+'</span>';
+									html += '<i class="tag-triangle cs9-tri"></i>';
+									break;
+							}
+							html += '<b class="tag-circle"></b>';
+							html += '</div>';
+							html += '<p class="content">'+jcmList[i].content+'</p>';
+							html += '</div>';
+						}
+					}
+	           		$("#chattingDetailModalBody").html(html);
+	           		
+					createTime=jcmList[_this].createTime;
+					updateTime=jcmList[_this].updateTime;
+
+					
+					$("#id").val(jcmList[_this].id);
+					if(jcmList[_this].status == "0"){
+						$("#status").html("已解决");
+						$("#status").removeClass("text-bgno");
+					}else if(jcmList[_this].status == "1"){
+						$("#status").html("未解决");
+						$("#status").addClass("text-bgno");
+					}
+					_pubquestionId = jcmList[_this].id;
+					$("#serverName").val(jcmList[_this].serverName);
+					$("#playerName").val(jcmList[_this].playerName);
+					$("#createTime").val(createTime);
+					$("#updateTime").val(updateTime);
+					//$("#title").val(html);
+				}
+			});
+		},
+		claim : function (msgId){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/claim',
+				dataType:'json', 
+				data: {"msgId":msgId,"csId":_pubCsId,"csName":_pubCsName,"flag":0,"statusId":0},		
+				success:function(data){
+					$("#questionDetailModal").modal("hide");
+					mgr.getListPage(1,16);
+					mgr.getCsInfoForSearch();
+				}
+			});
+		},
+		sendModel : function(msgId,flag,statusId){
+			_pubMsgId = msgId;
+			_pubStatusId = statusId;
+			_pubSendOpenFlag = flag;
+			$("#questionDetailModal").modal("hide");
+			$("#sendModal").modal("toggle");
+			if(_pubIsAdmin == "on"){
+                mgr.getCsList();
+			}else{
+                mgr.getCsMgrList();
+			}
+
+		},
+		send : function(){
+			var csId = $("#csName  option:selected").val();
+			var csName = $("#csName  option:selected").text();
+			if(csId == "" || csId == null || csName == "选择客服" || csName == null){
+				alert("请选择指派客服");
+				return false;
+			}
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/claim',
+				dataType:'json', 
+				data: {"msgId":_pubMsgId,"csId":csId,"csName":csName,"flag":_pubSendOpenFlag,"statusId":_pubStatusId},		
+				success:function(data){
+					$("#sendModal").modal("hide");
+					mgr.getListPage(1,16);
+					mgr.getCsInfoForSearch();
+				}
+			});
+		},
+		finish : function(id){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/finish',
+				dataType:'json', 
+				data: {"id":id},		
+				success:function(data){
+					$("#questionDetailModal").modal("hide");
+					mgr.getListPage(1,16);
+					mgr.getCsInfoForSearch();
+				}
+			});
+		},
+		open : function(id){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/open',
+				dataType:'json', 
+				data: {"id":id},		
+				success:function(data){
+					$("#questionDetailModal").modal("hide");
+					mgr.getListPage(1,16);
+					mgr.getCsInfoForSearch();
+				}
+			});
+		},
+		chatting : function(){
+			/* $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/gotoChatting',
+				dataType:'html', 
+				data: {},		
+				success:function(data){
+					$("#questionDetailModal").modal("hide");
+				}
+			}); */
+			/* $.get(''+$ctx+'/sysmgr/cs/gotoChatting', function (data) {
+				$("#questionDetailModal").modal("hide");
+            }); */
+			$(window).attr('location',''+$ctx+'/sysmgr/cs/gotoChatting');
+		},
+		showChattingDetail : function(){
+			$("#questionDetailModal").modal("hide");
+			$("#chattingDetailModal").modal("toggle");
+		},
+		reShowChattingDetail : function(){
+			$("#chattingDetailModal").modal("hide");
+			$("#questionDetailModal").modal("toggle");
+		},
+		quickCliamBtn :function(){
+            if(_pubIsAdmin == "on"){
+                $("#quickCliam").show();
+			} else{
+                $("#quickCliam").hide();
+			}
+		},
+    	quickClaim : function(){
+            if(_pubIsAdmin == "on"){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/cs/quickClaim',
+                    dataType:'json',
+                    data: {},
+                    success:function(data){
+                        console.log(data);
+                        console.log(data.ret);
+                        console.log(typeof data.ret);
+                        if(data.ret){
+                            mgr.getListPage(1,16);
+                            mgr.getCsInfoForSearch();
+						}else{
+                            alert(data.msg);
+						}
+
+                    }
+                });
+            }else{
+                alert("无权限执行此操作");
+			}
+		},
+		getListPage:function(pageNo,pageSize){
+	 		var startDate = $("#startDateSearch").val();
+	 		var endDate = $("#endDateSearch").val();
+	 		var csId = $("#csNameSearch").val();
+	 		var status = $("#statusSearch").val();
+	 		var serverId = $("#serverIdSearch").val();
+	 		var playerId = $("#playerIdSearch").val();
+	 		var playerName = $("#playerNameSearch").val();
+	 		var claimButton = null;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getJCsMessageList', 
+				dataType:'json', 
+				data: {"csId":csId,"status":status,"serverId":serverId,"playerId":playerId,"playerName":playerName,"startDate":startDate,"endDate":endDate,"pageNo":pageNo,"pageSize":pageSize},				
+				success:function(data){
+					$("#questionListTable").trigger("update");
+					//console.log(data);
+					var questionList = data;
+					if(questionList != null && questionList.length>1){		
+						var htmlTable = "";
+						for(var i=1;i<questionList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].id;
+							htmlTable = htmlTable+"</td>";
+							/* htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getQuestionById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].title;
+							htmlTable = htmlTable+"</td>"; */
+							htmlTable = htmlTable+"<td>";
+							if(questionList[i].status == "1"){
+								htmlTable = htmlTable+"<span class='text-bg text-bgno'>";
+								htmlTable = htmlTable+"未解决";
+								htmlTable = htmlTable+"</span>";
+							}else if(questionList[i].status == "0"){
+								htmlTable = htmlTable+"<span class='text-bg'>";
+								htmlTable = htmlTable+"已解决";
+								htmlTable = htmlTable+"</span>";
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].serverName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].playerId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].playerName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].csName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].strCreateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td style='cursor:pointer' onclick='mgr.getJCsMessageById("+questionList[i].id+")'>";
+							htmlTable = htmlTable+questionList[i].strUpdateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							if(questionList[i].csId == null || questionList[i].csName == ""){
+								claimButton = "<a href='javascript:mgr.claim("+questionList[i].msgId+")'>认领</a>";
+							}else{
+								claimButton = "";
+							}
+							htmlTable = htmlTable+claimButton;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#pageInfo').html(pageStr);
+					}else{
+						htmlTable="<tr><td colspan='10' align='right'>没有查询到数据</td><tr>";
+						$('#pageInfo').html("");
+					}
+					$('#questionListTable').find('tbody').html(htmlTable);
+				}
+			});
+	 	}
+	}
+</script>
+</body>
+</html>

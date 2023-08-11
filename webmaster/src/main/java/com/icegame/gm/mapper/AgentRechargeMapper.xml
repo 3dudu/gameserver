@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.AgentRechargeMapper">
+
+	<sql id="query_agent_recharge_sql_where">
+		<if test=" agentRecharge.loginName != null and agentRecharge.loginName != '' ">
+			and ar.`login_name`=#{agentRecharge.loginName}
+		</if>
+		<if test=" agentRecharge.serverId != null and agentRecharge.serverId != '' ">
+			and ar.`server_id`=#{agentRecharge.serverId}
+		</if>
+		<if test=" agentRecharge.playerId != null and agentRecharge.playerId != '' ">
+			and ar.`player_id`=#{agentRecharge.playerId}
+		</if>
+		<if test=" agentRecharge.playerName != null and agentRecharge.playerName != '' ">
+			and ar.`player_name`=#{agentRecharge.playerName}
+		</if>
+		<if test=" agentRecharge.proIdx != null">
+			and ar.`pro_idx`=#{agentRecharge.proIdx}
+		</if>
+		<if test=" agentRecharge.payPrice != null and agentRecharge.payPrice != '' ">
+			and ar.`pay_price` = #{agentRecharge.payPrice}
+		</if>
+		<if test=" agentRecharge.moneyType != null and agentRecharge.moneyType != '' ">
+			and ar.`money_type` = #{agentRecharge.moneyType}
+		</if>
+		<if test=" agentRecharge.platform != null and agentRecharge.platform != '' ">
+			and ar.`platform`=#{agentRecharge.platform}
+		</if>
+		<if test=" agentRecharge.orderType != null and agentRecharge.orderType != '' ">
+			and ar.`order_type`=#{agentRecharge.orderType}
+		</if>
+		<if test=" agentRecharge.channel != null and agentRecharge.channel != '' ">
+			and ar.`channel`=#{agentRecharge.channel}
+		</if>
+		<if test=" agentRecharge.channelCode != null and agentRecharge.channelCode != '' ">
+			and ar.`channelCode`=#{agentRecharge.channelCode}
+		</if>
+		<if test=" agentRecharge.channelCode != null and agentRecharge.channelCode != '' ">
+			and ar.`channelCode`=#{agentRecharge.channelCode}
+		</if>
+		<if test=" startTime != null  and startTime != '' ">
+			<![CDATA[ and ar.`create_time` >= #{startTime} ]]>
+		</if>
+		<if test=" passTime != null  and passTime != '' ">
+			<![CDATA[ and ar.`create_time` < #{passTime}  ]]>
+		</if>
+		<if test=" agentRecharge.status != null">
+			and ar.`status`=#{agentRecharge.status}
+		</if>
+		<if test=" agentRecharge.orderId != null and agentRecharge.orderId != '' ">
+			and ar.`order_id`=#{agentRecharge.orderId}
+		</if>
+
+	</sql>
+	<sql id="query_agent_recharge_mutserver_sql_where">
+		<if test=" agentRecharge.loginName != null and agentRecharge.loginName != '' ">
+			and ar.`login_name`=#{agentRecharge.loginName}
+		</if>
+		<if test=" agentRecharge.multServerId != null and agentRecharge.multServerId != '' ">
+			and ar.`server_id` in ${agentRecharge.multServerId}
+		</if>
+		<if test=" agentRecharge.playerId != null and agentRecharge.playerId != '' ">
+			and ar.`player_id`=#{agentRecharge.playerId}
+		</if>
+		<if test=" agentRecharge.playerName != null and agentRecharge.playerName != '' ">
+			and ar.`player_name`=#{agentRecharge.playerName}
+		</if>
+		<if test=" agentRecharge.proIdx != null">
+			and ar.`pro_idx`=#{agentRecharge.proIdx}
+		</if>
+		<if test=" agentRecharge.payPrice != null and agentRecharge.payPrice != '' ">
+			and ar.`pay_price` = #{agentRecharge.payPrice}
+		</if>
+		<if test=" agentRecharge.moneyType != null and agentRecharge.moneyType != '' ">
+			and ar.`money_type` = #{agentRecharge.moneyType}
+		</if>
+		<if test=" agentRecharge.platform != null and agentRecharge.platform != '' ">
+			and ar.`platform`=#{agentRecharge.platform}
+		</if>
+		<if test=" agentRecharge.orderType != null and agentRecharge.orderType != '' ">
+			and ar.`order_type`=#{agentRecharge.orderType}
+		</if>
+		<if test=" agentRecharge.channel != null and agentRecharge.channel != '' ">
+			and ar.`channel`=#{agentRecharge.channel}
+		</if>
+		<if test=" agentRecharge.channelCode != null and agentRecharge.channelCode != '' ">
+			and ar.`channelCode`=#{agentRecharge.channelCode}
+		</if>
+		<if test=" agentRecharge.channelCode != null and agentRecharge.channelCode != '' ">
+			and ar.`channelCode`=#{agentRecharge.channelCode}
+		</if>
+		<if test=" startTime != null  and startTime != '' ">
+			<![CDATA[ and ar.`create_time` >= #{startTime} ]]>
+		</if>
+		<if test=" passTime != null  and passTime != '' ">
+			<![CDATA[ and ar.`create_time` < #{passTime}  ]]>
+		</if>
+		<if test=" agentRecharge.status != null">
+			and ar.`status`=#{agentRecharge.status}
+		</if>
+		<if test=" agentRecharge.orderId != null and agentRecharge.orderId != '' ">
+			and ar.`order_id`=#{agentRecharge.orderId}
+		</if>
+
+	</sql>
+
+	<select id="getAllAgentRecharge" resultType="agentRecharge">
+		SELECT ar.`id`, ar.`server_id`, ar.`player_id`, ar.`user_id`, ar.`pro_idx`, ar.`pay_price`, ar.`platform`, ar.`order_type`,
+		ar.`channel`, ar.`channelCode`, ar.`ext`, ar.`create_time`, ar.`finish_time`, ar.`status`, ar.`order_id`,sl.`name`
+		,ar.`player_name`,ar.`money_type`,ar.`login_name`
+		FROM agent_recharge ar
+		LEFT JOIN server_list sl
+		ON ar.`server_id` = sl.`server_id`
+		ORDER BY ar.`id` DESC
+	</select>
+
+	<select id="getAgentRechargeByConditions" resultType="agentRecharge">
+		SELECT ar.`id`, ar.`server_id`, ar.`player_id`, ar.`user_id`, ar.`pro_idx`, ar.`pay_price`, ar.`platform`,
+		ar.`order_type`,ar.`channel`, ar.`channelCode`, ar.`ext`, ar.`create_time`, ar.`finish_time`, ar.`status`,
+		ar.`order_id`,sl.`name`,ar.`player_name`,ar.`money_type`,ar.`login_name`
+		FROM agent_recharge ar
+		LEFT JOIN server_list sl
+		ON ar.`server_id` = sl.`server_id`
+		<where>
+			<include refid="query_agent_recharge_sql_where"></include>
+		</where>
+		ORDER BY ar.`id`DESC
+	</select>
+	<select id="getAgentRechargeByConditionsAndMutServer" resultType="agentRecharge">
+		SELECT ar.`id`, ar.`server_id`, ar.`player_id`, ar.`user_id`, ar.`pro_idx`, ar.`pay_price`, ar.`platform`,
+		ar.`order_type`,ar.`channel`, ar.`channelCode`, ar.`ext`, ar.`create_time`, ar.`finish_time`, ar.`status`,
+		ar.`order_id`,sl.`name`,ar.`player_name`,ar.`money_type`,ar.`login_name`
+		FROM agent_recharge ar
+		LEFT JOIN server_list sl
+		ON ar.`server_id` = sl.`server_id`
+		<where>
+			<include refid="query_agent_recharge_mutserver_sql_where"></include>
+		</where>
+		ORDER BY ar.`id` DESC
+	</select>
+	<select id="getAgentRechargeById" resultType="com.icegame.gm.entity.AgentRecharge">
+		SELECT ar.`id`, ar.`server_id`, ar.`player_id`, ar.`user_id`, ar.`pro_idx`, ar.`pay_price`, ar.`platform`,
+		ar.`order_type`,ar.`channel`, ar.`channelCode`, ar.`ext`, ar.`create_time`, ar.`finish_time`, ar.`status`,
+		ar.`order_id`,sl.`name`,ar.`player_name`,ar.`money_type`,ar.`login_name`
+		FROM agent_recharge ar
+		LEFT JOIN server_list sl
+		ON ar.`server_id` = sl.`server_id`
+		WHERE ar.id = #{id}
+	</select>
+
+	<insert id="addAgentRecharge" parameterType="agentRecharge">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO
+		agent_recharge(`server_id`,`player_id`, user_id, `pro_idx`,`pay_price`,`platform`,`order_type`,`channel`,
+		`channelCode`,`ext`,`create_time`,`finish_time`,`status`, `order_id`, `player_name`, `money_type`, `login_name`)
+		VALUES
+		(#{serverId}, #{playerId}, #{userId}, #{proIdx}, #{payPrice}, #{platform}, #{orderType}, #{channel},
+		#{channelCode},#{ext},#{createTime}, #{finishTime}, #{status}, #{orderId}, #{playerName}, #{moneyType},#{loginName})
+	</insert>
+
+	<update id="updateAgentRecharge" parameterType="agentRecharge">
+		UPDATE agent_recharge
+		SET`server_id` = #{serverId},
+           `player_id` = #{playerId},
+           `user_id` = #{userId},
+           `pro_idx` = #{proIdx},
+           `pay_price` = #{payPrice},
+           `platform` = #{platform},
+           `order_type` = #{orderType},
+           `channel` = #{channel},
+           `channelCode` = #{channelCode},
+           `ext` = #{ext},
+           `create_time` = #{createTime},
+           `finish_time` = #{finishTime},
+           `status` = #{status},
+           `order_id` = #{orderId},
+           `player_name` = #{playerName},
+           `money_type` = #{moneyType},
+           `login_name` = #{loginName}
+		WHERE `id` = #{id}
+ 	</update>
+
+	<delete id="deleteAgentRecharge">
+		DELETE FROM agent_recharge
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+
+</mapper>

@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">标记列表</a></li>
+    <li><a href="javascript:mgr.editHelpSysSign(1);">添加标记</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+
+    <div class="controls">
+    	<label  class="control-label" for="signNameInput">类型:</label>
+        <input id="signNameInput" name="signNameInput" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,20);"/>
+	</div>
+    
+</form>
+<table id="helpSysSignListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">编号</th>
+        <th class="header">类型</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 590px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">修改标记</h5>
+            </div>
+            <div class = "modal-body" style="max-height: 500px;">
+                <form id="editForm" class="form-horizontal" action="#" method="post">
+                    <input id="id" name="id" type="hidden" value=""/>
+                    <div class="control-group">
+                        <label class="control-label">编号:</label>
+                        <div class="controls">
+                            <input style="float:left" id="signType" name="signType" type="text" value="" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">类型:</label>
+                        <div class="controls">
+                            <input style="float:left" id="signName" name="signName" type="text" value="" />
+                        </div>
+                    </div>
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#helpSysSignListTable").tablesorter();
+});
+
+$(document).ready(function(){
+    mgr.getListPage(1,20);
+});
+
+
+var mgr ={
+	 	getListPage : function(pageNo,pageSize){
+	 	    var signName = $("#signNameInput").val();
+	 		$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/helpsyssign/getHelpSysSignList',
+				dataType:'json', 
+				data: {"signName":signName,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#helpSysSignListTable").trigger("update");
+					var dataList = data;
+					if(dataList != null && dataList.length > 1){
+						var htmlTable = "";
+						for(var i = 1 ; i < dataList.length ; i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+dataList[i].signType;
+							htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+dataList[i].signName;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var editButton = "<a href='javascript:mgr.editHelpSysSign(2,"+dataList[i].id+")'>修改</a>";
+                            var delButton = "<a href='javascript:mgr.delHelpSysSign("+dataList[i].id+")'>删除</a>";
+                            var addButton = "<a href='javascript:mgr.editHelpSysSign(1)'>添加</a>";
+                            htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#helpSysSignListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#helpSysSignListTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+        editHelpSysSign : function(editFlag,id){
+	 	    if(editFlag == 1){
+                $("#editForm").validate({
+                    rules: {
+                        signType: {
+                            required: true,
+                            digits:true,
+                            remote:{
+                                type:'post',
+                                url:''+$ctx+'/sysmgr/helpsyssign/checkExistSignType',
+                                dataType:'html',
+                                data: {"editFlag":"add"},
+                                dataFilter: function(data,type){
+                                    return data == "0"?true:false;
+                                }
+                            }
+                        },
+                        signName :{
+                            required: true
+                        }
+                    },
+                    messages: {
+                        signType: {
+                            required: "请输入编号",
+                            digits: "必须是正整数",
+                            remote: "编号已存在"
+                        },
+                        signName: {
+                            required: "请输入类型"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveHelpSysSign(form);
+                    }
+                });
+                $("#signType").attr("readonly",false);
+            }else if(editFlag == 2){
+                $("#editForm").validate({
+                    rules: {
+                        signType: {
+                            required: true,
+                            digits:true
+                        },
+                        signName :{
+                            required: true
+                        }
+                    },
+                    messages: {
+                        signType: {
+                            required: "请输入编号",
+                            digits: "必须是正整数",
+                        },
+                        signName: {
+                            required: "请输入类型"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveHelpSysSign(form);
+                    }
+                });
+                $("#signType").attr("readonly",true);
+            }
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsyssign/gotoHelpSysSignEdit',
+                dataType:'json',
+                data: {"editFlag":editFlag,"id":id},
+                success:function(data){
+                    //console.log(data);
+                    $("#editModal").modal("toggle");
+                    var helpSysSign = data;
+
+                    $("#id").val(helpSysSign.id);
+                    $("#signType").val(helpSysSign.signType);
+                    $("#signName").val(helpSysSign.signName);
+                }
+            });
+        },
+        delHelpSysSign : function(id){
+            if(confirm("您确定要删除此条记录吗?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/helpsyssign/delHelpSysSign',
+                    dataType:'json',
+                    data: {"id":id},
+                    success:function(data){
+                        mgr.getListPage(1,18);
+                    }
+                });
+            }
+        },
+        saveHelpSysSign : function(form){
+            var helpSysSign={};
+            var formObject = {};
+            var formArray =$("#editForm").serializeArray();
+            $.each(formArray, function(i, item){
+                formObject[item.name]=item.value;
+            });
+            helpSysSign = JSON.stringify(formObject);
+            // console.log(helpSysType);
+            // return false;
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/helpsyssign/saveHelpSysSign',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: helpSysSign,
+                success:function(data){
+                    $("#editModal").modal("hide");
+                    mgr.getListPage(1,18);
+                }
+            });
+        }
+	}; 
+
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.JFacebookMapper">
+
+	<!--  获取 点赞记录  -->
+	<select id="getFacebooklike" parameterType="jFacebook" resultType="jFacebook">
+		select `id`, `yuanbao`, `likenum`, `channel` from jfacebook
+		<where>
+			<if test="channel != null and channel != '' " >
+				AND  `channel` = #{channel}
+				AND  `channel` in ${channelgroup}
+			</if>
+		</where>
+	</select>
+
+
+	<insert id="addFacebooklike" parameterType="jFacebook">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into jfacebook(`yuanbao`, `likenum`, `channel`)
+		values (#{yuanbao},#{likenum},#{channel})
+	</insert>
+
+	<update id="updateFacebooklike" parameterType="jFacebook">
+		update jfacebook set `yuanbao` = #{yuanbao},`likenum` = #{likenum},`channel` = #{channel}
+		where id = #{id}
+	</update>
+
+
+	<delete id="delFacebooklike" parameterType="java.lang.Long">
+		delete from jfacebook
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+
+	<!--  获取 根据channel 查询  -->
+	<select id="getFacebooklikeById" parameterType="java.lang.Long" resultType="jFacebook">
+		select `id`, `yuanbao`, `likenum`, `channel` from jfacebook
+		where `id` = #{id}
+	</select>
+
+	<!--  获取 根据channel 查询  -->
+	<select id="getFacebooklikeByChannel" parameterType="java.lang.String" resultType="jFacebook">
+		select `id`, `yuanbao`, `likenum`, `channel` from jfacebook
+		where `channel` = #{channel}
+	</select>
+
+</mapper>

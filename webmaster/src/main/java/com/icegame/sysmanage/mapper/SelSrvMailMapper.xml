@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.SelSrvMailMapper">
+	<select id="getSelSrvMailList" parameterType="selSrvMail" resultType="selSrvMail">
+	<![CDATA[
+		select `id`,`sid`,`context`,`create_time`,`awardStr`,`subject`,`status` from sel_srv_mail
+		where FROM_UNIXTIME(create_time/1000) >= #{startDate} and FROM_UNIXTIME(create_time/1000) < #{endDate}
+	]]>
+	</select>
+
+	<select id="getSelSrvMailById" parameterType="java.lang.Long" resultType="selSrvMail">
+		select `id`,`sid`,`context`,`create_time`,`awardStr`,`subject`,`status` from sel_srv_mail
+		where id = #{id}
+	</select>
+	
+	<insert id="addSelSrvMail" parameterType="selSrvMail">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO sel_srv_mail(`id`,`sid`,`context`,`create_time`,`awardStr`,`subject`,`status`)
+		VALUES (#{id},#{sid},#{context},#{createTime},#{awardStr},#{subject},#{status})
+	</insert>
+	
+	<delete id="delSelSrvMail" parameterType="java.lang.Long">
+		DELETE FROM sel_srv_mail
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateSelSrvMail" parameterType="selSrvMail">
+		UPDATE sel_srv_mail  set
+		   `sid` = #{sid},
+           `context` = #{context},
+           `create_time` = #{createTime},
+           `awardStr` = #{awardStr},
+           `subject` = #{subject},
+           `status` = #{status}
+		WHERE id = #{id}
+ 	</update>
+
+	<update id="refreshStatus" parameterType="selSrvMail">
+		UPDATE sel_srv_mail  set
+		`status` = #{status}
+		WHERE id = #{id}
+	</update>
+</mapper>

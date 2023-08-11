@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">维护时长</a></li>
+    <li id="addMessageTab"><a href="javascript:mgr.editMessage(1);">添加记录</a></li>
+</ul>
+
+<form>
+	<table id="messageListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	    <thead>
+	    <tr>
+	    	<th class="header">记录ID</th>
+	        <th class="header">预计开始时间</th>
+	        <th class="header">预计结束时间</th>
+	        <th class="header">剩余时间</th>
+	        <th class="header">操作</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	     
+	    
+	    </tbody>
+	</table>
+</form>
+<div class = "modal fade modal default-model" id = "messageModal" style="display:none;width:527px">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">编辑</h5>
+               </div>
+               <div class = "modal-body" style="max-height: none;">
+                 <form id="messageForm" class="form-horizontal" action="#" method="post">
+                 	<input id="id" name="id" type="hidden" value=""/>
+					 <div class="control-group">
+						 <label class="control-label" for="expectEndTime">预计维护开始时间:</label>
+						 <div class="controls">
+							 <input id="expectStartTime" name="expectStartTime" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+						 </div>
+					 </div>
+					<div class="control-group">
+						<label class="control-label" for="expectEndTime">预计维护结束时间:</label>
+						<div class="controls">
+							<input id="expectEndTime" name="expectEndTime" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myQuestionBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="saveMessageSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#messageListTable").tablesorter(); 
+    $("#messageForm").validate({
+		/*rules: {
+			hours: {
+				required: true,
+                digits:true
+			},
+			minutes: {
+                required: true,
+                digits:true
+            },
+            seconds: {
+                required: true,
+                digits:true
+            }
+		},
+		messages: {
+            hours: {
+				required: "请输入小时",
+                digits: "必须为整数"
+			},
+            minutes: {
+                required: "请输入分钟",
+                digits: "必须为整数"
+            },
+            seconds: {
+                required: "请输入秒钟",
+                digits: "必须为整数"
+            }
+		} ,*/
+		submitHandler: function(form) {      
+	       mgr.saveMessage(form);     
+	    } 
+	});
+});
+
+function getRealTime(seconds,millseconds){
+    //var days = parseInt(seconds / (1000 * 60 * 60 * 24));
+    var hours = parseInt((seconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = parseInt((seconds % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = parseInt((seconds % (1000 * 60)) / 1000);
+    //return days + " 天 " + hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 ";
+    return hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 " + "(" + millseconds + ")";
+}
+
+$(function () {
+	mgr.getListPage(1,16);
+});
+var mgr ={
+		editMessage : function(editFlag,id){
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/maintaintime/gotoMainTainDescTimeEdit',
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},			
+				success:function(data){
+				    var expectStartTime = "";
+				    var expectEndTime = "";
+					$("#messageModal").modal("toggle");
+					var message = data;
+					$("#id").val(message.id);
+                    if(editFlag == 1){
+                        expectStartTime = ""
+                        expectEndTime="";
+                    }else{
+                        expectStartTime = message.expectStartTime;
+                        expectEndTime = message.expectEndTime;
+                    }
+                    $("#expectStartTime").val(expectStartTime);
+                    $("#expectEndTime").val(expectEndTime);
+				}
+			});
+	 	},
+	 	delMessage:function(id){	
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/maintaintime/delMainTainDescTime',
+					dataType:'json', 
+					data: {"id":id},				
+					success:function(data){
+                        alert(data.result);
+						mgr.getListPage(1,18);					
+					}
+				});
+			}
+	 	},
+	 	saveMessage:function(form){	
+	 		var mainTainDescTime={};
+			var formObject = {};
+			var formArray =$("#messageForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+            mainTainDescTime = JSON.stringify(formObject);
+				$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/maintaintime/saveMainTainDescTime',
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: mainTainDescTime,
+				success:function(data){
+					$("#messageModal").modal("hide");
+					alert(data.result);
+					mgr.getListPage(1,16);
+ 				}
+			});
+	 	},
+		getListPage:function(pageNo,pageSize){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/maintaintime/getMainTainDescTime',
+				dataType:'json', 
+				data: {"pageNo":pageNo,"pageSize":pageSize},				
+				success:function(data){
+					$("#messageListTable").trigger("update");
+					//console.log(data);
+					var messageList = data;
+					if(messageList != null && messageList.length>1){		
+						var htmlTable = "";
+						for(var i=1;i<messageList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].id;
+							htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+messageList[i].expectStartTime;
+                            htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].expectEndTime;
+							htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+							var str = messageList[i].residueTime;
+                            var residueTimeNum = parseInt(str.substring(0,str.length-2));
+                            htmlTable = htmlTable+getRealTime(residueTimeNum,messageList[i].residueTime);
+                            htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+ 			    			var editButton = "<a href='javascript:mgr.editMessage(2,"+messageList[i].id+")'>修改</a>";
+							var delButton = "<a href='javascript:mgr.delMessage("+messageList[i].id+")'>删除</a>";
+							htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton;
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#pageInfo').html(pageStr);
+						$("#addMessageTab").hide();
+					}else{
+						htmlTable="<tr><td colspan='10' align='right'>没有查询到数据</td><tr>";
+						$('#pageInfo').html("");
+						$("#addMessageTab").show();
+					}
+					$('#messageListTable').find('tbody').html(htmlTable);
+				}
+			});
+	 	}
+	}
+</script>
+</body>
+</html>

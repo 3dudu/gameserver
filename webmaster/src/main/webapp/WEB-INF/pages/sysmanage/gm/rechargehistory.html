@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+<style>
+	.arr{    
+		height: 667px !important;
+   	 	overflow: scroll;
+    	overflow-x: hidden;
+    }
+</style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">充值记录查询</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+    <div class="controls">
+    	<label for="serverId">所在区:</label>
+    	<select id="serverId" name="serverId" style="width:190px">
+			<option value="">选择所在区</option>
+			<option value="10">十区</option>
+			<option value="13">十三区</option>
+			<option value="14">十四区</option>
+			<option value="15">十五区</option>
+			<option value="16">十六区</option>
+	    </select>
+		<label for="playerId">角色ID:</label>
+        <input id="playerId" name="playerId" class="input-medium" type="text" value=""/>&nbsp;
+        <label for="playerName">角色名:</label>
+        <input id="playerName" name="playerName" class="input-medium" type="text" value=""/>&nbsp;
+	</div>
+</form>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <div class="controls">
+    	<label for="chckbxTopUp">充值:</label>
+    	<input id="chckbxTopUp" name="searchHistory" type="checkbox" value="1" />
+    	
+    	<label for="chckbxBuy">购买:</label>
+    	<input id="chckbxBuy" name="searchHistory" type="checkbox" value="2" />
+    	
+    	<label for="chckbxLot">抽卡:</label>
+    	<input id="chckbxLot" name="searchHistory" type="checkbox" value="3" />
+    	
+    	<label for="chckbxOthers">其他:</label>
+    	<input id="chckbxOthers" name="searchHistory" type="checkbox" value="4" />
+    	
+        <label for="startDate">起始日期:</label>
+        <input id="startDate" name="startDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;
+		<label for="endDate">截止日期:</label>
+        <input id="endDate" name="endDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.searchRechargeHistory();"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+</form>
+<form class="arr">
+	<table id="rechargeListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	    <thead>
+	    <tr>
+	    	<th class="header">时间</th>
+	        <th class="header">角色名</th>
+	        <th class="header">详情</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	     
+	    
+	    </tbody>
+	</table>
+</form>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#rechargeListTable").tablesorter(); 
+});
+$(function () {
+	mgr.getAllChannelServerList();
+	var initHtml = "<tr><td colspan='3' align='right'>没有查询到数据</td><tr>";
+	$('#rechargeListTable').find('tbody').html(initHtml);
+});
+var mgr ={
+		getAllChannelServerList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var array = new Array();
+					var serverList = data;
+					if(serverList!=null&&serverList.length>0){
+
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+
+						/*var html = '<option value="">选择所在区</option>';
+						for(var i=0;i<serverList.length;i++){
+							html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+						}*/
+						$('#serverId').html(html);		
+					}
+				}
+			});
+		},
+	 	searchRechargeHistory:function(){
+	 		var serverId = $("#serverId").val();
+	 		var playerId = $("#playerId").val();
+			var playerName = $("#playerName").val();
+			var username = $("#username").val();
+	 		var startDate = $("#startDate").val();
+	 		var endDate = $("#endDate").val();
+	 		
+	 		if(serverId == ""){
+				alert("请先选择区服");
+				return false;
+			}
+			/* if(playerId == "" && playerName == "" && username == ""){
+				alert("查询信息为空");
+				return false;
+			}
+	 		 */
+	 		
+			var checkedValue = $("input:checkbox[name='searchHistory']:checked").map(function(index,elem) {
+	            return $(elem).val();
+	        }).get().join(',');
+
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gm/searchRechargehistory', 
+				dataType:'json', 
+				data: {"playerId":playerId,"serverId":serverId,"startDate":startDate,"endDate":endDate,"checkedValue":checkedValue,"playerName":playerName,"username":username},				
+				success:function(data){
+					$("#rechargeListTable").trigger("update");
+					//console.log(data);
+					var rechargeList = data;
+					/* alert(rechargeList.length); */
+					if(rechargeList!=null&&rechargeList.length>0){		
+						var htmlTable = "";
+						for(var i=0;i<rechargeList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+rechargeList[i].createTime;
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+rechargeList[i].playerName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+rechargeList[i].description;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+					}else{
+						htmlTable="<tr><td colspan='3' align='right'>没有查询到数据</td><tr>";
+					}
+					$('#rechargeListTable').find('tbody').html(htmlTable);
+				}
+			});
+	 	}
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.HelpSysTypeMapper">
+	<select id="getHelpSysTypeList" parameterType="helpSysType" resultType="helpSysType">
+
+		select `id`,`diff_name`,`diff_type` from help_sys_type
+		<where>
+			<if test="diffName != null and diffName != '' ">
+				and diff_name like concat("%",#{diffName},"%")
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getHelpSysTypeById" parameterType="java.lang.Long" resultType="helpSysType">
+		select `id`,`diff_name`,`diff_type` from help_sys_type
+		where id = #{id}
+	</select>
+
+	<select id="checkExistDiffType" parameterType="helpSysType" resultType="helpSysType">
+		select `diff_type` from help_sys_type
+		where `diff_type` = #{diffType}
+	</select>
+	
+	<insert id="addHelpSysType" parameterType="helpSysType">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               select LAST_INSERT_ID() as id
+        </selectKey>
+		insert into help_sys_type(`diff_name`,`diff_type`)
+		values (#{diffName},#{diffType})
+	</insert>
+	
+	<delete id="delHelpSysType" parameterType="java.lang.Long">
+		delete from help_sys_type
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+	
+	<update id="updateHelpSysType" parameterType="helpSysType">
+		update help_sys_type
+		<set>
+			<if test="diffName != null and diffName != '' ">
+				`diff_name` = #{diffName},
+			</if>
+			<if test="diffType != null and diffType != '' ">
+				`diff_type` = #{diffType},
+			</if>
+		</set>
+		where id = #{id}
+ 	</update>
+</mapper>

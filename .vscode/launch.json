@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "ServerStartMain",
+            "request": "launch",
+            "mainClass": "com.xuegao.LoginServer.ServerStartMain",
+            "projectName": "gameserver-loginserver"
+        },
+        {
+            "type": "java",
+            "name": "Debug java",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": "8000",
+            "projectName": "platform-admin"
+        }
+    ]
+}

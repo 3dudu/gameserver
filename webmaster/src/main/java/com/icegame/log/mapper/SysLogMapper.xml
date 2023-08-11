@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.log.mapper.SysLogMapper">
+	<select id="getLogList" parameterType="sysLog" resultType="sysLog">
+	<![CDATA[
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+	]]>
+	</select>
+	
+	<insert id="save" parameterType="sysLog">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO  msyslog(username,operation,method,params,ip,createTime)
+		VALUES (#{username},#{operation},#{method},#{params},#{ip},#{createTime})
+	</insert>
+
+
+</mapper>

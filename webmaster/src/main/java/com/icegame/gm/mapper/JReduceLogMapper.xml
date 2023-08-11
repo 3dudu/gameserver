@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JReduceLogMapper">
+	<select id="getJReduceLogList" parameterType="jreducelog" resultType="jreducelog">
+		select `id`,`serverId`,`playerId`,`playerName`,`serverName`,`createTime`,`items`,`npcId`,`npcName`,`potential`,`evolveLevel`,`level`,`exp`
+		from jreducelog
+		<where>
+			<if test=" serverId != null and serverId != '' ">
+	           serverId=#{serverId}
+	        </if>
+	        <if test=" playerId != null and playerId != '' ">
+	           and playerId=#{playerId}
+	        </if>
+	        <if test=" playerName != null and playerName != '' ">
+	           and playerName=#{playerName}
+	        </if>
+	        <if test=" startTime != null  and startTime != '' ">
+	           <![CDATA[ and createTime >= #{startTime} ]]>
+	        </if>
+	        <if test=" passTime != null  and passTime != '' ">
+	           <![CDATA[ and createTime < #{passTime}  ]]>
+	        </if>
+	    </where>
+	</select>
+
+	<select id="getJReduceLogById" parameterType="java.lang.Long" resultType="jreducelog">
+		select `id`,`serverId`,`playerId`,`playerName`,`serverName`,`createTime`,`items`,`npcId`,`npcName`,`potential`,`evolveLevel`,`level`,`exp`
+		from jreducelog where id = #{id}
+	</select>
+	
+	<insert id="addJReduceLog" parameterType="jreducelog">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jreducelog(`serverId`,`playerId`,`playerName`,`serverName`,`createTime`,`items`,`npcId`,`npcName`,`potential`,`evolveLevel`,`level`,`exp`)
+		VALUES (#{serverId},#{playerId},#{playerName},#{serverName},#{createTime},#{items},#{npcId},#{npcName},#{potential},#{evolveLevel},#{level},#{exp})
+	</insert>
+
+</mapper>

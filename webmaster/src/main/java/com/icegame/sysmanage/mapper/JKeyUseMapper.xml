@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.JKeyUseMapper">
+	<select id="getKeyUseList" parameterType="jKeyUse" resultType="jKeyUse">
+	<![CDATA[
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+	]]>
+	</select>
+
+	<select id="getKeyUseById" parameterType="java.lang.Long" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+		where id = #{id}
+	</select>
+
+	<select id="getKeyUseByKey" parameterType="jKeyUse" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+		where `cdKey` = #{cdKey}
+	</select>
+
+	<select id="getKeyUseByKeyNoLimit" parameterType="jKeyUse" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+		where `cdKey` = #{cdKey} and `playerId` = #{playerId} and `serverId` = #{serverId} and `useType` = #{useType}
+	</select>
+
+	<select id="isThisPlayerUsed" parameterType="jKeyUse" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+		where `cdKey` = #{cdKey} and `playerId` = #{playerId} and `serverId` = #{serverId}
+	</select>
+
+	<select id="isUsedSameType" parameterType="jKeyUse" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType`, `diffType` from jkeyuse
+		where `playerId` = #{playerId} and `serverId` = #{serverId} and `useType` = #{useType} and `diffType` = #{diffType}
+	</select>
+
+	<select id="usedTimes" parameterType="jKeyUse" resultType="jKeyUse">
+		select `id`, `cdKey` , `playerId`, `serverId`, `useType` from jkeyuse
+		where `cdKey` = #{cdKey}
+	</select>
+	
+	<insert id="addKeyUse" parameterType="jKeyUse">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jkeyuse(`cdKey` , `playerId`, `serverId`, `useType`, `diffType`)
+		VALUES (#{cdKey},#{playerId},#{serverId},#{useType},#{diffType})
+	</insert>
+	
+	<delete id="delKeyUse" parameterType="java.lang.Long">
+		DELETE FROM jkeyuse
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+
+	<delete id="delKeyUseByCdKey" parameterType="jKeyUse">
+		DELETE FROM jkeyuse
+		<where>
+			`cdKey`=#{cdKey}
+		</where>
+	</delete>
+	
+	<update id="updateKeyUse" parameterType="jKeyUse">
+		UPDATE jkeyuse  set
+           `cdKey` = #{cdKey},
+           `playerId` = #{playerId},
+           `serverId` = #{serverId},
+           `useType` = #{useType},
+           `diffType` = #{diffType}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

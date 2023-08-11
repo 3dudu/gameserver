@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JAutoreplyMessageMapper">
+	<select id="getJAutoreplyMessageList" parameterType="jAutoreplyMessage" resultType="jAutoreplyMessage">
+		select `id`,`content` from jautoreply_message
+	</select>
+
+	<select id="getJAutoreplyMessageById" parameterType="java.lang.Long" resultType="jAutoreplyMessage">
+		select `id`,`content` from jautoreply_message where id = #{id}
+	</select>
+	
+	<insert id="addJAutoreplyMessage" parameterType="jAutoreplyMessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jautoreply_message(`content`)
+		VALUES (#{content})
+	</insert>
+	
+	<insert id="delJAutoreplyMessage" parameterType="java.lang.Long">
+		delete from jautoreply_message
+		<where>
+			id = #{id}
+		</where>
+	</insert>
+	
+	<update id="updateJAutoreplyMessage" parameterType="jAutoreplyMessage">
+		update jautoreply_message
+		set content = #{content}
+		where id = #{id}
+ 	</update>
+
+</mapper>

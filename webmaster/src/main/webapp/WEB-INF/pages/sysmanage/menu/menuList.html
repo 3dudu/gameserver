@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>菜单列表</title>	
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+</head>
+<body>
+	<ul class="nav nav-tabs">
+		<li class="active"><a href="javascript:void(0);">菜单列表</a></li>
+		<li><a href="javascript:mgr.editMenu(1)">菜单添加</a></li>
+	</ul>
+	 
+	<form id="menuListForm">
+		<table id="treeTable" class="table table-hover table-striped table-bordered table-condensed hide">
+			<thead>
+				<tr>
+					<th>名称</th>
+					<th>链接</th>
+					<th>方法</th>
+					<th style="text-align:center;">排序</th>
+					<th>可见</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>				 
+				
+			</tbody>
+		</table>
+	</form>
+	<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">编辑菜单</h5>
+                </div>
+                <div class = "modal-body" style="max-height:none">
+                   <form id="menuEditForm" class="form-horizontal" action="#" method="post">
+						<input id="id" name="id" type="hidden" value=""/>
+				 		<div class="control-group">
+							<label class="control-label">上级菜单:</label>
+							<div class="controls">
+								<div class="input-append" style="float:left">
+									<input id="parentId" name="parentId" class="required" type="hidden" value=""/>
+									<input id="parentName" name="parenName" readonly="readonly" type="text" value=""  style=""/>
+										<a id="menuButton" href="javascript:showMenu();" class="btn" style="">
+										&nbsp;<i class="icon-search" ></i>&nbsp;</a>&nbsp;&nbsp;
+								</div>
+								<i class="layer-tips" id="menuTips" tips="点击“放大镜”按钮打开选择菜单。新添加菜单的父级菜单。例如：此处选择了功能菜单，那么此时新加的菜单为功能菜单的子菜单"></i>
+							</div>
+						</div>
+						<div id="menuContent"  style="display:none; position: absolute; background: #f0f6e4;">
+							<ul id="menuTree" class="ztree" style="margin-top:0; width:260px;"></ul>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="name">名称:</label>
+							<div class="controls">
+								<input style="float:left" id="name" name="name" class="required input-xlarge" type="text" value="" />
+								<span class="help-inline" style="float:left;margin-top:8px"><span style="color:red">*</span> </span>								
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="href">链接:</label>
+							<div class="controls">
+								<input style="float:left" id="href" name="href" class="input-xxlarge" type="text" value="" maxlength="2000"/>
+								<i class="layer-tips" id="hrefTips" tips="点击此菜单跳转的页面。如果上级菜单为“功能菜单”或者“所有的一级菜单”，那么此项内容可置空，不填即可"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="href">方法:</label>
+							<div class="controls">
+								<input style="float:left" id="todo" name="todo" class="input-medium" type="text" value="" maxlength="2000"/>
+								<i class="layer-tips" id="funcTips" tips="此处为该按钮需要执行的方法名"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="target">目标:</label>
+							<div class="controls">
+								<input style="float:left" id="target" name="target" class="input-small" type="text" readonly="readonly" value="mainFrame" maxlength="10"/>
+								<!-- <span class="help-inline">链接地址打开的目标窗口，默认：mainFrame</span> -->
+								<i class="layer-tips" id="targetTips" tips="链接地址打开的目标窗口，默认：mainFrame"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="icon">图标:</label>
+							<div class="controls">
+								<input id="icon" name="icon" class="input-small" type="text" value="list-alt" readonly="readonly" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="sort">排序:</label>
+							<div class="controls">
+								<input style="float:left" id="sort" name="sort" class="input-small" type="text" value="" />
+								<i class="layer-tips" id="sortTips" tips="一级菜单为10，二级菜单为20，三级菜单为(按钮)30，排列顺序，升序"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="isShow">可见:</label>
+							<div class="controls">
+								<select id="isShow" name="isShow" style="float:left;width:80px">
+									<option value="">请选择</option>
+									<option value="1">显示</option>
+									<option value="0">隐藏</option>
+				 				</select>
+							</div>
+						</div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                 </div>
+					</form>
+                </div>
+            </div>
+        </div>
+	</div>
+	<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+	<script type="text/javascript">				
+		$(function(){	
+			mgr.getMenuList();
+		});
+		
+		var mgr = {
+			getMenuList: function(){
+				var fromObj={};
+				$.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/menu/getMenuList', 
+					dataType:'json', 
+					contentType :"application/json;charset=UTF-8",
+					data: JSON.stringify(fromObj),					
+					success:function(data){
+						var menu = data;
+						var html="";
+						for(var i = 0 ; i < data.length ; i++){
+							html += '<tr id="'+menu[i].id+'" pId="'+menu[i].parentId+'">';
+							html += '<td nowrap>';
+							if(menu[i].icon != ""){
+								html += '<i class="icon-'+menu[i].icon+'"></i>';
+							}else{
+								html += '<i class="icon- hide"></i>';
+							}
+							if(menu[i].parentId != 0){
+								html += '<a href="javascript:mgr.editMenu(2,'+menu[i].id+')">'+menu[i].name+'</a></td>';
+							}else{
+								html += menu[i].name+'</td>';
+							}
+							html += '<td title="'+menu[i].href+'">'+menu[i].href+'</td>';
+							html += '<td>';
+							html += menu[i].todo;
+							html += '</td>';
+							html += '<td style="text-align:center;">';
+							html += menu[i].sort;
+							html += '</td>';
+							html += '<td>';
+							if(menu[i].isShow == 1){
+								html += '显示';
+							}else{
+								html += '不显示';
+							}
+							html += '</td>';
+							html += '<td nowrap>';
+							if(menu[i].parentId != 0){
+								html += '<a href="javascript:mgr.editMenu(2,'+menu[i].id+',null)">修改</a>';
+							}
+							//html += '<a href="" onclick="menuEdit(2,'+menu[i].id+')">修改</a></td>';
+							html += '&nbsp;&nbsp;'
+							if(menu[i].parentId != 0){
+								html += '<a href="javascript:mgr.delMenu('+menu[i].id+')">删除</a>';
+							}
+							html += '&nbsp;&nbsp;'
+							if(menu[i].parentId ==1){
+								html += '<a href="javascript:mgr.editMenu(1,null,'+menu[i].id+')">添加下级菜单</a>';
+							}else if(menu[i].sort ==30){
+								html += '<a href="javascript:mgr.editMenu(1,null,'+menu[i].id+')">添加下级按钮</a>';
+							}
+							html += '</td>';
+							html += '</tr>';
+						}
+						$('#treeTable').find('tbody').html(html);	
+						$("#treeTable").treeTable({expandLevel : 5}).show();
+					}
+				}); 
+			},
+			delMenu:function(menuId){	
+	 	 		if(confirm("您确定要删除此菜单吗?")){  	 			 
+	 		 		  $.ajax({
+	 						type:'post',
+	 						url:''+$ctx+'/sysmgr/menu/delMenu', 
+	 						dataType:'json', 
+	 						data: {"menuId":menuId},				
+	 						success:function(data){
+	 							alert(data.result);
+	 						  	document.getElementById("menuListForm").submit();			
+	 						}
+	 				  });
+				}
+			} ,
+			editMenu:function(editFlag,menuId,parentId){
+				if(editFlag == 1){
+					$("#menuEditForm").validate({
+						rules: {
+							parentName: "required",
+							name: {
+								required: true,
+								maxlength: 8/* ,
+								remote:{
+									type:'post',
+									url:''+$ctx+'/sysmgr/menu/checkExistMenu', 
+									dataType:'html',
+									dataFilter: function(data,type){
+										return data == "0"?true:false;
+									}
+								} */
+							},
+							sort: {
+								required: true,
+								digits: true
+							},
+							isShow: "required"
+						},
+						messages: {
+							parentName: "请选择上级菜单",
+							name: {
+								required: "请输入菜单名称",
+								maxlength: "最大长度为8"/* ,
+								remote: "菜单已存在" */
+							},
+							sort: {
+								required: "请输入排序号",
+								digits: "只能输入正整数"
+							},
+							isShow: "请选择是否显示到菜单栏中"
+						} ,
+						submitHandler: function(form) {      
+						    mgr.saveMenu(form);     
+						} 
+					});
+				}else{
+					$("#menuEditForm").validate({
+						rules: {
+							parentName: "required",
+							name: {
+								required: true,
+								maxlength: 8
+							},
+							sort: {
+								required: true,
+								digits: true
+							},
+							isShow: "required"
+						},
+						messages: {
+							parentName: "请选择上级菜单",
+							name: {
+								required: "请输入菜单名称",
+								maxlength: "最大长度为8"
+							},
+							sort: {
+								required: "请输入排序号",
+								digits: "只能输入正整数"
+							},
+							isShow: "请选择是否显示到菜单栏中"
+						} ,
+						submitHandler: function(form) {      
+						    mgr.saveMenu(form);     
+						} 
+					});
+				}
+	 		  $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/menu/gotoMenuEdit', 
+					dataType:'json', 
+					data: {"editFlag":editFlag,"menuId":menuId,"parentId":parentId},				
+					success:function(data){
+						$("#editModal").modal("toggle");
+						var menu = data;
+						if(editFlag == 2)$("#id").val(menu.id);
+						$("#parentId").val(menu.parentId);
+						$("#parentName").val(menu.parentName);
+						$("#name").val(menu.name);
+						$("#href").val(menu.href);
+						$("#todo").val(menu.todo);
+						$("#target").val(menu.target);
+						$("#icon").val(menu.icon);
+						$("#sort").val(menu.sort);
+						$("#isShow").val(menu.isShow).trigger("change");
+					}
+			  });
+			},
+			saveMenu: function(form){
+		 		//获取字典修改后的信息数据,组装成json字符串
+				var formObject = {};
+				var formArray =$("#menuEditForm").serializeArray();
+				$.each(formArray, function(i, item){
+					formObject[item.name]=item.value;
+				 });
+			 	var jsonObj = formObject;
+			 	if(jsonObj.parentId == 1 || jsonObj.parentId == ""){
+			 		if(jsonObj.href != "")jsonObj.href="";
+			 	}
+			 	//console.log(jsonObj);
+			 	//return false;
+				$.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/menu/saveMenu', 
+					contentType :"application/json;charset=UTF-8",
+					dataType:'json',
+					data: JSON.stringify(jsonObj),				
+					success:function(data){
+						$("#editModal").modal("hide");
+						mgr.getMenuList();
+					}
+				});
+			},
+		};
+		var setting = {
+			view: {
+				dblClickExpand: false
+			},
+			data: {
+				simpleData: {
+					enable: true,
+					idKey:"id",
+					pIdKey:"parentId",
+					rootPId:0
+				}
+			},
+			callback: {
+				beforeClick: beforeClick,
+				onClick: onClick
+			}
+		};
+
+		 
+		function beforeClick(treeId, treeNode) {
+			/* var check = (treeNode && !treeNode.isParent);
+			if (!check) alert("只能选择城市...");
+			return check; */
+		};
+			
+		//点击树节点 时将选中节点返回给页面
+		function onClick(e, treeId, treeNode) {
+			var zTree = $.fn.zTree.getZTreeObj("menuTree");
+			var nodes = zTree.getSelectedNodes();
+			var nodeName = nodes[0].name;
+			var nodeId = nodes[0].id;
+ 			$("#parentId").attr("value", nodeId);
+			$("#parentName").attr("value", nodeName);
+			//为使得用户体验更加，选中节点后，影藏数结构
+			hideMenu() ;
+		};
+		//点击搜索框，显示树
+		function showMenu() {
+			var parentObj = $("#parentName");
+			var parentOffset = parentObj.offset();
+			$("#menuContent").css({left:205 + "px", top:45 + "px"}).slideDown("fast");
+			//$("#menuContent").css({left:parentOffset.left-369 + "px", top:parentOffset.top + parentObj.outerHeight()-100 + "px"}).slideDown("fast");
+			$("body").bind("mousedown", onBodyDown);
+		};
+		function hideMenu() {
+			$("#menuContent").fadeOut("fast");
+			$("body").unbind("mousedown", onBodyDown);
+		};
+		function onBodyDown(event) {
+			if (!(event.target.id == "menuBtn" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+				hideMenu();
+			}
+		};
+
+		$(document).ready(function(){
+			//此地方要稍微注意下，考虑不将本身以及下级节点显示出来，怕选择错误，造成连环套
+			var menuId = $("#id").val();
+			$.get(""+$ctx+"/sysmgr/menu/getParentMenuTreeData.action?menuId="+menuId,
+			function(zNodes){
+				//初始化数结构
+				//var jsonObj= $.parseJSON(zNodes.jsonObj);
+				var tree = $.fn.zTree.init($("#menuTree"), setting, zNodes);
+				//默认展开节点
+				var nodes = tree.getNodesByParam("level",2);
+				for(var i=0;i<nodes.length;i++){
+					tree.expandNode(nodes[i],true,false,false);
+				}
+				//如果是进入修改页面，定位到当前选中的节点
+				var selectNodeId = $("#parentId").val();
+				if(selectNodeId!=null){
+					tree.selectNode(tree.getNodeByParam("id",selectNodeId,null));
+				}
+		
+			});
+		});
+	</script>
+</body>
+</html>

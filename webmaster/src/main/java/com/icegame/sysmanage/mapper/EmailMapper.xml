@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.EmailMapper">
+
+	<select id="getEmailList" parameterType="email" resultType="email">
+		select `id`, `email`, `type` from memail
+		<where>
+			<if test="email!=null">
+				AND `email` like concat("%",#{email},"%")
+			</if>
+		</where>
+	</select>
+
+	<select id="getAutoOpenServerEmailList" parameterType="email" resultType="email">
+		select `id`, `email`, `type` from memail
+		where `type` = 1
+	</select>
+
+	<select id="existEmail" parameterType="email" resultType="email">
+		select `id`, `email`, `type` from memail
+		where `email` = #{email}
+	</select>
+
+	<select id="getEmailById" parameterType="java.lang.Long" resultType="email">
+		select `id`, `email`, `type` from memail
+		where `id` = #{id}
+	</select>
+
+
+	<insert id="addEmail" parameterType="email">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into memail(`email`, `type`)
+		values (#{email},#{type})
+	</insert>
+
+	<update id="updateEmail" parameterType="email">
+		update memail set `email` = #{email}
+		where id = #{id}
+	</update>
+
+
+	<delete id="delEmail" parameterType="java.lang.Long">
+		delete from memail
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+
+</mapper>

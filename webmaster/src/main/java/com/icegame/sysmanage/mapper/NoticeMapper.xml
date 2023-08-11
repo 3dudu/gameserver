@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.NoticeMapper">
+	<select id="getNoticeList" parameterType="notice" resultType="notice">
+		select `id`,`title`,`channel`,`context`,`context_review`,`type`,`isNew`,`isUnfold`,`sort`,
+		       `titleColor`,`contextColor`,`contextReviewColor`,`startTime`,`endTime` from notice
+		<where>
+			<if test="channel != null and channel != '' ">
+				and channel = #{channel}
+			</if>
+			<if test="hasChannel != null and hasChannel != ''">
+				and `channel` in ${hasChannel}
+			</if>
+		</where>
+	</select>
+
+	<select id="getNoticeById" parameterType="java.lang.Long" resultType="notice">
+		select `id`,`title`,`channel`,`context`,`context_review`,`type`,`isNew`,`isUnfold`,
+		       `sort`,`titleColor`,`contextColor`,`contextReviewColor` ,`startTime`,`endTime` from notice
+		where id = #{id}
+	</select>
+
+	<select id="getNoticeByChannel" parameterType="java.lang.String" resultType="notice">
+		select `id`,`title`,`channel`,`context`,`context_review`,`type`,`isNew`,`isUnfold`,
+		       `sort`,`titleColor`,`contextColor`,`contextReviewColor`,`startTime`,`endTime` from notice
+		where channel = #{channel} and #{curTime} > startTime  and endTime > #{curTime}
+	</select>
+
+	<select id="getChannelList" parameterType="notice" resultType="notice">
+		select distinct `channel` from notice
+	</select>
+
+	<select id="getNoticeLists" parameterType="notice" resultType="notice">
+		select * from notice
+	</select>
+
+	<select id="checkExistNotice" parameterType="notice" resultType="notice">
+		select `channel` from notice where `channel` =#{channel}
+	</select>
+
+	<insert id="addNotice" parameterType="notice">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO notice(`title`,`channel`,`context`,`context_review`,`type`,`isNew`,`isUnfold`,`sort`,`titleColor`,`contextColor`,`contextReviewColor`,`startTime`,`endTime`)
+		VALUES (#{title},#{channel},#{context},#{contextReview},#{type},#{isNew},#{isUnfold},#{sort},#{titleColor},#{contextColor},#{contextReviewColor},#{startTime},#{endTime})
+	</insert>
+
+	<delete id="delNotice" parameterType="java.lang.Long">
+		DELETE FROM notice
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+
+	<update id="updateNotice" parameterType="notice">
+		UPDATE notice  set
+		   `title` = #{title},
+           `channel` = #{channel},
+           `context` = #{context},
+           `context_review` = #{contextReview},
+           `type` = #{type},
+           `isNew` = #{isNew},
+           `isUnfold` = #{isUnfold},
+		   `sort` = #{sort},
+		   `titleColor` = #{titleColor},
+		   `contextColor` = #{contextColor},
+		   `contextReviewColor` = #{contextReviewColor},
+		   `startTime` = #{startTime},
+		   `endTime` = #{endTime}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

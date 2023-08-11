@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">全服邮件</a></li>
+    <li><a href="javascript:mgr.editAllSrvMail(1);">添加邮件</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <label>起始日期</label>
+        <input id="startDate" name="startDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+		<label>截止日期</label>
+        <input id="endDate" name="endDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+
+</form>
+<table id="roleMailTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">时间</th>
+    	<th class="header">标题</th>
+        <th class="header">邮件内容</th>
+        <th class="header">奖励物品</th>
+        <th class="header">渠道</th>
+        <th class="header">SlaveId</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">修改邮件</h5>
+                </div>
+                <div class = "modal-body" style="max-height: 500px;">
+                   <form id="userEditForm" class="form-horizontal" action="#" method="post">
+						<input id="id" name="id" type="hidden" value=""/>
+						<input id="status" name="status" type="hidden" value=""/>
+						<div class="control-group">
+							<label class="control-label">时间:</label>
+							<div class="controls">
+								<input style="float:left" id="createTime" readonly = "readonly" name="createTime" type="text" value="" />
+								<i class="layer-tips" id="timeTips" tips="时间由系统自动生成，不可修改"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">标题:</label>
+							<div class="controls">
+								<input style="float:left" id="subject" name="subject" type="text" value="" />
+							</div>
+						</div>
+					   <div class="control-group">
+						   <label class="control-label" for="mailType">邮件方式:</label>
+						   <div class="controls">
+							   <select id="mailType" name="mailType" style="float:left;width:120px">
+								   <option value="0">Channel</option>
+								   <option value="1">Slave节点</option>
+							   </select>
+<!--							   <i class="layer-tips" id="mainTypeTips" tips="默认：按照现有逻辑维护，Slave节点：维护特定的Slave，Channel：维护特定的channel的区服"></i>-->
+						   </div>
+					   </div>
+					   <div class="control-group" id="channelSelectGroup">
+						   <label class="control-label" for="channel">渠道:</label>
+						   <div class="controls">
+							   <select id="channel" name="selectedChannel" style="width:100px;float: left;" multiple="multiple">
+							   </select>
+							   <i class="layer-tips" id="chanelTips" tips="不选择默认所有渠道"></i>
+						   </div>
+					   </div>
+					   <div class="control-group" id="slaveSelectGroup" style="display: none">
+						   <label class="control-label" for="selectedSlave">Slave节点:</label>
+						   <div class="controls">
+							   <select id="selectedSlave" name="selectedSlave" style="float:left;width:188px" multiple="multiple">
+							   </select>
+						   </div>
+					   </div>
+						<div class="control-group">
+							<label class="control-label">邮件内容:</label>
+							<div class="controls">
+								<!-- <input id="protocol" name="protocol" type="text" value="" /> -->
+								<textarea id="context" name="context" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="邮件内容">
+								</textarea>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">奖励物品:</label>
+							<div class="controls">
+								<!-- <input id="protocol" name="protocol" type="text" value="" /> -->
+								<textarea id="awardStr" name="awardStr" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="奖励物品">
+								</textarea>
+								<i class="layer-tips" id="contextTips" tips="奖励物品包括金币 元宝  卡牌  法宝 道具 和文字提示"></i>
+								<!-- <i class="layer-tabs" id="contextTabs" title="添加模板"></i> -->
+							</div>
+						</div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                 </div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#roleMailTable").tablesorter();
+	$('#mailType').change(function(e){
+		var val = $(this).val();
+		switch(parseInt(val)){
+			case 0 :
+				$("#slaveSelectGroup").hide();
+				$("#channelSelectGroup").show();
+				$("#selectedSlave").val('').trigger("change");
+				break;
+			case 1 :
+				$("#slaveSelectGroup").show();
+				$("#channelSelectGroup").hide();
+				$("#channel").val('').trigger("change");
+				break;
+		}
+	});
+});
+$().ready(function() {
+	$("#userEditForm").validate({
+		rules: {
+			context: {
+				required: true,
+				maxlength: 800
+			},
+			awardStr: {
+				required: true,
+				maxlength: 800
+			}
+		},
+		messages: {
+			context: {
+				required: "请输入邮件内容",
+				maxlength: "最大长度为800"
+			},
+			awardStr: {
+				required: "请输入奖励内容",
+				maxlength: "最大长度为800"
+			}
+		} ,
+		submitHandler: function(form) {
+	        mgr.saveAllSrvMail(form);
+	    }
+	});
+});
+$(function () {
+	mgr.getListPage(1,18);
+	mgr.getSlaveNodesList();
+	mgr.getAuthorizeChannelList();
+});
+var mgr ={
+		getSlaveNodesList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/slavenodes/getSlaveNodesListNoPage',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					//console.log(data);
+					var slaveNodesList = data;
+					var htmlSlaveSelect = "";
+					for(var i = 0 ; i < slaveNodesList.length ; i++){
+						htmlSlaveSelect += '<option value="'+slaveNodesList[i].id+'" ip="'+slaveNodesList[i].ip+'" slaveId="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+					}
+					$('#selectedSlave').html(htmlSlaveSelect);
+				}
+			});
+		},
+		getAuthorizeChannelList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getAuthorizeChannelList',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					var channel = data.hasChannel;
+					if(channel != "" && channel.length != 0){
+						var html = '';
+						var channelList = data.hasChannel.split("\r\n");
+						for(var i = 0 ; i < channelList.length ; i++){
+							if(channelList[i] != "undefined"){
+								html += '<option value="'+channelList[i]+'">'+channelList[i]+'</option>';
+							}
+						}
+						$('#channel').html(html);
+					}
+				}
+			});
+		},
+	 	getListPage : function(pageNo,pageSize){
+	 		var serverNodeIp = $("#serverNodeIp").val();
+	 		var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/allsrvmail/getAllSrvMailList',
+				dataType:'json',
+				data: {"startDate":startDate,"endDate":endDate,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#roleMailTable").trigger("update");
+					var allSrvMailList = data;
+					if(allSrvMailList!=null&&allSrvMailList.length>1){
+							var htmlTable = "";
+							for(var i=1;i<allSrvMailList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].createTime;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].subject;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].context;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].awardStr;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].channel;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+allSrvMailList[i].slave;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editAllSrvMail(2,"+allSrvMailList[i].id+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delAllSrvMail("+allSrvMailList[i].id+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editAllSrvMail(1)'>添加</a>";
+								if(allSrvMailList[i].status == "1"){
+                                    var sendButton = "<a href='javascript:mgr.sendAllSrvMail("+allSrvMailList[i].id+","+allSrvMailList[i].status+")'>重新发送</a>";
+								}else if(allSrvMailList[i].status == "2"){
+                                    var sendButton = "<a href='javascript:mgr.sendAllSrvMail("+allSrvMailList[i].id+","+allSrvMailList[i].status+")'>发送</a>";
+								}else{
+                                    var sendButton = "";
+								}
+								if(allSrvMailList[i].status != "0"){
+									htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+sendButton;
+								}else{
+									htmlTable = htmlTable + "";
+								}
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#roleMailTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);
+	 				} else{
+						$('#roleMailTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");
+	 				}
+
+				}
+			});
+	 	},
+	 	editAllSrvMail : function(editFlag,id){
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/allsrvmail/gotoAllSrvMailEdit',
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},
+				success:function(data){
+					//console.log(data);
+					var currentCreatTime = null;
+					$("#editModal").modal("toggle");
+					var roleMailList = data;
+					if(JSON.stringify(roleMailList)=="{}"){
+						currentCreatTime="";
+					}else{
+						currentCreatTime=roleMailList.createTime;
+					}
+					$("#id").val(roleMailList.id);
+					$("#createTime").val(currentCreatTime);
+					$("#subject").val(roleMailList.subject);
+					$("#sid").val(roleMailList.sid);
+					$("#pid").val(roleMailList.pid);
+					$("#context").val(roleMailList.context);
+					$("#awardStr").val(roleMailList.awardStr);
+					$("#status").val(roleMailList.status);
+					$("#mailType").val(roleMailList.mailType).trigger("change");
+
+					if(roleMailList.id == null){
+						$("#selectedSlave").val('').trigger("change");
+						$("#selectedChannel").val('').trigger("change");
+					}
+
+					if(roleMailList.channel != "" && roleMailList.id != null){
+						var selectedChannel = roleMailList.channel;
+						$("#channel").val(selectedChannel.split(",")).trigger("change");
+					}
+
+					if(roleMailList.slave != "" && roleMailList.id != null){
+						var selectedSlave = roleMailList.slave;
+						$("#selectedSlave").val(selectedSlave.split(",")).trigger("change");
+					}
+				}
+			});
+	 	},
+	 	sendAllSrvMail:function(id,status){
+	 	    if(status == "1"){// status = 1 说明是重新发送邮件
+                if(confirm("友情提示：请在发送前仔细检查奖励物品数量、格式等信息，确认无误再进行发送。\n是否确认发送?")) {
+                    if(confirm("注意：此邮件为重新发送邮件。\n是否确认发送")) {
+                        if(confirm("注意：此邮件为全服邮件。\n请再次确认是否进行发送?")) {
+                            $.ajax({
+                                type: 'post',
+                                url: '' + $ctx + '/sysmgr/allsrvmail/sendAllSrvMail',
+                                dataType: 'json',
+                                data: {"id": id},
+                                success: function (data) {
+                                    alert(data.msg);
+                                }
+                            });
+                        }
+                    }
+                }
+            }else{
+                if(confirm("友情提示：请在发送前仔细检查奖励物品数量、格式等信息，确认无误再进行发送。\n是否确认发送?")) {
+                    if(confirm("注意：此邮件为全服邮件。\n请再次确认是否进行发送?")) {
+                        $.ajax({
+                            type: 'post',
+                            url: '' + $ctx + '/sysmgr/allsrvmail/sendAllSrvMail',
+                            dataType: 'json',
+                            data: {"id": id},
+                            success: function (data) {
+                                alert(data.msg);
+                            }
+                        });
+                    }
+                }
+            }
+	 	},
+	 	delAllSrvMail:function(id){
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/allsrvmail/delAllSrvMail',
+					dataType:'json',
+					data: {"id":id},
+					success:function(data){
+						mgr.getListPage(1,18);
+					}
+				});
+			}
+	 	},
+	 	saveAllSrvMail: function(form){
+	 		var roleMail={};
+			var formObject = {};
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+
+			var mailType = $("#mailType").val();
+
+			if(mailType == "0"){
+				formObject["selectedChannel"]= $("#channel").val();
+			}
+			if(mailType == "1"){
+				formObject["selectedSlave"]= $("#selectedSlave").val();
+			}
+
+			// 如果选择slave邮件，那就必须选择至少选择一个slave
+			var selectedSlave = $("#selectedSlave").val();
+			if(mailType == "1" && (selectedSlave == null || selectedSlave == "[]")){
+				alert("邮件方式为 Slave节点 的时候至少需要选择一个 Slave，才可以添加邮件");
+				return false;
+			}
+
+			roleMail = JSON.stringify(formObject);
+
+			// console.log(roleMail);
+			// return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/allsrvmail/saveAllSrvMail',
+				dataType:'json',
+				contentType :"application/json;charset=UTF-8",
+				data: roleMail,
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,18);
+ 				}
+			});
+		}
+}
+</script>
+</body>
+</html>

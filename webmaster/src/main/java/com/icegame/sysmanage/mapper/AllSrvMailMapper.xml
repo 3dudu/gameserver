@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.AllSrvMailMapper">
+	<select id="getAllSrvMailList" parameterType="allSrvMail" resultType="allSrvMail">
+	<![CDATA[
+		select `id`,`context`,`create_time`,`awardStr`,`subject`,`status`,`channel`,`slave`,`mailType` from all_srv_mail
+		where FROM_UNIXTIME(create_time/1000) >= #{startDate} and FROM_UNIXTIME(create_time/1000) < #{endDate}
+	]]>
+	</select>
+
+	<select id="getAllSrvMailById" parameterType="java.lang.Long" resultType="allSrvMail">
+		select `id`,`context`,`create_time`,`awardStr`,`subject`,`status`,`channel`,`slave`,`mailType` from all_srv_mail
+		where id = #{id}
+	</select>
+	
+	<insert id="addAllSrvMail" parameterType="allSrvMail">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO all_srv_mail(`id`,`context`,`create_time`,`awardStr`,`subject`,`status`,`channel`,`slave`,`mailType`)
+		VALUES (#{id},#{context},#{createTime},#{awardStr},#{subject},#{status},#{channel},#{slave},#{mailType})
+	</insert>
+	
+	<delete id="delAllSrvMail" parameterType="java.lang.Long">
+		DELETE FROM all_srv_mail
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateAllSrvMail" parameterType="allSrvMail">
+		UPDATE all_srv_mail  set
+           `context` = #{context},
+           `create_time` = #{createTime},
+           `awardStr` = #{awardStr},
+           `subject` = #{subject},
+           `status` = #{status},
+           `channel` = #{channel},
+           `slave` = #{slave},
+           `mailType` = #{mailType}
+		WHERE id = #{id}
+ 	</update>
+
+	<update id="refreshStatus" parameterType="allSrvMail">
+		UPDATE all_srv_mail  set
+		`status` = #{status}
+		WHERE id = #{id}
+	</update>
+</mapper>

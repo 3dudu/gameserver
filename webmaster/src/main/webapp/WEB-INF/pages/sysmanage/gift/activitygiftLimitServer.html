@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">礼包列表</a></li>
+    <li><a href="javascript:mgr.editActivityGift(1);">添加礼包</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <label>起始日期</label>
+        <input id="startDate" name="startDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+		<label>截止日期</label>
+        <input id="endDate" name="endDate" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+    
+</form>
+<table id="giftListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">自增ID</th>
+    	<th class="header">目标区服</th>
+    	<!--<th class="header">序列号类型</th>-->
+        <th class="header">标题</th>
+        <!--<th class="header">渠道</th>-->
+        <th class="header">使用类型</th>
+        <th class="header">金币</th>
+        <th class="header">元宝</th>
+        <th class="header">功德</th>
+        <th class="header">奖励道具</th>
+        <th class="header">数量</th>
+        <th class="header">使用限制</th>
+		<th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">指定区服</h5>
+                </div>
+                <div class = "modal-body" style="max-height: 500px;">
+                   <form id="activityGiftForm" class="form-horizontal" action="#" method="post">
+					    <input id="id" name="id" type="hidden" value=""/>
+					    <input id="targets" name="targets" type="hidden" value=""/>
+					    <input id="diffType" name="diffType" type="hidden" value="1" />
+						<div class="control-group">
+							<label class="control-label" for="selectedTargetsList">目标:</label>
+							<div class="controls">
+								<input style="float:left" id="selectedTargetsList" name="selectedTargetsList" type="text" value="" readonly="readonly"/>&nbsp;&nbsp;
+								<input style="float:left;margin-left:7px" id="btnShowTarget" name="btnShowTarget" class="btn btn-primary" type="button" value="查找" onclick = "mgr.showTargetsList()" />
+								<i class="layer-tips" id="allServerlTips" tips="如果未选择、默认是全服礼包"></i>
+							</div>
+						</div>
+					   <!--<div class="control-group">
+						   <label class="control-label">序列号类型:</label>
+						   <div class="controls">
+							   <select id="diffType" name="diffType" class="input-medium" style="width:100px;float:left;">
+								   <option value="0">无限使用</option>
+								   <option value="1">指定区服</option>
+								   <option value="2">特定渠道</option>
+							   </select>
+							   <i class="layer-tips" id="typeTips" tips="无限使用：创建一条CDKEY集合  该集合内的所有CDKEY 都可以无限次数使用;指定区服：指定单个/多个区服使用的cdKey  (这个cdkey全局都只能使用一次);特定渠道：单独的渠道才能使用的cdkey供给渠道商用的(全局也只能使用一次)"></i>
+						   </div>
+					   </div>-->
+						<div class="control-group">
+							<label class="control-label">标题:</label>
+							<div class="controls">
+								<input style="float:left" id="title" name="title" type="text" value="" />
+							</div>
+						</div>
+						<!--<div class="control-group">
+							<label class="control-label">渠道:</label>
+							<div class="controls">
+								<input style="float:left" id="channel" name="channel" type="text" value="" />
+							</div>
+						</div>-->
+						<div class="control-group">
+							<label class="control-label">使用类型:</label>
+							<div class="controls">
+							   <input style="float:left" id="useType" name="useType" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">金币:</label>
+							<div class="controls">
+							   <input style="float:left" id="coin" name="coin" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">元宝:</label>
+							<div class="controls">
+							   <input style="float:left" id="dollar" name="dollar" type="text" value="" />
+							</div>
+						</div>
+					    <div class="control-group">
+						    <label class="control-label">功德:</label>
+						    <div class="controls">
+							    <input style="float:left" id="merit" name="merit" type="text" value="" />
+						    </div>
+					    </div>
+						<div class="control-group">
+							<label class="control-label">奖励道具:</label>
+							<div class="controls">
+								<textarea id="awardStr" name="awardStr" style=" float:left;width: 520px;height: 80px;resize:none" placeholder="奖励道具">
+								</textarea>
+								<i class="layer-tips" id="awardStrTips" tips="格式：7:40001:100,7:40002:100。每种奖励物品之间，用英文逗号隔开，切记不要用换行"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">数量:</label>
+							<div class="controls">
+							   <input style="float:left" id="number" name="number" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">使用限制:</label>
+							<div class="controls">
+							    <!--<input style="float:left" id="useLimit" name="useLimit" type="text" value="" />-->
+								<!--<select id="useLimit" name="useLimit" class="input-medium" style="width:80px">
+									<option value="false">false</option>
+									<option value="true">true</option>
+								</select>-->
+								<input type="checkbox" id="useLimit" name="useLimit" style="margin-top: 5px;" value="true"/>
+							</div>
+						</div>
+					    <div class="control-group">
+						    <label class="control-label">序列号列表:</label>
+						    <div class="controls">
+								 <textarea id="cdKeyList" name="cdKeyList" style=" float:left;width: 520px;height: 150px;resize:none" placeholder="cdKeyList" readonly="readonly">
+								 </textarea>
+						    </div>
+					    </div>
+						<div class = "modal-footer model-bot">
+							<button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+							<input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+						</div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+
+
+
+<div class = "modal fade modal" id = "getTargetListModel" style="display:none;width: 1100px;left:30%;top:5%">
+	<div class = "modal-dialog">
+		<div class = "modal-content">
+			<div class ="modal-header">
+				<button type = "button" class = "close" data-dismiss = "modal">
+					<span aria-hidden = "true">&times;</span>
+					<span class = "sr-only"></span>
+				</button>
+				<h5 class = "modal-title">选择区服</h5>
+			</div>
+			<div class = "modal-body" style="max-height: none;">
+				<form id="getTargetsForm" class="breadcrumb form-search" method="post">
+					<input id="pageNoInput" name="pageNoInput" type="hidden" value="1"/>
+					<input id="pageSizeInput" name="pageSizeInput" type="hidden" value="20"/>
+					<div class="controls">
+						<label for="ipInput">节点</label>
+						<select id="ipInput" name="ipInput" class="input-medium" style="width:240px">
+
+						</select>
+						<label for="nameInput">名称</label>
+						<input id="nameInput" name="nameInput" class="input-medium" type="text" value="" />&nbsp;
+						<label for="channelInput">渠道号</label>
+						<input id="channelInput" name="channelInput" class="input-medium" type="text" value="" />&nbsp;
+						<input id="btnSubmitInput" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getTargetsList(null,null,null,1,12)"/>
+					</div>
+				</form>
+				<table id="serverListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+					<thead>
+					<tr>
+						<th style="text-align:center;width:37px;"><input id="checkAll" type="checkbox" value="" /></th>
+						<th class="header">区服ID</th>
+						<th class="header">区服名称</th>
+						<th class="header">IP地址</th>
+						<th class="header">端口号</th>
+						<th class="header">渠道号</th>
+						<th class="header">跨服分组</th>
+						<th class="header">关闭</th>
+						<th class="header">开始时间</th>
+						<th class="header">结束时间</th>
+						<th class="header">更新时间</th>
+					</tr>
+					</thead>
+					<tbody>
+
+
+					</tbody>
+				</table>
+				<div class="pagination" id = "serverListPageInfo">
+
+				</div>
+			</div>
+			<div class = "modal-footer">
+				<button id ="myBtnCloseInput" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+				<button class ="btn btn-primary" type="button" onclick="mgr.saveTargetList()">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+    $("#giftListTable").tablesorter();
+    $("#serverListTable").tablesorter({headers:{0:{sorter:false}}});
+});
+
+
+function chkInit() {
+    $(":checkbox[name='serverIds']").change(function(e) {
+        $('#checkAll').prop("checked",true);
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='serverIds']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAll').prop("checked",false);
+            }
+        }
+    });
+}
+
+
+$().ready(function() {
+	$("#activityGiftForm").validate({
+		rules: {
+			useType: {
+				required: true,
+				maxlength: 11
+			},
+			coin: {
+				required: true,
+				maxlength: 11
+			},
+            dollar: {
+                required: true,
+                maxlength: 11
+            },
+            merit: {
+                required: true,
+                maxlength: 11
+            },
+            number: {
+                required: true,
+                maxlength: 11
+            }
+		},
+		messages: {
+            useType: {
+                required: "请输入使用类型",
+                maxlength: "最大长度为11"
+            },
+            coin: {
+                required: "请输入金币",
+                maxlength: "最大长度为11"
+            },
+            dollar: {
+                required: "请输入元宝",
+                maxlength: "最大长度为11"
+            },
+            merit: {
+                required: "请输入功德",
+                maxlength: "最大长度为11"
+            },
+            number: {
+                required: "请输入数量",
+                maxlength: "最大长度为11"
+            }
+		} ,
+		submitHandler: function(form) {      
+	        mgr.saveActivityGift(form);
+	    } 
+	});
+});
+$(function () {
+	mgr.getListPage(1,18);
+    mgr.getSlaveNodesList();
+    $('#checkAll').click(function(){
+        $(":checkbox[name='serverIds']").is(":checked")?$(":checkbox[name='serverIds']").attr("checked",false):$(":checkbox[name='serverIds']").attr("checked",true);
+    });
+
+    chkInit();
+});
+var mgr ={
+		getSlaveNodesList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/slavenodes/getSlaveNodesListNoPage',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					//console.log(data);
+					var slaveNodesList = data;
+					var html = '<option value="">选择节点</option>';
+					for(var i = 0 ; i < slaveNodesList.length ; i++){
+						html += '<option value="'+slaveNodesList[i].id+'" ip="'+slaveNodesList[i].ip+'" slaveId="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+					}
+					$('#ipInput').html(html);
+				}
+			});
+		},
+		showTargetsList : function (){
+			$("#editModal").modal("hide");
+			$("#getTargetListModel").modal("toggle");
+			mgr.getTargetsList(null,null,null,1,12);
+		},
+		getTargetsList : function (channel,name,ip,pageNo,pageSize){
+			if(typeof channel == "number" && typeof name == "number"){
+				pageNo = channel;
+				pageSize = name;
+			}
+			if(typeof pageNo == "undefined" && typeof pageSize == "undefined"){
+				pageNo = channel;
+				pageSize = name;
+			}
+
+			var channel = $("#channelInput").val();
+			var name = $("#nameInput").val();
+			var slaveId = $("#ipInput").find("option:selected").attr("slaveId");
+			//console.log(ip);
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getServerListOpen',
+				dataType:'json',
+				data: {"channel":channel,"name":name,"slaveId":slaveId,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$('#checkAll').prop("checked",false);
+					$("#serverListTable").trigger("update");
+					$("#checkAll").attr("checked",false);
+					var serverList = data;
+					if(serverList!=null&&serverList.length>1){
+						var htmlTable = "";
+						for(var i=1;i<serverList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td style='text-align:center;width:37px;'>";
+							var closeButton = "<input type='checkbox' name='serverIds' value='"+serverList[i].serverId+"' sname='"+serverList[i].name+"'/>";
+							htmlTable = htmlTable+closeButton;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].name;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].ip;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].port;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].channel;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].group;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							if(serverList[i].close == 0){
+								htmlTable = htmlTable+"false";
+							}else if(serverList[i].close == 1){
+								htmlTable = htmlTable+"true";
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].beginTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].passTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].updateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#serverListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#serverListPageInfo').html(pageStr);
+
+					} else{
+						$('#serverListTable').find('tbody').html("<tr><td colspan='12' align='right'>没有查询到数据</td><tr>");
+						$('#serverListPageInfo').html("");
+					}
+					chkInit();
+				}
+			});
+		},
+		saveTargetList: function(form){
+			var targetList={};
+			var targetCheckObj = {};
+			var targetStr = "";
+			$.each($("input[name='serverIds']:checked"), function(i, item){
+				targetStr += $(this).attr('value')+"."+$(this).attr('sname')+",";
+				//console.log($(this).attr('value')+"."+$(this).attr('sname'));
+				targetCheckObj[item.value]=item.value;
+			});
+			targetList["selectServer"]=targetCheckObj;
+			targetList = JSON.stringify(targetCheckObj);
+			//console.log(targetStr);
+			//console.log(targetList);
+			$("#getTargetListModel").modal("hide");
+			targetStr=targetStr.substring(0,targetStr.length-1);
+			$("#selectedTargetsList").val(targetStr);
+
+			//console.log(targetList);
+			//console.log("----------------")
+			$("#targets").val(targetList);
+			$("#editModal").modal("toggle");
+		},
+	 	getListPage : function(pageNo,pageSize){
+	 		var serverNodeIp = $("#serverNodeIp").val();
+	 		var startDate = $("#startDate").val();
+			var endDate = $("#endDate").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gift/getActivityGiftList',
+				dataType:'json', 
+				data: {"diffType":1,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#giftListTable").trigger("update");
+                    var typeName = "";
+					var giftList = data;
+					if(giftList!=null&&giftList.length>1){
+							var htmlTable = "";
+							for(var i=1;i<giftList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+giftList[i].id;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+giftList[i].selectedTargetsList;
+								htmlTable = htmlTable+"</td>";
+                                /*htmlTable = htmlTable+"<td>";
+                                switch(giftList[i].diffType){
+									case "0" : typeName = "无限使用"; break;
+									case "1" : typeName = "指定区服"; break;
+									case "2" : typeName = "特定渠道"; break;
+								}
+                                htmlTable = htmlTable+typeName;
+                                htmlTable = htmlTable+"</td>";*/
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+giftList[i].title;
+								htmlTable = htmlTable+"</td>";
+                                /*htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].channel;
+                                htmlTable = htmlTable+"</td>";*/
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+giftList[i].useType;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].coin;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].dollar;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].merit;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].awardStr;
+                                htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+giftList[i].number;
+								htmlTable = htmlTable+"</td>";
+                                htmlTable = htmlTable+"<td>";
+                                htmlTable = htmlTable+giftList[i].useLimit;
+                                htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editActivityGift(2,"+giftList[i].id+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delActivityGift("+giftList[i].id+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editActivityGift(1)'>添加</a>";
+								htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#giftListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#giftListTable').find('tbody').html("<tr><td colspan='12' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+	 	editActivityGift : function(editFlag,id){
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gift/gotoActivityGiftEdit',
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},			
+				success:function(data){
+				    var add = editFlag == 1 ? true : false;
+					//console.log(data);
+					$("#editModal").modal("toggle");
+					var gift = data;
+					$("#id").val(gift.id);
+                    $("#selectedTargetsList").val(gift.selectedTargetsList);
+                    /*$("#diffType").val(gift.diffType).trigger("change");*/
+                    $("#targets").val(gift.targets);
+					$("#title").val(gift.title);
+					/*$("#channel").val(gift.channel);*/
+					$("#useType").val(add ? 0 :gift.useType);
+					$("#coin").val(add ? 0 :gift.coin);
+					$("#dollar").val(add ? 0 :gift.dollar);
+					$("#merit").val(add ? 0 :gift.merit);
+					$("#awardStr").val(gift.awardStr);
+					$("#number").val(add ? 0 :gift.number);
+					if(gift.useLimit){
+					    $("#useLimit").attr("checked",true);
+					}else{
+                        $("#useLimit").attr("checked",false);
+					}
+                    $("#cdKeyList").val(gift.cdKeyList);
+				}
+			});
+	 	},
+    	delActivityGift:function(id){
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/gift/delActivityGift',
+					dataType:'json', 
+					data: {"id":id},				
+					success:function(data){
+						mgr.getListPage(1,18);					
+					}
+				});
+			}
+	 	},
+		saveActivityGift: function(form){
+	 		var activityGift={};
+			var formObject = {};
+			var formArray =$("#activityGiftForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+            if(formObject.targets == ""){
+                alert("请选择区服");
+                return false;
+			}
+            if(formObject.awardStr.indexOf("\r\n") > -1){
+                alert("奖励道具格式有误，请按规范填写");
+                return false;
+            }
+
+            if(formObject.targets == "" && formObject.selectedTargetsList != ""){
+                alert("区服选择有误，刷新页面之后重新选择");
+                return false;
+            }
+
+            if(formObject.targets != "" && formObject.selectedTargetsList == ""){
+                alert("区服选择有误，刷新页面之后重新选择");
+                return false;
+            }
+
+			activityGift = JSON.stringify(formObject);
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gift/saveActivityGift',
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: activityGift,
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,18);
+ 				}
+			});
+		}
+}
+</script>
+</body>
+</html>

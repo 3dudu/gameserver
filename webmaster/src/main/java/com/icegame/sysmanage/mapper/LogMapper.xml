@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.LogMapper">
+	<select id="getLogList" parameterType="log" resultType="log">
+	<![CDATA[
+		select `id`,`userId`,`userName`,`createTime`,`operation`,`type` from mlog
+		where `userName` like concat("%",#{userName},"%") and createTime >= #{startDate} and createTime< #{endDate}
+		and `type` like concat("%",#{type},"%")
+	]]>
+	</select>
+	
+	<select id="getTypeList" parameterType="log" resultType="log">
+		select distinct type from mlog
+	</select>
+	
+	<select id="getLogByUserId" parameterType="java.lang.Long" resultType="log">
+		select `id`,`userId`,`userName`,`createTime`,`operation`,`type` from mlog
+		where userId = #{userId}
+	</select>
+	
+	<insert id="addLog" parameterType="log">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO mlog(`userId`,`userName`,`createTime`,`operation`,`type`)
+		VALUES (#{userId},#{userName},#{createTime},#{operation},#{type})
+	</insert>
+	
+	<delete id="delLog" parameterType="java.lang.Long">
+		DELETE FROM mlog
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateLog" parameterType="log">
+		UPDATE mlog  set
+		   `userName` = #{userName},
+           `createTime` = #{createTime},
+           `operation` = #{operation},
+           `type` = #{type}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

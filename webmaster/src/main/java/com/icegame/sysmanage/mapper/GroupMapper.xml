@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace = "com.icegame.sysmanage.mapper.GroupMapper">
+	<sql id = "all_group_columns">
+	 	groupId,groupName,has_channel
+	</sql>
+ 
+	<!--将通用的sql查询条件抽取出来,成为sql片段 ,给不同方法应用  -->
+	<sql id="query_group_sql_where">			
+		<if test="groupName!=null"> 
+			and groupName like concat("%",#{groupName},"%")
+		</if>
+	</sql>
+
+	<!--根据条件查询 用户组列表   -->
+	<select id="getGroupList" parameterType="group" resultType="group">
+		select
+		<include refid="all_group_columns"></include>
+			from mgroup
+		<where>
+			<include refid="query_group_sql_where"></include>		
+		</where>
+	</select> 
+	
+	<!-- 查询所有用户组的名字 -->
+	<select id="getAllGroupName"  resultType="group">
+		 select groupId,groupName from mgroup
+	</select>
+	<!-- 根据用户组ID查询用户组明细 -->
+	<select id="getGroupInfoById" parameterType="group" resultType="group">
+		select 
+			<include refid="all_group_columns"></include>
+		from mgroup
+			<where>
+				groupId=#{groupId}	
+			</where>
+	</select>
+	
+	<select id="checkExistGroup" parameterType="group" resultType="group">
+		select groupName from mgroup where groupName=#{groupName}
+	</select>
+	
+	<!--根据角色id查询用户组菜单对应关系  -->
+	<select id="getMenuListByGroupId" parameterType="long" resultType="groupToMenu"> 
+		select groupId , menuId 
+ 		from mgroupmenu
+		where groupId = #{groupId}		 	
+	</select>
+	
+	<!--根据角色id查询用户组菜单对应关系  -->
+	<select id="getGroupIdByUserId" parameterType="long" resultType="group"> 
+		select groupId
+ 		from musergroup
+		where userId = #{userId}		 	
+	</select>
+	
+	<!-- 根据用户组ID或者用户名 查询用户组内的成员 -->
+	<select id="getUserInGroup" parameterType="userDto" resultType="userDto">
+		select A.userId,A.loginName,A.userName,B.groupId,B.groupName 
+		FROM muser A,mgroup B,musergroup C where 
+		A.userId=C.userId AND B.groupId = C.groupId
+		and B.groupId = #{groupId} and A.userName like concat("%",#{userName},"%")
+	</select> 
+	<!-- 查询所有不属于任何用户组的用户返回前台用于添加到用户组 -->
+	<select id="getUserNotInGroup" parameterType="user" resultType="user">
+		select A.userId,A.loginName,A.userName from muser A 
+		left join musergroup B on A.userId=B.userId where B.userId is null
+		and A.userName like concat("%",#{userName},"%")
+	</select>
+	
+	<!-- 新增用户组 -->
+	<insert id="addGroup" parameterType="group">
+		<selectKey keyProperty="groupId" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as groupId
+        </selectKey>
+		INSERT INTO mgroup(groupName,has_channel)
+		VALUES (#{groupName},#{hasChannel})
+	</insert>
+	<!--增加角色菜单对应关系  -->
+	<insert id="addGroupToMenu" parameterType = "groupToMenu">	
+		insert into mgroupmenu(groupId,menuId)
+		values(#{groupId},#{menuId})  
+	</insert>
+	<!--批量 增加用户组菜单对应关系-->
+	<insert id="addGroupMenuBatch" parameterType = "groupToMenu">	
+		insert into mgroupmenu(groupId,menuId)
+		values
+		<foreach collection="list" item="groupToMenu" index="index" separator="," >  
+        	(#{groupToMenu.groupId},#{groupToMenu.menuId})  
+   		</foreach> 
+	</insert>
+	<!-- 批量增加用户用户组对应关系  -->
+	<insert id="addUserToGroup" parameterType = "userToGroup">	
+		insert into musergroup(userId,groupId)
+		values
+		<foreach collection="list" item="userToGroup" index="index" separator="," >  
+        	(#{userToGroup.userId},#{userToGroup.groupId})  
+   		</foreach> 
+	</insert>
+	
+	
+	<!-- 删除用户组 -->
+	<delete id="delGroup" parameterType="java.lang.Long">
+		delete from mgroup
+		<where>
+			groupId=#{groupId}
+		</where>
+	</delete>
+	<!--根据菜单id删除所有菜单角色对应关系记录  -->
+	<delete id="delGroupMenuByMenuId" parameterType="long" > 
+		delete from  mgroupmenu  where menuId =  #{menuId}		 	
+	</delete>
+	<!--根据角色id删除角色菜单对应表  -->
+	<delete id="delGroupMenuByGroupId" parameterType="long" > 
+		delete from  mgroupmenu  where groupId =  #{groupId}		 	
+	</delete>
+	<!-- 从用户组中删除用户 -->
+	<delete id="delUserFromGroup" parameterType="userToGroup" > 
+		delete from musergroup where userId IN
+		<foreach collection="list" item="userToGroup" index="index" open="(" separator="," close=")">  
+        	#{userToGroup.userId} 
+   		</foreach>
+   		AND groupId IN
+   		<foreach collection="list" item="userToGroup" index="index" open="(" separator="," close=")">  
+        	#{userToGroup.groupId} 
+   		</foreach>		 	
+	</delete>
+	
+	<!--修改用户组信息  -->
+	<update id="updateGroup" parameterType="group">
+		update mgroup  
+		<set> 
+	        <if test="groupName != null">
+	            groupName = #{groupName},
+	        </if>
+			<if test="hasChannel != null">
+				has_channel= #{hasChannel},
+			</if>
+		</set>
+		WHERE groupId = #{groupId}
+ 	</update>
+ 	
+</mapper>

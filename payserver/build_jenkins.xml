@@ -1,0 +1,83 @@
+<project default="" name="slg" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <!-- maven包解析 -->
+    <path id="maven-ant-tasks.classpath" path="${basedir}/lib/maven-ant-tasks-2.1.3.jar" />
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath" />
+    <!-- settingsfile="C:\Users\Administrator\.m2\repository\settings.xml" -->
+    <artifact:dependencies filesetId="mavenlib" pathId="mavenclasspath" useScope="runtime">
+        <pom file="pom.xml" />
+    </artifact:dependencies>
+    <property environment="env"/>
+
+    <property name="jarname" value="PayServer.jar"/>
+    <property name="mainclass" value="com.xuegao.PayServer.ServerStartMain"/>
+    <property name="srcdir" value="${basedir}/src/main/java"/>
+    <property name="confdir" value="${basedir}/config"/>
+    <property name="deploydir" value="${basedir}/deploy"/>
+    <property name="deployfiledir" value="${basedir}/deploy/PayServer"/>
+    <property name="compilepath" value="${basedir}/classes"/>
+
+
+    <!-- 编译 -->
+    <path id="classpath">
+        <path refid="mavenclasspath"/>
+        <fileset dir="${basedir}/lib"></fileset>
+    </path>
+    <delete dir="${compilepath}"></delete>
+    <mkdir dir="${compilepath}"/>
+    <javac source="1.7" target="1.7" srcdir="${srcdir}" destdir="${compilepath}" includeantruntime="false" optimize="true" verbose="false" failonerror="true">
+        <compilerarg line="-encoding UTF-8"/>
+        <classpath refid="classpath"/>
+        <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+    <!-- 文件结构  -->
+    <delete dir="${deployfiledir}"></delete>
+    <mkdir dir="${deployfiledir}"/>
+    <mkdir dir="${deployfiledir}/config"/>
+    <mkdir dir="${deployfiledir}/lib"/>
+    <mkdir dir="${deployfiledir}/logs"/>
+    <copy todir="${deployfiledir}/config">
+        <fileset dir="${confdir}"></fileset>
+    </copy>
+    <copy todir="${deployfiledir}/lib">
+        <fileset refid="mavenlib" />
+        <fileset dir="${basedir}/lib" excludes="rt.jar"/>
+        <mapper type="flatten" />
+    </copy>
+    <copy todir="${deployfiledir}">
+        <fileset dir="${basedir}" includes="*.sh"/>
+        <mapper type="flatten" />
+    </copy>
+    <copy todir="${deployfiledir}">
+        <fileset dir="${basedir}" includes="*.cmd"/>
+        <mapper type="flatten" />
+    </copy>
+    <copy todir="${deployfiledir}">
+        <fileset dir="${basedir}" includes="init.sql"/>
+        <mapper type="flatten" />
+    </copy>
+    <copy todir="${deployfiledir}">
+        <fileset dir="${basedir}" includes="update.sql"/>
+        <mapper type="flatten" />
+    </copy>
+    <copy todir="${deployfiledir}">
+        <fileset dir="${basedir}" includes="*.md"/>
+        <mapper type="flatten" />
+    </copy>
+    <!-- 打jar包 -->
+    <jar jarfile="${deployfiledir}/${jarname}">
+        <manifest>
+            <attribute name="Main-class" value="${mainclass}"/>
+            <attribute name="Class-Path" value="."/>
+        </manifest>
+        <fileset dir="${compilepath}"/>
+    </jar>
+    <!-- 打zip包 -->
+    <tstamp prefix="buildtime" >
+       <format property="TimeSign" pattern="yyyyMMddHHmmss" />
+    </tstamp>
+    <zip destfile="${deploydir}/PayServer-${buildtime.TimeSign}.zip">
+        <fileset dir="${deployfiledir}"></fileset>
+    </zip>
+    <!-- 清理临时文件夹 -->
+    <delete dir="${compilepath}"></delete>
+</project>

@@ -1,0 +1,358 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>用户查询页面</title>
+    <meta charset="utf-8"/>
+    <meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet"/>
+<style>
+    #mergeForm h5 {
+        display: inline-block;
+    }
+
+    .modelInput {
+        width: 90px;
+    }
+
+    .input-table{
+        width: 50px !important;
+        margin: 0 !important;
+    }
+
+</style>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">武将评价</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="16"/>
+    <input id="npcIdHidden" name="npcIdHidden" type="hidden" value=""/>
+    <div class="controls">
+        <label for="npcId">选择武将:</label>
+        <select id="npcId" name="npcId" style="width:180px">
+
+        </select>
+        <!--<label for="npcName">武将姓名:</label>
+        <select id="npcName" name="npcName" style="width:160px">
+
+        </select>-->
+        &nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick="mgr.searchMessage(1,16);"/>
+        <i class="layer-tips right" id="evaluateTips" tips="此处的选择弟子ID，和选择弟子姓名，条件互双击数字的输入框可以修改投票数"></i>
+    </div>
+</form>
+<form>
+    <table id="messageListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th class="header" style="width: 200px;">评价问题</th>
+            <th class="header" style="width: 300px;">选项</th>
+            <th class="header">票数</th>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        </tbody>
+    </table>
+</form>
+<div class = "modal fade modal default-model" id = "mergeModal" style="display:none">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">修改投票数</h5>
+            </div>
+            <div class = "modal-body">
+                <form id="mergeForm" class="form-horizontal" action="#" method="post">
+                    <div class="control-group">
+                        <h5 id="titleH5" style="margin-left:150px"></h5>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls" style="margin-left: 150px;margin-bottom:8px">
+                            <label for="curentNum">当前投票数:</label>
+                            <input id="curentNum" readonly = "readonly" name="curentNum" type="text" value=""/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls" style="margin-left: 150px;">
+                            <label for="value">修&emsp;改&emsp;为:</label>
+                            <input id="value" name="value" type="text" value=""/>
+                        </div>
+                    </div>
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="mergeSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="pagination" id="pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+
+    var opt11 = "",
+        opt12 = "",
+        opt13 = "",
+        opt14 = "",
+
+        opt21 = "",
+        opt22 = "",
+        opt23 = "",
+        opt24 = "",
+
+        opt31 = "",
+        opt32 = "",
+        opt33 = "",
+        opt34 = "";
+    var _pubId = null ;
+
+    $(document).ready(function () {
+        $("#messageListTable").tablesorter();
+    });
+
+    $(function () {
+        mgr.getEvaluate();
+        mgr.searchMessage(1, 16);
+        mgr.getEvaluateNpcId();
+        //mgr.getEvaluateNpcName();
+    });
+
+    $().ready(function() {
+        $("#mergeForm").validate({
+            rules: {
+                value: {
+                    required: true,
+                    digits: true,
+                    maxlength: 10
+                }
+            },
+            messages: {
+                value: {
+                    required: "请输入投票数",
+                    digits: "只能输入整数",
+                    maxlength: "最大长度为10"
+                }
+            },
+            submitHandler: function (form) {
+                mgr.save(form);
+            }
+        });
+    })
+
+    function getHtml(params) {
+        var html = "";
+        html += "<td>";
+        html += params;
+        html += "</td>";
+        return html;
+    }
+
+    function editAble(){
+        $("input[id^='answer']").dblclick(function(){
+            //console.log($(this).attr('id')+","+$(this).val());
+            $("#mergeModal").modal("toggle");
+            $("#titleH5").html($(this).parent().prev().html());
+            $("#curentNum").val($(this).val());
+
+            _pubId = $(this).attr('id');
+        });
+
+        /*$("input[id^='answer']").blur(function(){
+            $(this).attr("readonly",true);
+
+            var npcId = $("#npcIdHidden").val();
+            var thisId = $(this).attr('id');
+            var thisVal = $(this).val();
+            if(thisVal == "" || thisVal < 0){
+                alert("请输入一个正整数");
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/editEvaluate',
+                dataType: 'json',
+                data: {"key":thisId,"value":thisVal,"npcId":npcId},
+                success: function (data) {
+                    mgr.searchMessage(1,16);
+                }
+            });
+        });*/
+    }
+
+
+    var mgr = {
+        getEvaluateNpcId : function () {
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getEvaluateNpcId',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    if(data!=null&&data.length>0){
+                        var html = '<option value="">选择武将</option>';
+                        for(var i=0;i<data.length;i++){
+                            html += "<option value='"+data[i].npcId+"'>"+data[i].npcId+"."+data[i].npcName+"</option>";
+                        }
+                        $('#npcId').html(html);
+                    }
+                }
+            });
+        },
+        save : function () {
+            var npcId = $("#npcIdHidden").val();
+            var thisId = _pubId;
+            var thisVal = $("#value").val();
+            if(thisVal == "" || thisVal < 0){
+                alert("请输入一个正整数");
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/editEvaluate',
+                dataType: 'json',
+                data: {"key":thisId,"value":thisVal,"npcId":npcId},
+                success: function (data) {
+                    $("#mergeModal").modal("hide");
+                    mgr.searchMessage(1,16);
+                    alert("修改成功");
+                }
+            });
+        },
+        getEvaluateNpcName : function () {
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getEvaluateNpcName',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    if(data!=null&&data.length>0){
+                        var html = '<option value="">选择弟子ID</option>';
+                        for(var i=0;i<data.length;i++){
+                            html += "<option value='"+data[i].npcName+"'>"+data[i].npcName+"</option>";
+                        }
+                        $('#npcName').html(html);
+                    }
+                }
+            });
+        },
+        getEvaluate: function () {
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getEvaluate',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    //console.log(data);
+                    var evaluate = data[0];
+                    opt11 = evaluate[0].opt1;
+                    opt12 = evaluate[0].opt2;
+                    opt13 = evaluate[0].opt3;
+                    opt14 = evaluate[0].opt4;
+
+                    opt21 = evaluate[1].opt1;
+                    opt22 = evaluate[1].opt2;
+                    opt23 = evaluate[1].opt3;
+                    opt24 = evaluate[1].opt4;
+
+                    opt31 = evaluate[2].opt1;
+                    opt32 = evaluate[2].opt2;
+                    opt33 = evaluate[2].opt3;
+                    opt34 = evaluate[2].opt4;
+                }
+            });
+        },
+        searchMessage: function (pageNo, pageSize) {
+            var npcId = $("#npcId option:selected").val();
+            var npcName = $("#npcName option:selected").val();
+            $("#npcIdHidden").val(npcId);
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/cs/getEvaluateList',
+                dataType: 'json',
+                data: {"npcId": npcId, "npcName": npcName, "pageNo": pageNo, "pageSize": pageSize},
+                success: function (data) {
+                    $("#messageListTable").trigger("update");
+                    var evaluate = data;
+                    if (evaluate != null && evaluate.length > 1) {
+                        var htmlTable = "";
+                        for (var i = 1; i <= 16; i++) {
+                            switch (i) {
+                                case 1 :
+                                    htmlTable += "<tr>" + getHtml(evaluate[1].question1) + getHtml("") + getHtml("") + "</tr>";
+                                    break;
+                                case 2 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt11) + getHtml("<input id='answer11' readonly='readonly' type='text' class='input-table' value="+evaluate[1].answer11+" />") + "</tr>";
+                                    break;
+                                case 3 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt12) + getHtml("<input id='answer12' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer12+" />") + "</tr>";
+                                    break;
+                                case 4 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt13) + getHtml("<input id='answer13' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer13+" />") + "</tr>";
+                                    break;
+                                case 5 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt14) + getHtml("<input id='answer14' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer14+" />") + "</tr>";
+                                    break;
+
+
+                                case 6 :
+                                    htmlTable += "<tr>" + getHtml(evaluate[1].question2) + getHtml("") + getHtml("") + "</tr>";
+                                    break;
+                                case 7 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt21) + getHtml("<input id='answer21' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer21+" />") + "</tr>";
+                                    break;
+                                case 8 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt22) + getHtml("<input id='answer22' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer22+" />") + "</tr>";
+                                    break;
+                                case 9 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt23) + getHtml("<input id='answer23' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer23+" />") + "</tr>";
+                                    break;
+                                case 10 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt24) + getHtml("<input id='answer24' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer24+" />") + "</tr>";
+                                    break;
+
+
+                                case 11 :
+                                    htmlTable += "<tr>" + getHtml(evaluate[1].question3) + getHtml("") + getHtml("") + "</tr>";
+                                    break;
+                                case 12 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt31) + getHtml("<input id='answer31' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer31+" />") + "</tr>";
+                                    break;
+                                case 13 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt32) + getHtml("<input id='answer32' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer32+" />") + "</tr>";
+                                    break;
+                                case 14 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt33) + getHtml("<input id='answer33' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer33+" />") + "</tr>";
+                                    break;
+                                case 15 :
+                                    htmlTable += "<tr>" + getHtml("") + getHtml(opt34) + getHtml("<input id='answer34' readonly='readonly'  type='text' class='input-table' value="+evaluate[1].answer34+" />") + "</tr>";
+                                    break;
+                            }
+                        }
+                        var pageStr = data[0];
+                        $('#pageInfo').html(pageStr);
+                    } else {
+                        htmlTable = "<tr><td colspan='10' align='right'>没有查询到数据</td><tr>";
+                        $('#pageInfo').html("");
+                    }
+                    $('#messageListTable').find('tbody').html(htmlTable);
+                    editAble();
+                }
+            });
+
+        }
+    }
+</script>
+</body>
+</html>

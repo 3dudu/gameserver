@@ -1,0 +1,9 @@
+### 区服列表接口测试
+GET http://114.115.200.181:8080/master/serverlist?x=VD8NqDggixhzrWVPSlf7hQ%3D%3D&m=098f6bcd4621d373cade4e832627b4f6
+Accept: application/json
+
+### 带推荐服的区服列表接口测试
+GET http://114.115.200.181:8080/master/serverlistSuggested?x=VD8NqDggixhzrWVPSlf7hQ%3D%3D&m=098f6bcd4621d373cade4e832627b4f6
+Accept: application/json
+
+###

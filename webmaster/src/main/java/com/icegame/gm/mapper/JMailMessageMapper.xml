@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JMailMessageMapper">
+	<select id="getJMCSList" parameterType="jmailmessage" resultType="jmailmessage">
+		select t1.`id`,t1.`senderId`,t1.`senderName`,t1.`senderServerId`,t1.`senderServerName`,t1.`receiverId`,t1.`receiverName`,
+		t1.`receiverServerId`,t1.`receiverServerName`,t1.`createTime`,t1.`content`,t2.`banTime`,t2.`chattingBanTime`,t2.`mailBanTime` ,t2.`shieldCount`
+		from jmailmessage t1 left join jcsmessage_info t2 on t1.`senderServerId` = t2.`serverId` and t1.`senderId` = t2.`playerId`
+		<where>
+			<if test=" senderId != null and senderId != '' ">
+	           senderId=#{senderId}
+	        </if>
+	        <if test=" senderName != null and senderName != '' ">
+	           and senderName=#{senderName}
+	        </if>
+	        <if test=" senderServerId != null and senderServerId != '' ">
+	           and senderServerId=#{senderServerId}
+	        </if>
+	        <if test=" senderServerName != null  and senderServerName != '' ">
+	           and senderServerName=#{senderServerName}
+	        </if>
+	        <if test=" receiverId != null and receiverId != '' ">
+	           and receiverId=#{receiverId}
+	        </if>
+	        <if test=" receiverName != null and receiverName != '' ">
+	           and receiverName=#{receiverName}
+	        </if>
+	        <if test=" receiverServerId != null  and receiverServerId != '' ">
+	           and receiverServerId =#{receiverServerId}
+	        </if>
+	        <if test=" receiverServerName != null and receiverServerName != '' ">
+	           and receiverServerName=#{receiverServerName}
+	        </if>
+	        <if test=" content != null  and content != '' ">
+	           and content like concat("%",#{content},"%")
+	        </if>
+	        <if test=" startTime != null  and startTime != '' ">
+	           <![CDATA[ and createTime >= #{startTime} ]]>
+	        </if>
+	        <if test=" passTime != null  and passTime != '' ">
+	           <![CDATA[ and createTime < #{passTime}  ]]>
+	        </if>
+	    </where>
+	</select>
+
+	<select id="getJMCSById" parameterType="java.lang.Long" resultType="jmailmessage">
+		select `id`,`senderId`,`senderName`,`senderServerId`,`senderServerName`,`receiverId`,`receiverName`,
+		`receiverServerId`,`receiverServerName`,`createTime`,`content` from jmailmessage
+		where id = #{id}
+	</select>
+	
+	<insert id="addJMCS" parameterType="jmailmessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jmailmessage(`senderId`,`senderName`,`senderServerId`,`senderServerName`,`receiverId`,`receiverName`,
+		`receiverServerId`,`receiverServerName`,`createTime`,`content`)
+		VALUES (#{senderId},#{senderName},#{senderServerId},#{senderServerName},#{receiverId}
+		,#{receiverName},#{receiverServerId},#{receiverServerName},#{createTime},#{content})
+	</insert>
+
+</mapper>

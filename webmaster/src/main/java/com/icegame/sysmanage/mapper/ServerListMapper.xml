@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.ServerListMapper">
+	<select id="download" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,t1.`is_suggest`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1 left join slave_nodes t2 on t1.slaveId = t2.id
+		where t1.`channel` = #{channel} order by t1.`server_id`
+	</select>
+
+	<select id="getAllChannelServerList" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,t1.`is_suggest`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1 left join slave_nodes t2 on t1.slaveId = t2.id
+		order by t1.`server_id`
+	</select>
+
+	<select id="getAllChannelServerListNoPage" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1, slave_nodes t2 where t1.slaveId = t2.id
+		and t1.`channel` in ${hasChannel} order by t1.`server_id`
+	</select>
+
+
+	<select id="getServerList" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,t1.`is_auto`,t1.`is_suggest`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1 left join slave_nodes t2 on t1.slaveId = t2.id
+		<where>
+			t1.`channel` like concat("%",#{channel},"%") and t1.`name` like concat("%",#{name},"%")
+			<if test="slaveId != null and slaveId != '' and slaveId != 0 ">
+				and slaveId=#{slaveId}
+			</if>
+			<if test="hasChannel != null and hasChannel != ''">
+				and t1.`channel` in ${hasChannel}
+			</if>
+		</where>
+		order by t1.`server_id`
+	</select>
+
+	<select id="getServerIdsList" parameterType="serverList" resultType="serverList">
+		select `server_id` from server_list
+	</select>
+
+	<select id="checkExistServerList" parameterType="serverList" resultType="serverList">
+		select `name` from server_list where `name` =#{name}
+	</select>
+
+	<select id="getServerListOpen" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.slaveId from server_list t1 left join slave_nodes t2 on t1.slaveId = t2.id
+		<where>
+			t1.`channel` like concat("%",#{channel},"%") and t1.`name` like concat("%",#{name},"%") and t1.`close` = 0
+			<if test="slaveId != null and slaveId != '' and slaveId != 0 ">
+				and slaveId=#{slaveId}
+			</if>
+			<if test="hasChannel != null and hasChannel != ''">
+				and t1.`channel` in ${hasChannel}
+			</if>
+		</where>
+	</select>
+
+	<select id="getAllChannelList" parameterType="serverList" resultType="serverList">
+		select distinct `channel` from server_list
+	</select>
+
+	<select id="getSuggestServerInChannel" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,t1.`is_suggest`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1, slave_nodes t2 where t1.slaveId = t2.id
+		and t1.`channel` = #{channel} and t1.`is_suggest` = 1 order by t1.`server_id`
+	</select>
+
+	<select id="getServerById" parameterType="java.lang.Long" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t2.`ip`,t2.`nip`,t2.`name` as slaveName,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId`,t2.`port` as slavePort from server_list t1 left join slave_nodes t2 on t1.slaveId = t2.id
+		where t1.`server_id` = #{serverId}
+	</select>
+
+	<select id="getServerBySlaveId" parameterType="java.lang.Long" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1
+		where t1.`slaveId` = #{serverId}
+	</select>
+
+	<select id="getServerByChannelAndCreateTime" parameterType="serverList" resultType="serverList">
+		<![CDATA[
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t2.`ip`,t2.`nip`,
+		t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1, slave_nodes t2
+		where t1.`channel` = #{channel} and t1.`slaveId` = t2.`id` and
+		(
+			( t1.`beginTime` > #{beginTime})
+			or
+			( t1.`is_success` = 0 and t1.`beginTime` <= #{beginTime})
+		) order by t1.`server_id`
+		]]>
+	</select>
+
+	<select id="getServerByChannel" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t2.`ip`,t2.`nip`,
+		t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1, slave_nodes t2
+		where t1.`channel` = #{channel} and t1.`slaveId` = t2.`id`
+	</select>
+
+	<select id="existsChannel" parameterType="java.lang.String" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1
+		where t1.`channel` = #{channel} order by t1.`server_id`
+	</select>
+
+	<select id="existsMainTainServer" parameterType="serverList" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1
+		where t1.`close` = 1 order by t1.`server_id`
+	</select>
+
+	<select id="getServerByIP" parameterType="serverList" resultType="serverList">
+		select `server_id`,`name`,`ip`,`port`,`channel`,`group`,`wudaogroup`,`close`,`beginTime`,`updateTime`,`passTime`,`is_success` from server_list
+		where ip like concat("%",#{ip},"%")
+	</select>
+
+	<select id="getServerListByMultChannel" parameterType="java.lang.String" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1
+		where t1.`channel` in ${multChannel} order by t1.`server_id`
+	</select>
+
+	<select id="getServerListByMultSlaveId" parameterType="java.lang.String" resultType="serverList">
+		select t1.`server_id`,t1.`name`,t1.`port`,t1.`channel`,t1.`group`,t1.`wudaogroup`,t1.`close`,t1.`beginTime`,
+		t1.`updateTime`,t1.`passTime`,t1.`is_success`,t1.`slaveId` from server_list t1
+		where t1.`slaveId` in ${multSlaveId} order by t1.`server_id`
+	</select>
+
+	<insert id="addServer" parameterType="serverList">
+		<selectKey keyProperty="serverId" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as server_id
+        </selectKey>
+		INSERT INTO server_list(`name`,`ip`,`port`,`channel`,`group`,`wudaogroup`,`close`,`beginTime`,`updateTime`,`passTime`,`slaveId`,`is_auto`)
+		VALUES (#{name},#{ip},#{port},#{channel},#{group},#{close},#{beginTime},#{updateTime},#{passTime},#{slaveId},#{isAuto})
+	</insert>
+
+	<insert id="addServerReturnId" parameterType="serverList">
+		<selectKey keyProperty="serverId" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as server_id
+        </selectKey>
+		INSERT INTO server_list(`name`,`ip`,`port`,`channel`,`group`,`wudaogroup`,`close`,`beginTime`,`updateTime`,`passTime`,`slaveId`,`is_auto`)
+		VALUES (#{name},#{ip},#{port},#{channel},#{group},#{wudaogroup},#{close},#{beginTime},#{updateTime},#{passTime},#{slaveId},#{isAuto})
+	</insert>
+
+	<delete id="delServer" parameterType="java.lang.Long">
+		DELETE FROM server_list
+		<where>
+			`server_id`=#{serverId}
+		</where>
+	</delete>
+
+	<update id="updateServer" parameterType="serverList">
+		UPDATE server_list  set
+           `name` = #{name},
+           `ip` = #{ip},
+           `port` = #{port},
+           `channel` = #{channel},
+           `group` = #{group},
+           `wudaogroup` = #{wudaogroup},
+           `beginTime` = #{beginTime},
+           `updateTime` = #{updateTime},
+           `passTime` = #{passTime},
+           `slaveId` = #{slaveId},
+           `is_auto` = #{isAuto}
+		WHERE server_id = #{serverId}
+ 	</update>
+
+ 	<update id="updateSlaveIp" parameterType="serverList">
+		UPDATE server_list  set
+           `ip` = #{ip}
+		WHERE slaveId = #{slaveId}
+ 	</update>
+
+ 	<update id="updateServerClose" parameterType="serverList">
+		UPDATE server_list  set
+           `close` = #{close}
+		WHERE server_id = #{serverId}
+ 	</update>
+
+	<update id="updateServerCloseBySlaveId" parameterType="serverList">
+		UPDATE server_list  set
+           `close` = #{close}
+		WHERE slaveId = #{slaveId}
+ 	</update>
+
+	<update id="syncSuccess" parameterType="serverList">
+		UPDATE server_list  set
+           `is_success` = #{isSuccess}
+		WHERE server_id = #{serverId}
+ 	</update>
+
+	<update id="syncFailed" parameterType="serverList">
+		UPDATE server_list  set
+           `is_success` = #{isSuccess}
+		WHERE server_id = #{serverId}
+ 	</update>
+
+	<update id="suggest" parameterType="serverList">
+		UPDATE server_list  set
+           `is_suggest` = #{isSuggest}
+		WHERE server_id = #{serverId}
+ 	</update>
+
+</mapper>

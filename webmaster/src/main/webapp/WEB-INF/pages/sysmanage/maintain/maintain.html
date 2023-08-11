@@ -1,0 +1,630 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>维护列表页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">维护列表</a></li>
+    <li><a href="javascript:mgr.editMainTain(1);">添加记录</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+    <div class="controls">
+        <label for="reasonInput">原因:</label>
+        <input id="reasonInput" name="reasonInput" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+    
+</form>
+<table id="slaveNodesTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">记录编号</th>
+    	<th class="header">目标</th>
+    	<th class="header">Chanenl</th>
+    	<th class="header">SlaveId</th>
+        <th class="header">标题</th>
+        <th class="header">原因</th>
+        <th class="header">关闭</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">查找带回</h5>
+            </div>
+            <div class = "modal-body">
+               <form id="mainTainListForm" class="form-horizontal" action="#" method="post">
+					<input id="id" name="id" type="hidden" value=""/>
+					<input id="targetList" name="targetList" type="hidden" value=""/>
+					<input id="targets" name="targets" type="hidden" value=""/>
+					<input id="arrayTargetsList" name="arrayTargetsList" type="hidden" value=""/>
+					<div class="control-group">
+						<label class="control-label" for="selectedTargetsList">目标:</label>
+						<div class="controls">
+							<input style="float:left" id="selectedTargetsList" name="selectedTargetsList" type="text" value=""/>&nbsp;&nbsp;
+							<input style="float:left;margin-left:7px" id="btnShowTarget" name="btnShowTarget" class="btn btn-primary" type="button" value="查找" onclick = "mgr.showTargetsList()" />
+							<i class="layer-tips" id="allServerlTips" tips="如果未选择、默认是全服维护"></i>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="selectedTargetsList">标题:</label>
+						<div class="controls">
+							<input id="title" name="title" type="text" value=""  readonly = "readonly"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="reason">原因:</label>
+						<div class="controls">
+							<input id="reason" name="reason" type="text" value="" />
+						</div>
+					</div>
+				   <div class="control-group">
+					   <label class="control-label" for="mainType">维护方式:</label>
+					   <div class="controls">
+						   <select id="mainType" name="mainType" style="float:left;width:120px">
+							   <option value="0">默认</option>
+							   <option value="1">Slave节点</option>
+<!--							   <option value="2">Channel</option>-->
+						   </select>
+						   <i class="layer-tips" id="mainTypeTips" tips="默认：按照现有逻辑维护，Slave节点：维护特定的Slave，Channel：维护特定的channel的区服"></i>
+					   </div>
+				   </div>
+				   <div class="control-group" id="slaveSelectGroup" style="display: none">
+					   <label class="control-label" for="slaveNodes">Slave节点:</label>
+					   <div class="controls">
+						   <select id="slaveNodes" name="slaveNodes" style="float:left;width:188px" multiple="multiple">
+						   </select>
+					   </div>
+				   </div>
+				   <div class="control-group" id="channelSelectGroup" style="display: none">
+					   <label class="control-label" for="channel">渠道:</label>
+					   <div class="controls">
+						   <select id="channel" name="channel" style="float:left;width:188px" multiple="multiple">
+						   </select>
+					   </div>
+				   </div>
+					<div class="control-group">
+						<label class="control-label" for="closed">服务器状态:</label>
+						<div class="controls">
+							<select id="closed" name="closed" style="float:left;width:80px">
+								<option value="">请选择</option>
+								<option value="0">开启</option>
+								<option value="1">关闭</option>
+								<option value="2">白名单</option>
+			 				</select>
+			 				<!-- <i class="layer-tips" id="closeOneModelTips" tips=" 开启为开服， 关闭为关服"></i> -->
+						</div>
+					</div>
+					<div class = "modal-footer  model-bot">
+	                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                </div>
+				</form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class = "modal fade modal" id = "getTargetListModel" style="display:none;width: 1100px;left:30%;top:5%">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">选择需要维护的区服</h5>
+                </div>
+                <div class = "modal-body" style="max-height: none;">
+                   <form id="getTargetsForm" class="breadcrumb form-search" method="post">
+					    <input id="pageNoInput" name="pageNoInput" type="hidden" value="1"/>
+					    <input id="pageSizeInput" name="pageSizeInput" type="hidden" value="20"/>
+					    <div class="controls">
+					    	<label for="ipInput">节点</label>
+					    	<select id="ipInput" name="ipInput" class="input-medium" style="width:240px">
+									
+		    				</select>
+							<label for="nameInput">名称</label>
+					        <input id="nameInput" name="nameInput" class="input-medium" type="text" value="" />&nbsp;
+							<label for="channelInput">渠道号</label>
+					        <input id="channelInput" name="channelInput" class="input-medium" type="text" value="" />&nbsp;
+					        <input id="btnSubmitInput" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getTargetsList(null,null,null,1,12)"/>
+						</div>
+					</form>
+					<table id="serverListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+					    <thead>
+					    <tr>
+					    	<th style="text-align:center;width:37px;"><input id="checkAll" type="checkbox" value="" /></th>
+					        <th class="header">区服ID</th>
+					        <th class="header">区服名称</th>
+					        <th class="header">IP地址</th>
+					        <th class="header">端口号</th>
+					        <th class="header">渠道号</th>
+					        <th class="header">跨服分组</th>
+					        <th class="header">关闭</th>
+					        <th class="header">开始时间</th>
+					        <th class="header">结束时间</th>
+					        <th class="header">更新时间</th>
+					    </tr>
+					    </thead>
+					    <tbody>
+					     
+					    
+					    </tbody>
+					</table>
+					<div class="pagination" id = "serverListPageInfo">
+				
+					</div>
+                </div>
+                <div class = "modal-footer">
+		            <button id ="myBtnCloseInput" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		            <button class ="btn btn-primary" type="button" onclick="mgr.saveTargetList()">保存</button>
+		        </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#slaveNodesTable").tablesorter();  
+    $("#serverListTable").tablesorter({headers:{0:{sorter:false}}});
+	$('#mainType').change(function(e){
+		var val = $(this).val();
+		switch(parseInt(val)){
+			case 0 : $("#slaveSelectGroup").hide();$("#channelSelectGroup").hide();break;
+			case 1 : $("#slaveSelectGroup").show();$("#channelSelectGroup").hide();break;
+			case 2 : $("#slaveSelectGroup").hide();$("#channelSelectGroup").show();break;
+		}
+	});
+});
+$().ready(function() {
+	$("#mainTainListForm").validate({
+		rules: {
+			closed: "required"
+		},
+		messages: {
+			closed: "请选择开启或关闭"
+		} ,
+		submitHandler: function(form) {      
+		    mgr.saveMainTain(form);     
+		} 
+	});
+});
+</script>
+<script type="text/javascript">
+$(function () {
+	mgr.getListPage(1,18);
+    mgr.getSlaveNodesList();
+    mgr.getAllChannel();
+    $('#checkAll').click(function(){
+        $(":checkbox[name='serverIds']").is(":checked")?$(":checkbox[name='serverIds']").attr("checked",false):$(":checkbox[name='serverIds']").attr("checked",true);
+    });
+
+    chkInit();
+
+    /*设置按下回车之后执行ajax提交事件*/
+    $("body").keydown(function() {
+        if (event.keyCode == "13") {//keyCode=13是回车键
+            $('#btnSubmitInput').click();
+        }
+
+   	});
+});
+
+function chkInit() {
+    $(":checkbox[name='serverIds']").change(function(e) {
+        $('#checkAll').prop("checked",true);
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='serverIds']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAll').prop("checked",false);
+            }
+        }
+    });
+}
+
+var mgr ={
+		getSlaveNodesList:function(){	
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/slavenodes/getSlaveNodesListNoPage', 
+				dataType:'json', 
+				data: {},				
+				success:function(data){
+					//console.log(data);	
+                    var slaveNodesList = data;
+                    var html = '<option value="">选择节点</option>';
+                    var htmlSlaveSelect = "";
+                    for(var i = 0 ; i < slaveNodesList.length ; i++){
+                        html += '<option value="'+slaveNodesList[i].id+'" ip="'+slaveNodesList[i].ip+'" slaveId="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+						htmlSlaveSelect += '<option value="'+slaveNodesList[i].id+'" ip="'+slaveNodesList[i].ip+'" slaveId="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+                    }
+					$('#ipInput').html(html);
+					$('#slaveNodes').html(htmlSlaveSelect);
+				}
+			});
+	 	},
+		getAllChannel : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/allsrvmail/getAllChannel',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					var serverList = data;
+					if(serverList!=null && serverList.length > 0){
+						var html = '';
+						for(var i = 0 ; i < serverList.length ; i++){
+							html += "<option value='"+ serverList[i].channel +"'>"+serverList[i].channel+"</option>";
+						}
+						$('#channel').html(html);
+					}
+				}
+			});
+		},
+		showTargetsList : function (){
+			$("#editModal").modal("hide");
+			$("#getTargetListModel").modal("toggle");
+			mgr.getTargetsList(null,null,null,1,12);
+		},
+		getTargetsList : function (channel,name,ip,pageNo,pageSize){
+			if(typeof channel == "number" && typeof name == "number"){
+				pageNo = channel;
+				pageSize = name;
+			}
+			if(typeof pageNo == "undefined" && typeof pageSize == "undefined"){
+				pageNo = channel;
+				pageSize = name;
+			}
+			
+			var channel = $("#channelInput").val();
+			var name = $("#nameInput").val();
+            var slaveId = $("#ipInput").find("option:selected").attr("slaveId");
+			//console.log(ip);
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getServerListOpen', 
+				dataType:'json', 
+				data: {"channel":channel,"name":name,"slaveId":slaveId,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+                    $('#checkAll').prop("checked",false);
+					$("#serverListTable").trigger("update");
+					$("#checkAll").attr("checked",false);
+					var serverList = data;
+					if(serverList!=null&&serverList.length>1){				
+						var htmlTable = "";
+						for(var i=1;i<serverList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td style='text-align:center;width:37px;'>";
+							var closeButton = "<input type='checkbox' name='serverIds' value='"+serverList[i].serverId+"' sname='"+serverList[i].name+"'/>";
+							htmlTable = htmlTable+closeButton;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].name;
+							htmlTable = htmlTable+"</td>";	
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].ip;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].port;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].channel;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].group;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							if(serverList[i].close == 0){
+								htmlTable = htmlTable+"false";
+							}else if(serverList[i].close == 1){
+								htmlTable = htmlTable+"true";
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].beginTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].passTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].updateTime;
+							htmlTable = htmlTable+"</td>";					
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#serverListTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#serverListPageInfo').html(pageStr);
+
+						} else{
+						$('#serverListTable').find('tbody').html("<tr><td colspan='12' align='right'>没有查询到数据</td><tr>");
+						$('#serverListPageInfo').html("");		
+					}
+                    chkInit();
+				}
+			});
+		},
+	 	getListPage : function(pageNo,pageSize){
+	 		var reason = $("#reasonInput").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/maintain/getMainTainList', 
+				dataType:'json', 
+				data: {"reason":reason,"pageNo":pageNo,"pageSize":pageSize},		
+				success:function(data){
+					$("#slaveNodesTable").trigger("update");
+					var mainTainList = data;
+					if(mainTainList!=null&&mainTainList.length>1){		
+							var htmlTable = "";
+							for(var i=1;i<mainTainList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].id;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].selectedTargetsList;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].selectedChannel;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].selectedSlave;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].title;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+mainTainList[i].reason;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								if(mainTainList[i].closed == 0){
+									htmlTable = htmlTable+"false";
+								}else if(mainTainList[i].closed == 1){
+									htmlTable = htmlTable+"true";
+								}else if(mainTainList[i].closed == 2){
+									htmlTable = htmlTable+"白名单";
+								}
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editMainTain(2,"+mainTainList[i].id+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delMainTain("+mainTainList[i].id+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editMainTain(1)'>添加</a>";
+								htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#slaveNodesTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#slaveNodesTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+	 	editMainTain : function(editFlag,id){
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/maintain/gotoMainTainEdit', 
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},			
+				success:function(data){
+					$("#editModal").modal("toggle");
+					var mainTainList = data;
+					var optionHtml = '';
+					$("#id").val(mainTainList.id);
+					$("#title").val(mainTainList.title);
+					$("#selectedTargetsList").val(mainTainList.selectedTargetsList);
+					$("#targetList").val(mainTainList.targetList);
+					$("#reason").val(mainTainList.reason);
+					$("#targets").val(mainTainList.targets);
+
+					$("#mainType").val(mainTainList.mainType).trigger("change");
+
+					if(mainTainList.id == null){
+						$("#channel").val('');
+						$("#slaveNodes").val('');
+					}
+
+					if(mainTainList.selectedChannel != "" && mainTainList.id != null){
+						var selectedChannel = mainTainList.selectedChannel;
+						$("#channel").val(selectedChannel.split(",")).trigger("change");
+					}
+
+					if(mainTainList.selectedSlave != "" && mainTainList.id != null){
+						var selectedSlave = mainTainList.selectedSlave;
+						$("#slaveNodes").val(selectedSlave.split(",")).trigger("change");
+					}
+
+
+					$("#closed").val(mainTainList.closed).trigger("change");
+					/* if(mainTainList.closed == 0){
+						$("#closed").val(0).trigger("change");
+					}else if(mainTainList.closed == 1){
+						$("#closed").val(1).trigger("change");
+					} */
+					
+				}
+			});
+	 	},
+	 	delMainTain:function(id){	
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/maintain/delMainTain', 
+					dataType:'json', 
+					data: {"id":id},				
+					success:function(data){
+						mgr.getListPage(1,18);					
+					}
+				});
+			}
+	 	},
+	 	saveMainTain: function(form){
+
+			// 0:开启 1:关闭
+			var close = $("#closed").val() == 1 ? true : false;
+
+			if(close){
+				if(confirm("确定要维护吗?\r\n此操作会踢掉对应区服的在线玩家，三思而行！")){
+					if(confirm("真的维护?\r\n确定后立马踢人，现在后悔还来得及！")){
+						if($("#mainType").val() == "0"){
+							$("#title").val("全服维护");
+							$("#reason").val("全服维护");
+							$("#slaveNodes").val("");
+							$("#channel").val("");
+						}else if($("#mainType").val() == "1"){
+							$("#title").val("Slave维护");
+							$("#reason").val("Slave维护");
+							$("#channel").val("");
+						}else if($("#mainType").val() == "2"){
+							$("#title").val("Channel维护");
+							$("#reason").val("Channel维护");
+							$("#slaveNodes").val("");
+						}
+						var mainTain={};
+						var formObject = {};
+						var formArray =$("#mainTainListForm").serializeArray();
+						$.each(formArray, function(i, item){
+							formObject[item.name]=item.value;
+						});
+						if($("#mainType").val() == "1"){
+							formObject["slaveNodes"]= $("#slaveNodes").val();
+						}
+						if($("#mainType").val() == "2"){
+							formObject["channel"]= $("#channel").val();
+						}
+						mainTain = JSON.stringify(formObject);
+						mainTain["targetList"]=targetList;
+						// console.log(mainTain);
+						// return false;
+						$.ajax({
+							type:'post',
+							url:''+$ctx+'/sysmgr/maintain/saveMainTain',
+							dataType:'json',
+							contentType :"application/json;charset=UTF-8",
+							data: mainTain,
+							success:function(data){
+								$("#editModal").modal("hide");
+								alert(data.result);
+								mgr.getListPage(1,18);
+							}
+						});
+					}
+				}
+			} else {
+				if(confirm("确定要开启吗?\r\n请检查是否更新完成！对应的sql是否有更新，对应的数据是否有备份？")){
+					if(confirm("真的开启?\r\n现在后悔还来得及！")){
+						if($("#mainType").val() == "0"){
+							$("#title").val("全服维护");
+							$("#reason").val("全服维护");
+							$("#slaveNodes").val("");
+							$("#channel").val("");
+						}else if($("#mainType").val() == "1"){
+							$("#title").val("Slave维护");
+							$("#reason").val("Slave维护");
+							$("#channel").val("");
+						}else if($("#mainType").val() == "2"){
+							$("#title").val("Channel维护");
+							$("#reason").val("Channel维护");
+							$("#slaveNodes").val("");
+						}
+						var mainTain={};
+						var formObject = {};
+						var formArray =$("#mainTainListForm").serializeArray();
+						$.each(formArray, function(i, item){
+							formObject[item.name]=item.value;
+						});
+						if($("#mainType").val() == "1"){
+							formObject["slaveNodes"]= $("#slaveNodes").val();
+						}
+						if($("#mainType").val() == "2"){
+							formObject["channel"]= $("#channel").val();
+						}
+						mainTain = JSON.stringify(formObject);
+						mainTain["targetList"]=targetList;
+						// console.log(mainTain);
+						// return false;
+						$.ajax({
+							type:'post',
+							url:''+$ctx+'/sysmgr/maintain/saveMainTain',
+							dataType:'json',
+							contentType :"application/json;charset=UTF-8",
+							data: mainTain,
+							success:function(data){
+								$("#editModal").modal("hide");
+								alert(data.result);
+								mgr.getListPage(1,18);
+							}
+						});
+					}
+				}
+			}
+
+		},
+	 	saveTargetList: function(form){
+	 		var targetList={};
+	 		var targetCheckObj = {};
+	 		var targetStr = "";
+			$.each($("input[name='serverIds']:checked"), function(i, item){
+				targetStr += $(this).attr('value')+"."+$(this).attr('sname')+",";
+				//console.log($(this).attr('value')+"."+$(this).attr('sname'));
+				targetCheckObj[item.value]=item.value;
+			 });
+			targetList["selectServer"]=targetCheckObj;
+			targetList = JSON.stringify(targetCheckObj);
+			//console.log(targetStr);
+			//console.log(targetList);
+			$("#getTargetListModel").modal("hide");
+			targetStr=targetStr.substring(0,targetStr.length-1)
+			$("#selectedTargetsList").val(targetStr);
+			
+			//console.log(targetList);
+			//console.log("----------------")
+			$("#targetList").val(targetList);
+			$("#editModal").modal("toggle");
+			/* if(targetList == "{}"){
+				alert("请先选择需要维护的区服");
+				return false;
+			} */
+			//如果一个都不选，那就是全服维护
+		}
+		
+}
+
+</script>
+</body>
+</html>

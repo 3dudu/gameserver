@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace = "com.icegame.sysmanage.mapper.MenuMapper">
+	<sql id="all_menu_columns">
+   		 id,parentId,name,sort,href,target,
+   		 icon,isShow,todo
+  	</sql>
+   
+	<!-- 获取所有的菜单列表-->
+	<select id="getAllMenuList"  resultType="menu">
+		 select 
+		 <include refid="all_menu_columns"></include>
+		 from mmenu
+	</select> 
+	
+	<!--获取某个节点的子节点数目  -->
+	<select id="getChildCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select count(*) from mmenu where parentId = #{parentId};	
+	</select>
+	
+	<!--根据用户id查询所拥有的菜单    -->
+    <select id="getMenuListByUserId" parameterType="java.lang.Long" resultType="menu">
+		select DISTINCT C.id,C.parentId,C.name,
+ 		C.sort,C.href,C.target,C.icon,C.isShow,C.todo,D.name as parentName
+ 		from musergroup A ,mgroupmenu B ,mmenu C
+ 		left join `mmenu` D on C.`parentId` = D.`id`
+ 		where A.userId= #{userId} and A.groupId = B.groupId and B.menuId = C.id		 
+	</select> 
+	
+	<!--根据用户id查询所拥有按钮    -->
+    <select id="getButtonListByUserId" parameterType="menuDto" resultType="menuDto">
+		select DISTINCT C.id,C.parentId,C.name,
+ 		C.sort,C.href,C.target,C.icon,C.isShow,C.todo
+ 		from musergroup A ,mgroupmenu B ,mmenu C
+ 		where A.userId= #{userId} and A.groupId = B.groupId and B.menuId = C.id	
+ 		and sort=100 and C.parentId=#{parentId}	 
+	</select>
+	
+	<select id="checkExistMenu" parameterType="menu" resultType="menu">
+		select name from mmenu where name=#{parentName}
+	</select>
+	
+	<!--获取菜单明细  -->
+	<select id="getMenuById" parameterType="java.lang.Long" resultType="menu">
+	 	<!--  select 
+		 <include refid="all_menu_columns"></include>
+		 from PM_SYS_MENU where ID = #{menuId} -->
+		 <!--业务需求 需要我们在查询明细信息的时候得到父亲节点的名字 -->
+		 select C.id,C.parentId,C.name,D.name AS parentName ,C.sort,C.href,C.target,
+   		 C.icon,C.isShow,C.todo
+		 from mmenu C LEFT JOIN mmenu D
+		 ON C.parentId =D.id where  C.id= #{menuId} 
+ 	</select>
+	
+	
+	<!--增加菜单  -->
+	<insert id="addMenu" parameterType="menu">
+		<!--在类似于mysql的数据库,有自增长id的设置时,在插入成功后,返回主键,放入对象中  -->
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               select LAST_insert_ID() as id
+        </selectKey>
+        	  
+		insert into mmenu(parentId,name,sort,href,target,icon,
+   						isShow,todo)
+		values(#{parentId},#{name},#{sort},#{href},
+				#{target},#{icon},#{isShow},#{todo})
+	
+	
+	</insert>
+	
+	<!--删除菜单记录  -->
+  	<delete id="delMenu" parameterType="java.lang.Long">
+  		delete from mmenu where id = #{id} 		
+  	</delete>
+  	
+  	<!--修改菜单  -->
+  	<update id="updateMenu" parameterType="menu">
+  		update mmenu  
+		<set> 				
+			<if test="parentId != null">
+	            parentId = #{parentId},
+	        </if>
+	        <if test="name != null">
+	            name = #{name},
+	        </if>	   
+	        <if test="sort != null">
+	            sort = #{sort},
+	        </if>
+	        <if test="href != null">
+	            href = #{href},
+	        </if>	
+	        <if test="target != null">
+	            target = #{target},
+	        </if>
+	        <if test="icon != null">
+	            icon = #{icon},
+	        </if>
+	        <if test="isShow != null">
+	            isShow = #{isShow},
+	        </if>
+	        <if test="todo != null">
+	            todo = #{todo},
+	        </if>		 
+		</set>
+		where id = #{id}
+
+  	</update>
+  	
+</mapper>

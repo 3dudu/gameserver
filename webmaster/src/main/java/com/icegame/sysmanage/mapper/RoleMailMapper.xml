@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.RoleMailMapper">
+	<select id="getRoleMailList" parameterType="roleMail" resultType="roleMail">
+	<![CDATA[
+		select `id`,`sid_pid`,`context`,`create_time`,`awardStr`,`subject`,`status` from role_mail
+		where FROM_UNIXTIME(create_time/1000) >= #{startDate} and FROM_UNIXTIME(create_time/1000) < #{endDate}
+	]]>
+	</select>
+
+	<select id="getRoleMailById" parameterType="java.lang.Long" resultType="roleMail">
+		select `id`,`sid_pid`,`context`,`create_time`,`awardStr`,`subject`,`status` from role_mail
+		where id = #{id}
+	</select>
+	
+	<insert id="addRoleMail" parameterType="roleMail">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO role_mail(`id`,`sid_pid`,`context`,`create_time`,`awardStr`,`subject`,`status`)
+		VALUES (#{id},#{sidPid},#{context},#{createTime},#{awardStr},#{subject},#{status})
+	</insert>
+	
+	<delete id="delRoleMail" parameterType="java.lang.Long">
+		DELETE FROM role_mail
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateRoleMail" parameterType="roleMail">
+		UPDATE role_mail  set
+		   `sid_pid` = #{sidPid},
+           `context` = #{context},
+           `create_time` = #{createTime},
+           `awardStr` = #{awardStr},
+           `subject` = #{subject},
+           `status` = #{status}
+		WHERE id = #{id}
+ 	</update>
+
+	<update id="refreshStatus" parameterType="roleMail">
+		UPDATE role_mail  set
+		`status` = #{status}
+		WHERE id = #{id}
+	</update>
+</mapper>

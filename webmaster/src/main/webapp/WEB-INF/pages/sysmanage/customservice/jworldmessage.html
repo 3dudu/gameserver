@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+<style>
+	#mergeForm h5{display: inline-block;}
+	.modelInput{width: 90px;}
+</style>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">世界聊天记录</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+	<input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="16"/>	
+	<ul class="ul-form">
+		<li>
+		    <label for="serverId">所在区:</label>
+	    	<select id="serverId" name="serverId" style="width:190px">
+				<option value="">选择所在区</option>
+				<option value="10">十区</option>
+				<option value="13">十三区</option>
+				<option value="29">二十九区</option>
+				<option value="30">三十区</option>
+				<option value="16">十六区</option>
+		    </select>
+		    <label for="playerId">玩家ID:</label>
+        	<input id="playerId" name="playerId" class="input-medium" type="text" value=""/>&nbsp;
+        	<label for="playerName">玩家姓名:</label>
+        	<input id="playerName" name="playerName" class="input-medium" type="text" value=""/>&nbsp;
+		</li>
+		<li class="clearfix"></li>
+		<li>
+			<label for="content">消息内容:</label>
+        	<input id="content" name="content" class="input-medium" type="text" value=""/>
+        	&nbsp;
+			<label for="startDate">起始日期:</label>
+        	<input id="startDate" name="startDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        	&nbsp;
+			<label for="endDate">截止日期:</label>
+        	<input id="endDate" name="endDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+		</li>
+		<li class="btns">
+			<input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.searchMessage(1,16);"/>
+		</li>
+		<li class="clearfix"></li>
+	</ul>
+</form>
+<form>
+	<table id="messageListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	    <thead>
+	    <tr>
+	    	<th class="header">时间</th>
+	        <th class="header">玩家ID</th>
+	        <th class="header">玩家姓名</th>
+	        <th class="header">区服ID</th>
+	        <th class="header">区服名称</th>
+	        <th class="header">聊天内容</th>
+	        <th class="header">被屏蔽次数</th>
+	        <th class="header">操作</th>
+	    </tr>
+	    </thead>
+	    <tbody>
+	     
+	    
+	    </tbody>
+	</table>
+</form>
+<div class = "modal fade modal default-model" id = "mergeModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">禁言</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="mergeForm" class="form-horizontal" action="#" method="post">
+                 	<input id="playerIdModel" name="playerIdModel" type="hidden" value=""/>
+                 	<input id="serverIdModel" name="serverIdModel" type="hidden" value=""/>
+                 	<input id="banFlagModel" name="banFlagModel" type="hidden" value=""/>
+                 	<input id="mergeKey" name="mergeKey" type="hidden" value=""/>
+					<!-- <div class="control-group">
+						<h5 style="margin-left:180px">分钟:</h5>
+					</div> -->
+					<div class="control-group">
+						<div class="controls">
+							<h5>禁言&emsp;</h5><input id="mergeValue" name="mergeValue" class="modelInput" type="text" value=""/><h5>&emsp;分钟</h5>
+						</div>
+					</div>
+					<div class = "modal-footer">
+	                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="mergeSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){ 
+    $("#messageListTable").tablesorter(); 
+});
+$(function () {
+	mgr.getAllChannelServerList();
+	mgr.searchMessage(1,16);
+});
+$().ready(function() {
+	$("#mergeForm").validate({
+		rules: {
+			mergeValue: {
+				required: true,
+				maxlength: 50,
+				digits: true
+			}
+		},
+		messages: {
+			mergeValue: {
+				required: "请输入修改值",
+				maxlength: "最大长度为50",
+				digits: "必须为0或正整数"
+			}
+		} ,
+		submitHandler: function(form) {      
+		    mgr.mergeBan(form);     
+		} 
+	});
+});
+$(window).load(function(){ 
+	function refreshMsg(pageNo,pageSize){
+	    return function(){
+	    	mgr.searchMessage(pageNo,pageSize);
+	    }
+	}
+	setInterval(refreshMsg(1,16),5000);
+});
+var mgr ={
+		getAllChannelServerList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json', 
+				data: {},		
+				success:function(data){
+					//console.log(data);
+					var serverList = data;
+					var array = new Array();
+					if(serverList!=null&&serverList.length>0){
+
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+                        for(var k = 0 ; k < array.length ; k++){
+                            html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+                            for(var i = 0 ; i < serverList.length ; i++){
+                                if(serverList[i].channel == array[k]){
+                                    serverNum++;
+                                    html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                                }
+                            }
+                            html += "</optgroup>";
+                        }
+
+						/*var html = '<option value="">选择所在区</option>';
+						for(var i=0;i<serverList.length;i++){
+							html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+						}*/
+						$('#serverId').html(html);		
+					}
+				}
+			});
+		},
+		chattingBan: function (playerId,serverId,flag){
+			$("#mergeModal").modal("show");
+			$("#mergeKey").val("chattingBanTime");
+			$("#mergeValue").focus();
+			$("#playerIdModel").val(playerId);
+			$("#serverIdModel").val(serverId);
+			$("#banFlagModel").val(flag);
+			
+		},
+		mergeBan: function (form){
+			var key = $("#mergeKey").val();
+	 		var value = $("#mergeValue").val();
+	 		var playerId = $("#playerIdModel").val();
+	 		var serverId = $("#serverIdModel").val();
+	 		var flag = $("#banFlagModel").val();
+	 		$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/mergePlayerBanDay', 
+				dataType:'json', 
+				data: {"playerId":playerId,"serverId":serverId,"key":key,"value":value,"flag":flag},				
+				success:function(data){
+					//console.log(data);
+					$("#mergeModal").modal("hide");
+					if(data.ret == 1){
+						alert("禁言成功");
+					}else{
+						alert("禁言失败");
+					}
+					mgr.searchMessage(1,16);
+				}
+			});
+		},
+		removeBan: function (playerId,serverId,flag){
+			var key = "chattingBanTime";
+	 		var value = 0;
+	 		$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/mergePlayerBanDay', 
+				dataType:'json', 
+				data: {"playerId":playerId,"serverId":serverId,"key":key,"value":value,"flag":flag},				
+				success:function(data){
+					//console.log(data);
+					$("#mergeModal").modal("hide");
+					if(data.ret == 1){
+						alert("解禁成功");
+					}else{
+						alert("解禁失败");
+					}
+					mgr.searchMessage(1,16);
+				}
+			});
+		},
+	 	searchMessage:function(pageNo,pageSize){
+	 		var serverId = $("#serverId").val();
+	 		var playerId = $("#playerId").val();
+			var playerName = $("#playerName").val();
+	 		var startDate = $("#startDate").val();
+	 		var endDate = $("#endDate").val();
+	 		var content = $("#content").val();
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/cs/getWorldMessageList', 
+				dataType:'json', 
+				data: {"playerId":playerId,"serverId":serverId,"startDate":startDate,"endDate":endDate,"playerName":playerName,"content":content,"pageNo":pageNo,"pageSize":pageSize},				
+				success:function(data){
+					$("#messageListTable").trigger("update");
+					//console.log(data);
+					var messageList = data;
+					
+					if(messageList != null && messageList.length>1){		
+						var htmlTable = "";
+						for(var i=1;i<messageList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].strCreateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].playerId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].playerName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].serverName;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].content;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+messageList[i].shieldCount;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							var curTime= new Date().getTime();
+							var operateBtn = "";
+							if(messageList[i].chattingBanTime > curTime){
+								operateBtn = "<a href='javascript:mgr.removeBan("+messageList[i].playerId+","+messageList[i].serverId+",1)'>解禁</a>";
+							}else{
+								operateBtn = "<a href='javascript:mgr.chattingBan("+messageList[i].playerId+","+messageList[i].serverId+",0)'>禁言</a>";
+							}
+							htmlTable = htmlTable+operateBtn;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#pageInfo').html(pageStr);
+					}else{
+						htmlTable="<tr><td colspan='10' align='right'>没有查询到数据</td><tr>";
+						$('#pageInfo').html("");
+					}
+					$('#messageListTable').find('tbody').html(htmlTable);
+				}
+			});
+	 	}
+	}
+</script>
+</body>
+</html>

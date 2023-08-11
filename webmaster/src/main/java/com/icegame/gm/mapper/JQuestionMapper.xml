@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JQuestionMapper">
+	<select id="getJQuestionList" parameterType="jQuestion" resultType="jQuestion">
+		select `id`,`title`,`status`,`playerId`,`playerName`,`serverId`,`serverName`,
+		`csId`,`csName`,`createTime`,`updateTime` from jquestion
+		<where>
+			<if test=" status != null and status != '' ">
+	           status=#{status}
+	        </if>
+	        <if test=" playerName != null and playerName != '' ">
+	           and playerName=#{playerName}
+	        </if>
+			<if test=" playerId != null and playerId != '' ">
+	           and playerId=#{playerId}
+	        </if>
+	        <if test=" serverId != null and serverId != '' ">
+	           and serverId=#{serverId}
+	        </if>
+	        <if test=" csId != null and csId != '' ">
+	           and csId=#{csId}
+	        </if>
+	        <if test=" startTime != null  and startTime != '' ">
+	           <![CDATA[ and createTime >= #{startTime} ]]>
+	        </if>
+	        <if test=" passTime != null  and passTime != '' ">
+	           <![CDATA[ and createTime < #{passTime}  ]]>
+	        </if>
+	    </where>
+	    order by `createTime` desc
+	</select>
+	
+	<select id="getJQuestionListNoPage" parameterType="jQuestion" resultType="jQuestion">
+		select distinct(csId) csId,csName from jquestion where `csId` is not null and `csName` is not null
+	</select>
+
+	<select id="getQuestionServerList" parameterType="jQuestion" resultType="jQuestion">
+		select distinct serverId ,serverName from jquestion
+	</select>
+
+	<select id="getJQuestionById" parameterType="java.lang.Long" resultType="jQuestion">
+		select `id`,`title`,`status`,`playerId`,`playerName`,`serverId`,`serverName`,
+		`csId`,`csName`,`createTime`,`updateTime` from jquestion where id = #{id}
+	</select>
+	
+	<select id="getJQuestionByCsId" parameterType="java.lang.Long" resultType="jQuestion">
+		select `id`,`title`,`status`,`playerId`,`playerName`,`serverId`,`serverName`,
+		`csId`,`csName`,`createTime`,`updateTime` from jquestion where `csId` = #{csId}
+	</select>
+	
+	<insert id="addJQuestion" parameterType="jQuestion">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jquestion(`title`,`status`,`playerId`,`playerName`,`serverId`,`serverName`,`csId`,`csName`,`createTime`,`updateTime`)
+		VALUES (#{title},#{status},#{playerId},#{playerName},#{serverId},#{serverName},#{csId},#{csName},#{createTime},#{updateTime})
+	</insert>
+	
+	<update id="claimQuestion" parameterType="jQuestion">
+		update jquestion  
+		<set> 
+			<if test="csId != null and csId != '' ">
+	            csId = #{csId},
+	        </if>
+	        <if test="csName != null and csId != '' ">
+	            csName = #{csName},
+	        </if>	 
+		</set>
+		where id = #{id}
+ 	</update>
+ 	
+ 	<update id="finish" parameterType="jQuestion">
+		update jquestion  set status=0
+		where id = #{id}
+ 	</update>
+
+</mapper>

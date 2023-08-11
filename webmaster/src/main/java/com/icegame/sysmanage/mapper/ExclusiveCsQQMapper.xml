@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.ExclusiveCsQQMapper">
+
+	<select id="existCurrentPlayer" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select t1.`id`, t1.`sid` as serverId, t1.`pid` as playerId,
+		t2.`qq` from jvipqq_recode t1, jvipqq t2
+		where t1.`qid` = t2.`id`
+		and t1.`sid` = #{serverId}
+		and t1.`pid` = #{playerId}
+		and t1.`channel` = #{channel}
+	</select>
+
+	<!--  获取 功能的开关	-->
+	<select id="getVipQQStatus" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select `value` as isOpen from mconfigure
+		where `key` = "vip.qq.status"
+	</select>
+
+	<!--  获取 配置的总金额	-->
+	<select id="getMoney" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select `value` as money from mconfigure
+		where `key` = "vip.qq.money"
+	</select>
+
+	<!--  获取 分配次数最少的qq  -->
+	<select id="getMinTimesQQ" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select `id`, `qq`, `times` from jvipqq
+		where `channel` = #{channel}
+		order by `times` asc
+	</select>
+
+	<!--  获取 qq List  -->
+	<select id="getQQList" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select `id`, `qq`, `times`, `channel` from jvipqq
+		<where>
+			<if test="qq!=null">
+				AND `qq` like concat("%",#{qq},"%")
+			</if>
+			<if test="channel!=null and channel != '' " >
+				AND  `channel` in ${channel}
+			</if>
+		</where>
+	</select>
+
+	<!--  获取 根据id 查询qq  -->
+	<select id="getQQById" parameterType="java.lang.Long" resultType="exclusiveCsQQ">
+		select `id`, `qq`, `times`, `channel` from jvipqq
+		where `id` = #{id}
+	</select>
+
+
+	<!--  获取 分配次数最少的qq  -->
+	<select id="existsQQ" parameterType="exclusiveCsQQ" resultType="exclusiveCsQQ">
+		select `id`, `qq`, `times` from jvipqq
+		where `qq` = #{qq} and `channel` = #{channel}
+	</select>
+
+
+	<insert id="addPlayerRecode" parameterType="exclusiveCsQQ">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into jvipqq_recode(`qid`, `sid`, `pid`, `channel`)
+		values (#{qqId},#{serverId},#{playerId},#{channel})
+	</insert>
+
+	<insert id="addQQ" parameterType="exclusiveCsQQ">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into jvipqq(`qq`, `times`, `channel`)
+		values (#{qq},0,#{channel})
+	</insert>
+
+	<update id="updateQQ" parameterType="exclusiveCsQQ">
+		update jvipqq set `qq` = #{qq},`channel` = #{channel}
+		where id = #{id}
+	</update>
+
+
+	<update id="timesPlus" parameterType="exclusiveCsQQ">
+		update jvipqq set `times` = `times` + 1
+		where id = #{qqId}
+	</update>
+
+
+	<update id="updateMoney" parameterType="exclusiveCsQQ">
+		update mconfigure set `value` = #{money}
+		where `key`= "vip.qq.money"
+	</update>
+
+
+	<update id="updateQQStatus" parameterType="exclusiveCsQQ">
+		update mconfigure set `value` = #{isOpen}
+		where `key`= "vip.qq.status"
+	</update>
+
+
+	<delete id="delQQ" parameterType="java.lang.Long">
+		delete from jvipqq
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+
+	<delete id="unbindQQ" parameterType="java.lang.Long">
+		delete from jvipqq_recode
+		<where>
+			`qid` = #{id}
+		</where>
+	</delete>
+
+</mapper>

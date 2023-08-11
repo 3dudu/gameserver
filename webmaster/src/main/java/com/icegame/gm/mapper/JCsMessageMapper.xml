@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.JCsMessageMapper">
+	<select id="getJCsMessageList" parameterType="jCsmessage" resultType="jCsmessage">
+		<!-- select B.id, A.csId, A.csName, A.serverId, A.serverName, A.playerId, A.playerName, A.createTime, A.updateTime, A.flag, A.isNew as isNewCcount,
+		B.status from jcsmessage A  left join jcsmessage_status B on  A.serverId = B.serverId and A.playerId = B.playerId  -->
+		select A.id msgId, B.id, C.csId, C.csName, A.serverId, A.serverName, A.playerId, A.playerName, B.createTime, A.updateTime, A.flag, A.isNew as isNewCcount,
+		B.status from jcsmessage A right join (select max(id) id,serverId,playerId from jcsmessage group by playerId,serverId) t2 on t2.id=A.id
+		left join jcsmessage_status B on  A.serverId = B.serverId and A.playerId = B.playerId left join jcsmessage_process C on A.serverId = C.serverId 
+		and A.playerId = C.playerId
+		<where>
+			<if test=" csId != null and csId != '' ">
+	           A.csId=#{csId}
+	        </if>
+			<if test=" serverId != null and serverId != '' ">
+	           and A.serverId=#{serverId}
+	        </if>
+	        <if test=" playerId != null and playerId != '' ">
+	           and A.playerId=#{playerId}
+	        </if>
+	        <if test=" status != null and status != '' ">
+	           and B.status=#{status}
+	        </if>
+	        <if test=" csName != null and csName != '' ">
+	           and A.csName=#{csName}
+	        </if>
+	        <if test=" playerName != null and playerName != '' ">
+	           and A.playerName=#{playerName}
+	        </if>
+	        <if test=" content != null  and content != '' ">
+	           and A.content like concat("%",#{content},"%")
+	        </if>
+	        <if test=" startTime != null  and startTime != '' ">
+	           <![CDATA[ and A.createTime >= #{startTime} ]]>
+	        </if>
+	        <if test=" passTime != null  and passTime != '' ">
+	           <![CDATA[ and A.createTime < #{passTime}  ]]>
+	        </if>
+	    </where>
+		group by A.serverId,A.playerId
+
+	</select>
+	
+	<select id="getJCsMessageByMsgId" parameterType="jCsmessage" resultType="jCsmessage">
+		select `serverId`,`playerId` from jcsmessage_status where id=#{id}
+	</select>
+	
+	<select id="getNewMessage" parameterType="jCsmessage" resultType="jCsmessage">
+		select t11.csId,t11.csName,t11.serverId,t11.playerId,vip,t12.playerName,t12.serverName,t12.content,t12.createTime,t12.isNew,t13.isNewCount,t12.flag from
+		(select t2.`csId`, t2.`csName`, t2.`playerId`, t2.`serverId`, t1.`vip` from jcsmessage_info t1, jcsmessage_process t2, jcsmessage_status t3, jcsmessage t5
+		where t1.`serverId`=t3.`serverId` and t1.`playerId` = t3.`playerId` and t1.`serverId`=t2.`serverId` and t1.`playerId` = t2.`playerId`
+		and t1.`serverId`=t5.`serverId` and t1.`playerId` = t5.`playerId` and t2.`csId` = ${csId} and t5.`createTime` between #{startTime} and #{passTime}
+		group by t2.`playerId`,t2.`serverId`) t11
+		left join
+		(select id,serverId,playerId,createTime,content,serverName,playerName,flag,isNew from jcsmessage
+		t1 where not exists(select 1 from jcsmessage where serverId = t1.serverId and playerId = t1.playerId
+		and createTime>t1.createTime)) t12
+		on t11.`serverId`=t12.`serverId` and t11.`playerId` = t12.`playerId`
+		left join
+		(select playerId,serverId, sum(isNew) as isNewCount from jcsmessage group by playerId,serverId) t13
+		on t11.playerId = t13.playerId and t11.serverId = t13.serverId order by t12.createTime desc
+	</select>
+	
+	<select id="getOldMessage" parameterType="jCsmessage" resultType="jCsmessage">
+		select t11.csId,t11.csName,t11.serverId,t11.playerId,vip,t12.playerName,t12.serverName,t12.content,t12.createTime,t12.isNew,t13.isNewCount,t12.flag from
+		(select t2.`csId`, t2.`csName`, t2.`playerId`, t2.`serverId`, t1.`vip` from jcsmessage_info t1, jcsmessage_process t2, jcsmessage_status t3, jcsmessage t5
+		where t1.`serverId`=t3.`serverId` and t1.`playerId` = t3.`playerId` and t1.`serverId`=t2.`serverId` and t1.`playerId` = t2.`playerId`
+		and t1.`serverId`=t5.`serverId` and t1.`playerId` = t5.`playerId` and t2.`csId` = ${csId} and t5.`createTime` between #{startTime} and #{passTime}
+		group by t2.`playerId`,t2.`serverId`) t11
+		left join
+		(select id,serverId,playerId,createTime,content,serverName,playerName,flag,isNew from jcsmessage
+		t1 where not exists(select 1 from jcsmessage where serverId = t1.serverId and playerId = t1.playerId
+		and createTime>t1.createTime)) t12
+		on t11.`serverId`=t12.`serverId` and t11.`playerId` = t12.`playerId`
+		left join
+		(select playerId,serverId, sum(isNew) as isNewCount from jcsmessage group by playerId,serverId) t13
+		on t11.playerId = t13.playerId and t11.serverId = t13.serverId order by t12.createTime desc
+	</select>
+	
+	<select id="getJCsMessageListChatting" parameterType="jCsmessage" resultType="jCsmessage">
+		<!-- select `id`,`csId`,`serverId`,`playerId`,`csName`,`playerName`,`serverName`,`createTime`,`flag`,`content` from jcsmessage -->
+		select A.`id`,C.`csId`,A.`serverId`,A.`playerId`,A.`csId` thisCsId,A.`csName` thisCsName,C.`csName`,`playerName`,`serverName`,A.`createTime`,`flag`,`content`,`status` from jcsmessage A,
+		jcsmessage_status B, jcsmessage_process C
+		<where>
+			<!-- <if test=" csId != null and csId != '' ">
+	           csId=#{csId}
+	        </if> -->
+	        A.playerId = B.playerId and A.serverId = B.serverId and
+	        A.playerId = C.playerId and A.serverId = C.serverId
+	        <if test=" playerId != null and playerId != '' ">
+	           and A.playerId=#{playerId}
+	        </if>
+	        <if test=" serverId != null and serverId != '' ">
+	           and A.serverId=#{serverId}
+	        </if>
+	        <if test=" startTime != null  and startTime != '' ">
+	           <![CDATA[ and A.createTime >= #{startTime} ]]>
+	        </if>
+	        <if test=" passTime != null  and passTime != '' ">
+	           <![CDATA[ and A.createTime < #{passTime}  ]]>
+	        </if>
+	    </where>
+	</select>
+
+	<!-- 返回预设消息，如果消息还没有处理完毕，就返回没有处理完毕的这条消息的聊天记录 -->
+	<select id="getLatestMessage" parameterType="java.lang.Long" resultType="jCsmessage">
+		select A.`id`,C.`csId`,A.`serverId`,A.`playerId`,A.`csId` thisCsId,A.`csName` thisCsName,C.`csName`,`playerName`,B.`createTime` as bTime,
+		B.`msgId`,`serverName`,A.`createTime` as createTime,`flag`,`content`,`status`,D.`usedTitle`,D.`skinId`,D.`speakerTypeId` from jcsmessage A,
+		jcsmessage_status B, jcsmessage_process C, jcsmessage_info D
+		where A.playerId = B.playerId and A.serverId = B.serverId and
+		A.playerId = C.playerId and A.serverId = C.serverId and
+		A.playerId = D.playerId and A.serverId = D.serverId and
+		A.playerId = #{playerId} and A.serverId =${serverId} and A.`createTime` >= B.`createTime`
+	</select>
+	
+
+	<!-- 获取某条消息详细情况 -->
+	<select id="getJCsMessageById" parameterType="java.lang.Long" resultType="jCsmessage">
+		select A.id msgId, B.id, B.status, A.serverId,A.playerId,A.csId thisCsId, C.csId, A.csName thisCsName, C.csName, A.serverName, A.playerName, A.createTime, A.updateTime, A.flag, A.content 
+		from jcsmessage A, jcsmessage_status B, jcsmessage_process C where  A.serverId = B.serverId and A.playerId = B.playerId
+		and A.serverId = C.serverId and A.playerId = C.playerId and B.id=#{id}
+	</select>
+	
+	<select id="getCsInfoForSearch" parameterType="jCsmessage" resultType="jCsmessage">
+		select distinct(csId) csId,csName from jcsmessage where `csId` is not null and `csName` is not null
+	</select>
+	
+	<select id="getServerInfoForSearch" parameterType="jCsmessage" resultType="jCsmessage">
+		select distinct serverId ,serverName from jcsmessage
+	</select>
+	
+	<select id="isExistsStatus" parameterType="jCsmessage" resultType="jCsmessage">
+		select `id`,`serverId`,`playerId`,`status` from jcsmessage_status 
+		where serverId=#{serverId} and playerId=#{playerId}
+	</select>
+	
+	<select id="isExistsProcess" parameterType="jCsmessage" resultType="jCsmessage">
+		select `id`,`serverId`,`playerId`,`csId`,`csName` from jcsmessage_process 
+		where serverId=#{serverId} and playerId=#{playerId}
+	</select>
+	
+	<select id="isExistsInfo" parameterType="jCsmessage" resultType="jCsmessage">
+		select `id`,`serverId`,`playerId`,`banTime`,`chattingBanTime`,`mailBanTime`,`vip` from jcsmessage_info 
+		where serverId=#{serverId} and playerId=#{playerId}
+	</select>
+	
+	<select id="isSendMail" parameterType="jCsmessage" resultType="jCsmessage">
+		select `sendMail` from jcsmessage_info 
+		where serverId=#{serverId} and playerId=#{playerId}
+	</select>
+	
+	<select id="refreshBanData" parameterType="jCsmessage" resultType="jCsmessage">
+		select `id`,`serverId`,`playerId`,`banTime`,`chattingBanTime`,`mailBanTime`,`vip` from jcsmessage_info 
+		where serverId=#{serverId} and playerId=#{playerId}
+	</select>
+
+	<select id="getEnableCs" parameterType="jCsmessage" resultType="jCsmessage">
+		select t2.`csId`, t2.`num` from muser t1,(select count(1) num , csId from jcsmessage_process where csId is not null group by csId) t2
+		where t1.`isOnline` = 'on' and t1.`typeName` = 'cs' and t1.`userId` = t2.`csId` order by num asc
+	</select>
+
+	<select id="getQuestionListNoclaim" parameterType="jCsmessage" resultType="jCsmessage">
+		select id, msgId, playerId, serverId from jcsmessage_process where csId is null and csName is null
+	</select>
+
+	<select id="getOnlineCs" parameterType="jCsmessage" resultType="jCsmessage">
+	/*	select `userId` as csId, `userName` as csName from muser
+		where `isOnline` = 'on' and `typeName` = 'cs' */
+
+		select `userId` as csId, 0 as num from muser
+		where `isOnline` = 'on' and `typeName` = 'cs'
+	</select>
+
+
+	<!-- 添加聊天消息 -->
+	<insert id="addJCsMessage" parameterType="jCsmessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jcsmessage(`csId`,`serverId`,`playerId`,`csName`,`playerName`,`serverName`,`createTime`,`updateTime`,`flag`,`content`,`isNew`)
+		VALUES (#{csId},#{serverId},#{playerId},#{csName},#{playerName},#{serverName},#{createTime},#{updateTime},#{flag},#{content},#{isNew})
+	</insert>
+	
+	<!-- 添加状态消息 -->
+	<insert id="addJCsMessageStatus" parameterType="jCsmessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jcsmessage_status(`msgId`,`serverId`,`playerId`,`status`,`createTime`)
+		VALUES (#{msgId},#{serverId},#{playerId},#{status},#{createTime})
+	</insert>
+	
+	<!-- 添加状态消息 -->
+	<insert id="addJCsMessageProcess" parameterType="jCsmessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jcsmessage_process(`msgId`,`serverId`,`playerId`,`csId`,`csName`)
+		VALUES (#{msgId},#{serverId},#{playerId},#{csId},#{csName})
+	</insert>
+	
+	<!-- 添加状态消息 -->
+	<insert id="addJCsMessageInfo" parameterType="jCsmessage">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jcsmessage_info(`serverId`,`playerId`,`banTime`,`chattingBanTime`,`mailBanTime`,`vip`,`shieldCount`,`usedTitle`,`skinId`,`speakerTypeId`,`sendMail`)
+		VALUES (#{serverId},#{playerId},#{banTime},#{chattingBanTime},#{mailBanTime},#{vip},0 ,#{usedTitle} ,#{skinId} ,#{speakerTypeId},0)
+	</insert>
+	
+	<update id="updateJCsMessage" parameterType="jCsmessage">
+		UPDATE jcsmessage  set isNew = 0
+		WHERE playerId = #{playerId}<!--  and csId = #{csId} -->
+ 	</update>
+ 	
+ 	<!-- 修改消息任务的状态为未完成 -->
+ 	<update id="updateStatus" parameterType="jCsmessage">
+		UPDATE jcsmessage_status  set status=1,msgId=#{id}
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 修改消息进度表的消息ID -->
+ 	<update id="updateProcess" parameterType="jCsmessage">
+		UPDATE jcsmessage_process
+		<set>
+			<if test="id != null ">
+				msgId = #{id},
+			</if>
+			<if test="csId != null ">
+				csId = #{csId},
+			</if>
+			<if test="csName != null ">
+				csName = #{csName},
+			</if>
+		</set>
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+
+	<!-- 一键分配 -->
+	<update id="quickClaim" parameterType="jCsmessage">
+		UPDATE jcsmessage_process  set csId = #{csId},csName = #{csName}
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+	</update>
+ 	
+ 	<!-- 修改信息表的封禁天数以及vip信息 -->
+ 	<update id="updateInfo" parameterType="jCsmessage">
+		UPDATE jcsmessage_info
+		<set> 
+			<if test="banTime != null ">
+	            banTime = #{banTime},
+	        </if>
+	        <if test="chattingBanTime != null ">
+	            chattingBanTime = #{chattingBanTime},
+	        </if>
+	        <if test="mailBanTime != null ">
+	            mailBanTime = #{mailBanTime},
+	        </if>
+	        <if test="vip != null and vip != '' ">
+	            vip = #{vip},
+	        </if>
+	        <if test="usedTitle != null and usedTitle != '' ">
+	            usedTitle = #{usedTitle},
+	        </if>
+	        <if test="skinId != null and skinId != '' ">
+	            skinId = #{skinId},
+	        </if>
+	        <if test="speakerTypeId != null and speakerTypeId != '' ">
+	            speakerTypeId = #{speakerTypeId},
+	        </if>	 
+		</set>
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 打开发送邮件-->
+ 	<update id="openSendMail" parameterType="jCsmessage">
+		UPDATE jcsmessage_info set sendMail = 0
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 关闭发送邮件-->
+ 	<update id="closeSendMail" parameterType="jCsmessage">
+		UPDATE jcsmessage_info set sendMail = 1
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 更改玩家被屏蔽的次数 -->
+ 	<update id="addShield" parameterType="jCsmessage">
+		UPDATE jcsmessage_info set shieldCount = shieldCount+1
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 更改玩家被屏蔽的次数 -->
+ 	<update id="subShield" parameterType="jCsmessage">
+		UPDATE jcsmessage_info set shieldCount = shieldCount-1
+		WHERE playerId = #{playerId} and serverId = #{serverId}
+ 	</update>
+ 	
+ 	<!-- 认领反馈问题 -->
+ 	<update id="claimQuestion" parameterType="jCsmessage">
+		update jcsmessage_process  
+		<set> 
+			<if test="csId != null and csId != '' ">
+	            csId = #{csId},
+	        </if>
+	        <if test="csName != null and csId != '' ">
+	            csName = #{csName},
+	        </if>
+		</set>
+		where msgId = #{msgId}
+ 	</update>
+ 	
+ 	<update id="finish" parameterType="jCsmessage">
+		update jcsmessage_status  set status=0,createTime=#{createTime}
+		where id = #{id}
+ 	</update>
+ 	
+ 	<update id="open" parameterType="jCsmessage">
+		update jcsmessage_status  set status=1
+		where id = #{id}
+ 	</update>
+
+</mapper>

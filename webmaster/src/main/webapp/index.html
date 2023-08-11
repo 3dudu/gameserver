@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>achieve-sd-master</title>
+	
+<meta charset="utf-8">
+<meta name="renderer" content="webkit">
+
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<script>
+   	/* window.onload=function(){
+   	  	var localObj = window.location;
+         	var contextPath = localObj.pathname.split("/")[1];
+         	var basePath = localObj.protocol+"//"+localObj.host+"/"+contextPath+"/gotoLogin"; 
+        	window.location.href=basePath;
+   	} */
+</script>
+</head>
+<body>
+<div id="loginForm" class="form-signin">
+	<h3 class="form-signin-heading">欢迎使用 achieve-sd-master</h3>
+	<p><input type="text" id="loginName" name="loginName" class="input-block-level" value="" placeholder="账号"></p>
+	<p><input type="password" id="password" name="password" class="input-block-level" placeholder="密码"></p>
+	<p><input type="text" id="verifycode" name="verifycode" class="input-block-level verifycode" placeholder="验证码">
+	<img id="img" class="img" src="/master/checkImg" onclick="refresh()"></p>
+	<p class="online-p"><input type="checkbox" id="online" name="online" value="1"> <label for="online">记住登录账号</label></p>
+	<label><input class="btn-default btn btn-primary" type="submit" value="登 录" id="submit">&nbsp;&nbsp;
+	<input class="btn-default btn btn-warning" type="reset" value="重 置">&nbsp;&nbsp;</label>
+	<span id="tips" style="color:red;font-size:16px;margin-left: 100px;"></span>
+</div>
+index.html
+</body>
+</html>

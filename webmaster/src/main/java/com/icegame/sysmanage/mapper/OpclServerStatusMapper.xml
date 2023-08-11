@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.OpclServerStatusMapper">
+	
+	<select id="getOpclServerStatusList" parameterType="opclServerStatus" resultType="opclServerStatus">
+	<![CDATA[
+		select `id`,`createTime`,`hosts`,`status`,`type`,`serverId`,`lastOperate` from opcl_server
+		where `status` like concat("%",#{status},"%") and `type` like concat("%",#{type},"%")
+		and createTime >= #{startDate} and createTime< #{endDate} order by `createTime` desc
+	]]>
+	</select>
+	
+	<select id="getStatusList" parameterType="opclServerStatus" resultType="opclServerStatus">
+		select distinct status from opcl_server
+	</select>
+	
+	<select id="getOpclServerStatusById" parameterType="java.lang.Long" resultType="opclServerStatus">
+		select `id`,`createTime`,`hosts`,`status`,`type`,`serverId`,`failed`,`lastOperate` from opcl_server
+		where `id`=#{id}
+	</select>
+
+	<insert id="addOpclServerStatus" parameterType="opclServerStatus">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO opcl_server(`createTime`,`hosts`,`status`,`type`,`serverId`,`failed`,`lastOperate`)
+		VALUES (#{createTime},#{hosts},#{status},#{type},#{serverId},#{failed},#{lastOperate})
+	</insert>
+	
+	
+	<update id="updateOpclServerStatus" parameterType="opclServerStatus">
+		UPDATE opcl_server  set
+           `createTime` = #{createTime},
+           `status` = #{status}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

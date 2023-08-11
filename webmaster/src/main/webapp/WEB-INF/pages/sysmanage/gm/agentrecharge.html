@@ -1,0 +1,934 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>代理充值页面</title>
+    <meta charset="utf-8"/>
+    <meta name="renderer" content="webkit">
+    <style>
+
+        button.close {
+            -webkit-appearance: none;
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+        }
+
+        .modal-open {
+            overflow: hidden;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+
+        @-webkit-keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+
+        .headerBox {
+            color: #fff;
+            /*padding: 10px;*/
+            font-size: 15px;
+            height: 60px;
+            animation: fade 600ms infinite;
+            -webkit-animation: fade 600ms infinite;
+        }
+
+        .size {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: block;
+            float: left;
+            margin: 2px 5px 0 0;
+        }
+
+        .bgWait {
+            background: #999;
+        }
+
+        .bgProcessing {
+            background: #f0ad4e;
+        }
+
+        .bgSuccess {
+            background: #7CFC00;
+        }
+
+        .bgFailed {
+            background: #EE4000;
+        }
+
+        .text-bg {
+            color: #fff;
+            background: #109bd6;
+            padding: 3px 6px;
+            white-space: nowrap;
+            border-radius: 4px;
+        }
+
+        .textbg-1 {
+            background: #f34949;
+        }
+        .textbg-2 {
+            background: #f0ad4e;
+        }
+
+        .textbg-3 {
+            background: #2dc26c;
+        }
+
+        .red-text {
+            color: red;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">代理订单</a></li>
+    <li><a href="javascript:mgr.editAgentRechargeList(1)">添加订单</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+    <div class="controls" style="margin-bottom: 8px;">
+        <label for="loginNameInput">操作人:</label>
+        <input id="loginNameInput" name="loginNameInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+        <label for="sidIdInput">区服名称:</label>
+        <select id="sidIdInput" name="sidIdInput" class="input-medium" style="width:220px">
+            <option value="">选择所在区</option>
+        </select>&nbsp;
+        <label for="pidInput">角色ID:</label>
+        <input id="pidInput" name="pidInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+        <label for="playerNameInput">角色名:</label>
+        <input id="playerNameInput" name="playerNameInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+        <label for="proIdxInput">充值档位:</label>
+        <input id="proIdxInput" name="proIdxInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+<!--        <label for="platformInput">平台:</label>-->
+<!--        <input id="platformInput" name="platformInput" class="input-medium" type="text" value="" style="width: 100px;"readonly="readonly"/>&nbsp;-->
+        <label for="orderTypeInput">订单类型:</label>
+        <select id="orderTypeInput" name="orderTypeInput" class="input-medium" style="width:150px">
+            <option value="">请选择</option>
+            <option value="3">GM代充</option>
+        </select>
+    </div>
+    <div class="controls" style="margin-bottom: 8px;">
+        <label for="payPriceInput">充值金额:</label>
+        <input id="payPriceInput" name="payPriceInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+        <label for="moneyTypeInput">货币类型:</label>
+        <input id="moneyTypeInput" name="moneyTypeInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+        <label for="channelInput">渠道:</label>
+        <select id="channelInput" name="channelInput" class="input-medium" style="width:150px">
+            <option value="" selected="selected">请选择渠道</option>
+        </select>
+        <label class="control-label" for="statusInput">充值状态:</label>
+        <select id="statusInput" name="statusInput" class="input-medium">
+            <option value="">请选择</option>
+            <option value="-1">失败</option>
+            <option value="0">待充值</option>
+            <option value="1">成功</option>
+        </select>
+        <label for="orderIdInput">订单ID:</label>
+        <input id="orderIdInput" name="orderIdInput" class="input-medium" type="text" value=""/>&nbsp;
+        <label for="channelCodeInput">channelCode:</label>
+        <input id="channelCodeInput" name="channelCodeInput" class="input-medium" type="text" value="" style="width: 100px;"/>&nbsp;
+    </div>
+    <div class="controls">
+        <label>起始日期</label>
+        <input id="startTime" name="startTime" class="required Wdate" type="text" value="" style="width: 188px"
+               onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly=""/>
+        <label>截止日期</label>
+        <input id="passTime" name="passTime" class="required Wdate" type="text" value="" style="width: 188px"
+               onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly=""/>
+        <i class="layer-tips right" id="hrefTips"
+           tips="默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。">
+        </i>
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick="mgr.getListPage(1,20);"/>
+        &nbsp;&nbsp;
+        <input id="export" class="btn btn-primary" onclick="mgr.exportExcel()" value="导出" type="button" />
+    </div>
+</form>
+
+<table id="agentRechargeTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">订单ID</th>
+        <th class="header">区服ID</th>
+        <th class="header">区服名称</th>
+        <th class="header">角色ID</th>
+        <th class="header">角色名</th>
+        <th class="header">充值档位</th>
+        <th class="header">充值金额</th>
+        <th class="header">货币类型</th>
+        <th class="header">订单类型</th>
+        <th class="header">渠道</th>
+        <th class="header">渠道码</th>
+        <th class="header">创建时间</th>
+        <th class="header">充值时间</th>
+        <th class="header">充值状态</th>
+        <th class="header">操作人</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div class="modal fade modal default-model" id="editModal" style="display:none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only"></span>
+                </button>
+                <h5 class="modal-title">编辑列表</h5>
+            </div>
+            <div class="modal-body" style="max-height: 480px;">
+                <form id="userEditForm" class="form-horizontal" action="#" method="post">
+                    <div class="control-group">
+                        <label class="control-label" for="serverId">所在区服:</label>
+                        <div class="controls">
+                            <select id="serverId" name="serverId" style="width:220px">
+                                <option value="" selected = "selected">选择所在区</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="playerId">角色ID:</label>
+                        <div class="controls">
+                            <input id="playerId" name="playerId" type="text" value=""/>
+                            <button id="myBtnSearch" class="btn btn-primary" type="button" onclick="mgr.searchPlayerInfo()">查询</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="playerName">角色名:</label>
+                        <div class="controls">
+                            <input id="playerName" name="playerName" type="text" value=""
+                                   readonly="readonly" placeholder="查询后自动填充"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="dollarType">元宝数量:</label>
+                        <div class="controls">
+                            <input id="dollarType" name="dollarType" type="text" value=""
+                                   readonly="readonly"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="vipType">VIP等级:</label>
+                        <div class="controls">
+                            <input id="vipType" name="vipType" type="text" value=""
+                                   readonly="readonly"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="vipExp">VIP经验:</label>
+                        <div class="controls">
+                            <input id="vipExp" name="vipExp" type="text" value=""
+                                   readonly="readonly"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="proIdx">充值档位:</label>
+                        <div class="controls">
+                            <select id="proIdx" name="proIdx" style="width:220px">
+                                <option value="" selected="selected">查询后选择</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="payPrice">充值金额:</label>
+                        <div class="controls">
+                            <input id="payPrice" name="payPrice" type="text" value=""
+                                   readonly="readonly" placeholder="选择充值档位自动填充"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="moneyType">货币类型:</label>
+                        <div class="controls">
+                            <input id="moneyType" name="moneyType" type="text" value=""
+                                   readonly="readonly"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer model-bot">
+                        <button id="myBtnClose" class="btn btn-primary" type="button" data-dismiss="modal">取消</button>
+                        <input id="myBtnSubmit" class="btn btn-primary" type="submit" value="确定">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal default-model" id="remindModal" style="display:none;width: 500px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only"></span>
+                </button>
+                <h5 class="modal-title">充值前请确认信息是否正确：</h5>
+            </div>
+            <div id="rechargeConfirm" class="modal-body" style="max-height: 480px;">
+
+<!--         档位金额 货币类型 区服名字 角色名  类似 你确定要为xxx区的xxx充值¥30么      -->
+
+            </div>
+            <div class="modal-footer model-bot" style="padding: 6px 6px 6px;margin: 0;">
+                <button id="tipBtnClose" class="btn btn-primary" type="button" data-dismiss="modal">取消</button>
+                <input id="tipBtnSubmit" class="btn btn-primary" type="submit" value="确定">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination" id="pageInfo">
+</div>
+
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    var SLAVE_RETURN_INFO = [];
+    var SERVER_LIST = [];
+
+    var userIdEdit;
+    var platformEdit = "";
+    var payPriceEdit;
+    var orderTypeEdit = "3";
+    var channelEdit;
+    var channelCodeEdit = "";
+    var extEdit = "";
+
+    var userNameEdit = "";
+    var moneyTypeEdit = "";
+
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, // 月份
+            "d+": this.getDate(), // 日
+            "h+": this.getHours(), // 小时
+            "m+": this.getMinutes(), // 分
+            "s+": this.getSeconds(), // 秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), // 季度
+            "S": this.getMilliseconds() // 毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+    function exportFinish(){
+        $("#export").attr('disabled',false);
+        top.$.jBox.closeTip();
+    }
+    $(function () {
+        $("#agentRechargeTable").tablesorter();
+
+        //先获取区服，再获取全部记录
+        mgr.getAllChannelServerList();
+        mgr.getAuthorizeChannelList();
+        mgr.getListPage(1, 20);
+        //退出按钮
+        $("#myBtnSubmit").click(function () {
+            $("#editModal").modal("hide");
+        });
+        $("#serverId").on("change",function(e){
+            var proIdxText=$("#serverId").find("option:selected").val(); //
+            for (var i = 0; i < SERVER_LIST.length; i++) {
+                if (SERVER_LIST[i].serverId == proIdxText) {
+                    channelEdit = SERVER_LIST[i].channel;
+                    break;
+                }
+            }
+        });
+        $("#proIdx").on("change",function(e){
+            var proIdxText=$("#proIdx").find("option:selected").val(); //
+            for (var i = 0; i < SLAVE_RETURN_INFO.length; i++) {
+                if (SLAVE_RETURN_INFO[i].id === proIdxText) {
+                    $("#payPrice").val(SLAVE_RETURN_INFO[i].price);
+                    $("#moneyType").val(SLAVE_RETURN_INFO[i].currencyType)
+                    payPriceEdit = SLAVE_RETURN_INFO[i].price;
+                    moneyTypeEdit = SLAVE_RETURN_INFO[i].currencyType;
+                    break;
+                }
+            }
+        });
+    });
+    var mgr = {
+
+        /**
+         *查询所有区服信息
+         */
+        getAllChannelServerList: function () {
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/getAllChannelServerListNoPage',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    var serverList = data;
+                    var array = [];
+                    if (serverList == null || serverList.length <= 0) {
+                        alert("未获取到区服信息！")
+                        return false;
+                    }
+
+                    for (var j = 0; j < serverList.length; j++) {
+                        if (array.indexOf(serverList[j].channel) == -1) {
+                            array.push(serverList[j].channel);
+                        }
+                    }
+
+                    var html = '<option value="">选择所在区</option>';
+                    var serverNum;
+                    for (var k = 0; k < array.length; k++) {
+                        html += "<optgroup label=" + array[k] + ">";
+                        serverNum = 0;
+                        for (var i = 0; i < serverList.length; i++) {
+                            if (serverList[i].channel == array[k]) {
+                                serverNum++;
+                                html += "<option value='" + serverList[i].serverId + "'>[" + serverList[i].channel + "]("
+                                    + serverNum + ")" + serverList[i].name + "</option>";
+                            }
+                        }
+                        html += "</optgroup>";
+                    }
+                    $('#sidIdInput').html(html);
+                }
+            });
+        },
+
+        getAuthorizeChannelList:function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/group/getAuthorizeChannelList',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    var channel = data.hasChannel;
+
+                    if(channel != "" && channel.length != 0){
+                        var html = "<option value=''>请选择渠道</option>";
+                        var channelList = data.hasChannel.split("\r\n");
+                        for(var i = 0 ; i < channelList.length ; i++){
+                            if(channelList[i] != "undefined"){
+                                html += '<option value="'+channelList[i]+'">'+channelList[i]+'</option>';
+                            }
+                        }
+                        $('#channelInput').html(html);
+                    }
+                }
+            });
+        },
+
+        /**
+         *据条件查出所有记录
+         */
+        getListPage: function (pageNo, pageSize) {
+            var loginName = $("#loginNameInput").val();
+            var serverId = $("#sidIdInput").val();
+            var playerId = $("#pidInput").val();
+            var playerName = $("#playerNameInput").val();
+            var proIdx = $("#proIdxInput").val();
+            var money = $("#payPriceInput").val();
+            var moneyType = $("#moneyTypeInput").val();
+            var platform = "";
+            var orderType = $("#orderTypeInput").val();
+            var channel = $("#channelInput").val();
+            var channelCode = $("#channelCodeInput").val();
+            var status = $("#statusInput").val();
+            var orderId = $("#orderIdInput").val();
+            var startTime = $("#startTime").val();
+            var passTime = $("#passTime").val();
+
+            var noFormatStartTime = $("#startTime").val();
+            var noFormatPassTime = $("#passTime").val();
+
+            var startTimeCheck = new Date(noFormatStartTime).getTime();
+            var passTimeCheck = new Date(noFormatPassTime).getTime();
+
+
+            if (startTimeCheck && passTimeCheck){
+                if (startTime > passTime) {
+                    alert("起始日期必须小于截止日期");
+                    return false;
+                }
+            }
+
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/gm/getAgentRechargeList',
+                dataType: 'json',
+                data: {
+                    "loginName":loginName, "moneyType": moneyType,
+                    "serverId": serverId, "playerId": playerId, "playerName": playerName,
+                    "proIdx": proIdx, "money": money, "platform": platform,
+                    "orderType": orderType, "channel": channel, "channelCode": channelCode,
+                    "status": status, "orderId": orderId, "startTime": startTime,
+                    "passTime": passTime, "pageNo": pageNo, "pageSize": pageSize
+                },
+                success: function (data) {
+                    // console.log(data);
+                    $("#agentRechargeTable").trigger("update");
+                    var agentRechargeList = data;
+                    if (agentRechargeList != null && agentRechargeList.length > 1) {
+                        var htmlTable = "";
+                        for (var i = 1; i < agentRechargeList.length; i++) {
+                            htmlTable = htmlTable + "<tr>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].orderId;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].serverId;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].name;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].playerId;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].playerName;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].proIdx;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].payPrice;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].moneyType;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            switch (agentRechargeList[i].orderType) {
+                                case 3:
+                                    htmlTable = htmlTable + "GM代充";
+                                    break;
+                            }
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].channel;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].channelCode;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + new Date(parseInt(agentRechargeList[i].createTime)).Format("yyyy-MM-dd hh:mm:ss");
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + (agentRechargeList[i].finishTime == "0" ? "0" :
+                                new Date(parseInt(agentRechargeList[i].finishTime)).Format("yyyy-MM-dd hh:mm:ss"));
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            switch (agentRechargeList[i].status) {
+                                case -1:
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-1'>失败</span>";
+                                    break;
+                                case 0:
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-2'>待充值</span>";
+                                    break;
+                                case 1:
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-3'>成功</span>";
+                                    break;
+                            }
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            htmlTable = htmlTable + agentRechargeList[i].loginName;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "<td>";
+                            var syncButton = "<a href='javascript:mgr.popUp(" + agentRechargeList[i].id + "," +
+                                agentRechargeList[i].serverId + ",&quot;" + agentRechargeList[i].name + "&quot;," +
+                                agentRechargeList[i].playerId + ",&quot;" + agentRechargeList[i].playerName + "&quot;," +
+                                agentRechargeList[i].proIdx + "," + agentRechargeList[i].payPrice + ",&quot;" +
+                                agentRechargeList[i].moneyType + "&quot;)'>充值</a>";
+                            htmlTable = htmlTable + syncButton;
+                            htmlTable = htmlTable + "</td>";
+                            htmlTable = htmlTable + "</tr>";
+                        }
+                        var pageStr = data[0];
+                        $('#agentRechargeTable').find('tbody').html(htmlTable);
+                        //取出分页条代码
+                        $('#pageInfo').html(pageStr);
+                    } else {
+                        $('#agentRechargeTable').find('tbody').html("<tr><td colspan='14' align='right'>没有查询到数据</td><tr>");
+                        $('#pageInfo').html("");
+                    }
+                }
+            });
+        },
+
+        /**
+         * 添加记录
+         */
+        editAgentRechargeList: function (editFlag, id) {
+
+            //表单校验
+            if (editFlag == 1) {
+                $("#userEditForm").validate({
+                    rules: {
+                        serverId: {
+                            required: true,
+                        },
+                        playerId: {
+                            required: true,
+                            digits: true
+                        },
+                        userId: {
+                            required: true,
+                            digits: true,
+                        },
+                        proIdx: "required",
+                        payPrice: "required",
+                        orderType: {
+                            required: true
+                        },
+                        channel: {
+                            required: true
+                        },
+
+                    },
+                    messages: {
+                        serverId: {
+                            required: "请选择区服",
+                        },
+                        playerId: {
+                            required: "请输入角色ID",
+                            digits: "必须是数字"
+                        },
+                        userId: {
+                            required: "请选择档位",
+                            digits: "必须是数字"
+                        },
+                        proIdx: "请选择",
+                        payPrice: "请选择档位",
+                        orderType: {
+                            required: "请选择"
+                        },
+                        channel: {
+                            required: "请选择channel",
+                        },
+                    },
+                    submitHandler: function (form) {
+                        mgr.saveAgentRecharge(form);
+                    }
+                });
+            }
+
+            //拿到区服信息
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/getAllChannelServerListNoPage',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    $("#editModal").modal("toggle");
+                    var serverList = data;
+                    var array = [];
+                    if (serverList == null || serverList.length <= 0) {
+                        alert("未获取到区服信息！")
+                        return false;
+                    }
+
+                    // 重置表单
+                    $("#serverId").val("").select2();
+                    $("#playerName").val("");
+                    $("#payPrice").val("");
+                    $("#playerId").val("");
+                    $("#moneyType").val("");
+                    $("#proIdx").val("").select2();
+                    $("#dollarType").val("");
+                    $("#vipType").val("");
+                    $("#vipExp").val("");
+
+
+                    for (var j = 0; j < serverList.length; j++) {
+                        if (array.indexOf(serverList[j].channel) == -1) {
+                            array.push(serverList[j].channel);
+                        }
+                    }
+
+                    SERVER_LIST = serverList;
+                    var html = '<option value="">选择所在区</option>';
+                    var serverNum;
+                    for (var k = 0; k < array.length; k++) {
+                        html += "<optgroup label=" + array[k] + ">";
+                        serverNum = 0;
+                        for (var i = 0; i < serverList.length; i++) {
+                            if (serverList[i].channel == array[k]) {
+                                serverNum++;
+                                html += "<option value='" + serverList[i].serverId + "'>[" + serverList[i].channel + "]("
+                                    + serverNum + ")" + serverList[i].name + "</option>";
+                            }
+                        }
+                        html += "</optgroup>";
+                    }
+                    $('#serverId').html(html);
+                }
+            });
+        },
+
+        //从slave查询信息
+        searchPlayerInfo :function() {
+
+            var serverId = $("#serverId").val();
+            var playerId = $("#playerId").val();
+            var playerName = "";
+            var username = "";
+            var serverInfo = getServerInfo();
+            if (serverId == "") {
+                alert("请先选择区服");
+                return false;
+            }
+            if (playerId == "") {
+                alert("请输入 角色ID!");
+                return false;
+            }
+            /**老接口 获取玩家信息*/
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/gm/searchPlayerInfo',
+                dataType: 'json',
+                data: {
+                    "playerId": playerId,
+                    "serverId": serverId,
+                    "playerName": playerName,
+                    "username": username,
+                    "serverInfo": serverInfo
+                },
+                success: function (data) {
+                    // console.log(data);
+                    if (data.ret == "-2") {
+                        alert("角色不存在");
+                        return false;
+                    }
+                    if (data.ret == "timeout") {
+                        alert("连接超时");
+                        return false;
+                    }
+                    var proIdx = JSON.parse((data.topUpList == undefined) ? null : data.topUpList);
+                    var html = "<option value=''>查询后选择</option>";
+                    if (proIdx != null){
+                        var proIdxes = proIdx.goods;
+                        SLAVE_RETURN_INFO = proIdxes;
+                        for (var i = 0; i < proIdxes.length; i++) {
+                            if (proIdxes[i] != "undefined") {
+                                html += '<option value="' + proIdxes[i].id + '">' + i + '-' +proIdxes[i].id + '</option>';
+                            }
+                        }
+                    }
+
+                    userIdEdit = (data.uid == null) ? "" : data.uid;
+                    userNameEdit = (data.playerName == null) ? "" : data.playerName;
+                    channelCodeEdit = (data.channelCode == null) ? "" : data.channelCode;
+                    $("#playerName").val((data.playerName == null) ? "" : data.playerName);
+                    $("#dollarType").val((data.dollar == null) ? "" : data.dollar);
+                    $("#vipType").val((data.vipLevel == null) ? "" : data.vipLevel);
+                    $("#vipExp").val((data.vipExp == null) ? "" : data.vipExp);
+                    $('#proIdx').html(html);
+                    $("#proIdx").val("").select2();
+                }
+            });
+            //获取选中区服信息
+            function getServerInfo(){
+                var serverInfo=$("#serverId option:selected"); //获取选中的项
+                return serverInfo.val()+"-"+serverInfo.text();
+            }
+        },
+
+        /**
+         * 选择档位后返回金额
+         */
+        // returnMoney: function() {
+        //     console.log(1);
+        //     var proIdxText=$("#proIdx option:selected").text(); //
+        //     console.log(proIdxText);
+        //     for (var i = 0; i < SLAVE_RETURN_INFO.length; i++) {
+        //         if (SLAVE_RETURN_INFO[i].id === proIdxText) {
+        //             console.log(SLAVE_RETURN_INFO[i]);
+        //             $('#payPrice').val(SLAVE_RETURN_INFO[i].price);
+        //         }
+        //     }
+        // },
+
+        /**
+         * 保存代理订单信息
+         * @param form
+         */
+        saveAgentRecharge: function (form) {
+            var formObject = {};
+            var formArray = $("#userEditForm").serializeArray();
+            $.each(formArray, function (i, item) {
+                if (item.name === "proIdx"){
+                    formObject[item.name] = $("#proIdx option:selected").text().split("-")[0];
+                }else {
+                    formObject[item.name] = item.value;
+                }
+            });
+
+
+            formObject["userId"] = userIdEdit;
+            formObject["platform"] = platformEdit;
+            formObject["payPrice"] = payPriceEdit;
+            formObject["orderType"] = orderTypeEdit;
+            formObject["channel"] = channelEdit;
+            formObject["channelCode"] = channelCodeEdit;
+            formObject["ext"] = extEdit;
+            formObject["playerName"] = userNameEdit;
+            formObject["moneyType"] = moneyTypeEdit;
+
+
+            var agentRecharge = JSON.stringify(formObject);
+
+
+            //打印
+            // console.log(formObject);
+
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/gm/saveAgentRecharge',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: agentRecharge,
+                success: function (data) {
+                    // console.log(data);
+                    if (data){
+                        alert(data.msg);
+                    }
+                    mgr.getListPage(1, 20);
+                }
+            });
+        },
+
+        /**
+         * 做一个弹出框
+         */
+        popUp: function(id,serverId,name,playerId,playerName,proIdx,payPrice,moneyType){
+            var confirmText = "";
+            confirmText += "<p>区服ID：" + serverId + "</p>";
+            confirmText += "<p>区服名称：<span class='red-text'>" + name + "</span></p>";
+            confirmText += "<p>角色ID：" + playerId + "</p>";
+            confirmText += "<p>角色名称：<span class='red-text'>" + playerName + "</span></p>";
+            confirmText += "<p>充值档位：" + proIdx + "</p>";
+            confirmText += "<p>充值金额：<span class='red-text'>" + moneyType + payPrice + "</span></p>";
+            confirmText += "<hr/>";
+            confirmText += "<p>你确定要为&nbsp;<span class='red-text'>" + name + "</span>" +
+                "&nbsp;的&nbsp;<span class='red-text'>" + playerName + "</span>&nbsp;充值&nbsp;" +
+                "<span class='red-text'>" + moneyType + payPrice + "</span>&nbsp;吗？</p>"
+            $("#rechargeConfirm").html(confirmText);
+            $("#remindModal").modal("toggle");
+            $("#tipBtnSubmit").off("click").on("click",function(){
+                mgr.syncPay(id);
+                $("#remindModal").modal("hide");
+            });
+        },
+
+        /**
+         * 向支付服完成订单充值
+         * @param id
+         */
+        syncPay: function(id){
+            $.ajax({
+                type: 'post',
+                url: '' + $ctx + '/sysmgr/gm/syncAgentRechargeToPay',
+                dataType: 'json',
+                data: {"id": id},
+                success: function (data) {
+                    // console.log(data);
+                    if (data){
+                        alert(data.msg);
+                    }
+                    mgr.getListPage(1, 20);
+                }
+            });
+        },
+
+        /**
+         * 导出
+         * @returns {boolean}
+         */
+        exportExcel:function (){
+            var loginName = $("#loginNameInput").val();
+            var serverId = $("#sidIdInput").val();
+            var playerId = $("#pidInput").val();
+            var playerName = $("#playerNameInput").val();
+            var proIdx = $("#proIdxInput").val();
+            var money = $("#payPriceInput").val();
+            var moneyType = $("#moneyTypeInput").val();
+            var platform = "";
+            var orderType = $("#orderTypeInput").val();
+            var channel = $("#channelInput").val();
+            var channelCode = $("#channelCodeInput").val();
+            var status = $("#statusInput").val();
+            var orderId = $("#orderIdInput").val();
+            var startTime = $("#startTime").val();
+            var passTime = $("#passTime").val();
+
+            var noFormatStartTime = $("#startTime").val();
+            var noFormatPassTime = $("#passTime").val();
+
+            var startTimeCheck = new Date(noFormatStartTime).getTime();
+            var passTimeCheck = new Date(noFormatPassTime).getTime();
+
+            if(noFormatStartTime == '' || noFormatPassTime == ''){
+                alert("请输入起始和截止日期");
+                return false;
+            }
+
+            if (startTimeCheck && passTimeCheck){
+                if(startTime > passTime){
+                    alert("起始日期必须小于截止日期");
+                    return false;
+                }
+            }
+
+            // 计算时间差
+            var time = passTimeCheck - startTimeCheck;
+
+            var montyMills = 7 * 86400 * 1000;
+
+            // 如果时间差大于7天，就不给导出
+            if(time > montyMills){
+                alert("只允许导出7天的数据");
+                return false;
+            }
+
+            loading('正在导出，请稍等...');
+
+            $("#export").attr('disabled',true);
+
+            setTimeout(exportFinish, 8000);
+
+            window.location.href=''+$ctx+'/sysmgr/gm/exportTable?loginName='+loginName+'&serverId='+serverId
+                +'&playerName='+playerName+'&proIdx='+proIdx+'&money='+money+'&moneyType='+moneyType
+                +'&platform=' +platform+'&channelCode='+channelCode+'&orderType='+orderType
+                +'&channel='+channel+'&status='+status+'&orderId='+orderId+'&playerId='+playerId
+                +'&startTime='+noFormatStartTime+'&passTime='+noFormatPassTime;
+        },
+    };
+</script>
+</body>
+</html>

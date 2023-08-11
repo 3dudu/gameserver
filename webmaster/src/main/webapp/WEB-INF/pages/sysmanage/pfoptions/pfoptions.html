@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">配置列表</a></li>
+    <li><a href="javascript:mgr.editPfOptions(1);">添加配置</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+    <div class="controls">
+        <label for="keySearch">键:</label>
+        <input id="keySearch" name="keySearch" class="input-medium" type="text" value="" />&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+	</div>
+    
+</form>
+<table id="pfOptionsTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<th class="header">记录编号</th>
+    	<th class="header">键</th>
+        <th class="header">值</th>
+        <th class="header">关闭</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+     
+    
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 950px;margin-left: -500px;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">修改配置</h5>
+                </div>
+                <div class = "modal-body">
+                   <form id="userEditForm" class="form-horizontal" action="#" method="post">
+						<input id="id" name="id" type="hidden" value=""/>
+						<div class="control-group">
+							<label class="control-label">键:</label>
+							<div class="controls">
+								<input id="key" name="key" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">关闭:</label>
+							<div class="controls">
+								<!-- <input id="close" name="close" type="text" value="" /> -->
+								<select id="close" name="close" style="float:left">
+									<option value="0">否</option>
+									<option value="1">是</option>
+		    					</select>
+		    					<i class="layer-tips" id="closeTips" tips="关闭该渠道充值要求客户端不再调起支付,关闭状态下订单直接返回false不允许支付"></i>
+							</div>
+							
+						</div>
+						<div class="control-group">
+							<label class="control-label">值:</label>
+							<div class="controls">
+								<textarea id="value" name="value" style=" float:left;width: 520px;height: 200px;resize:none" placeholder="value">
+								</textarea>
+							</div>
+						</div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                 </div>
+					</form>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){  
+    $("#pfOptionsTable").tablesorter();                      
+});
+</script>
+<script type="text/javascript">
+$(function () {
+	mgr.getListPage(1,18);
+});
+var mgr ={
+	 	getListPage : function(pageNo,pageSize){
+	 		var key = $("#keySearch").val();
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/pfoptions/getPfOptionsList', 
+				dataType:'json', 
+				data: {"key":key,"pageNo":pageNo,"pageSize":pageSize},		
+				success:function(data){
+					$("#pfOptionsTable").trigger("update");
+					var pfOptionsList = data;
+					if(pfOptionsList!=null&&pfOptionsList.length>1){		
+							var htmlTable = "";
+							for(var i=1;i<pfOptionsList.length;i++){
+								htmlTable = htmlTable+"<tr>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+pfOptionsList[i].id;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+pfOptionsList[i].key;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+pfOptionsList[i].value;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+								htmlTable = htmlTable+pfOptionsList[i].close;
+								htmlTable = htmlTable+"</td>";
+								htmlTable = htmlTable+"<td>";
+	 			    			var editButton = "<a href='javascript:mgr.editPfOptions(2,"+pfOptionsList[i].id+")'>修改</a>";
+								var delButton = "<a href='javascript:mgr.delPfOptions("+pfOptionsList[i].id+")'>删除</a>";
+								var addButton = "<a href='javascript:mgr.editPfOptions(1)'>添加</a>";
+								htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+								htmlTable = htmlTable+"</td>";	
+								htmlTable = htmlTable+"</tr>";
+							}
+						var pageStr = data[0];
+						$('#pfOptionsTable').find('tbody').html(htmlTable);	
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);							
+	 				} else{
+						$('#pfOptionsTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");		
+	 				}
+					
+				}
+			});	
+	 	},
+	 	editPfOptions : function(editFlag,id){
+	 		if(editFlag == 1){
+	 			$("#userEditForm").validate({
+	 				rules: {
+	 					key: {
+	 						required: true,
+	 						maxlength: 40,
+	 						remote:{
+	 							type:'post',
+	 							url:''+$ctx+'/sysmgr/pfoptions/checkExistPfOptions', 
+	 							dataType:'html',
+	 							dataFilter: function(data,type){
+	 								return data == "0"?true:false;
+	 							}
+	 						}
+	 					},
+	 					close: {
+	 						required: true,
+	 						digits: true,
+	 						maxlength: 1
+	 						
+	 					},
+	 					value: "required"
+	 				},
+	 				messages: {
+	 					key: {
+	 						required: "请输入key",
+	 						maxlength: "最大长度为40",
+	 						remote: "键已存在"
+	 					},
+	 					close: {
+	 						required: "请输入close",
+	 						digits: "close为正整数",
+	 						maxlength: "最大长度为1"
+	 					},
+	 					value: "请输入value"
+	 				} ,
+	 				submitHandler: function(form){      
+	 				    mgr.savePfOptions(form);     
+	 				} 
+	 			});
+	 		}else{
+	 			$("#userEditForm").validate({
+	 				rules: {
+	 					key: {
+	 						required: true,
+	 						maxlength: 40
+	 					},
+	 					close: {
+	 						required: true,
+	 						digits: true,
+	 						maxlength: 1
+	 						
+	 					},
+	 					value: "required"
+	 				},
+	 				messages: {
+	 					key: {
+	 						required: "请输入key",
+	 						maxlength: "最大长度为40"
+	 					},
+	 					close: {
+	 						required: "请输入close",
+	 						digits: "close为正整数",
+	 						maxlength: "最大长度为1"
+	 					},
+	 					value: "请输入value"
+	 				} ,
+	 				submitHandler: function(form){      
+	 				    mgr.savePfOptions(form);     
+	 				} 
+	 			});
+	 		}
+	 		 $.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/pfoptions/gotoPfOptionsEdit', 
+				dataType:'json',
+				data: {"editFlag":editFlag,"id":id},			
+				success:function(data){
+					//console.log(data);
+					var currentCreatTime = null;
+					$("#editModal").modal("toggle");
+					var pfOptionsList = data;
+					$("#id").val(pfOptionsList.id);
+					$("#key").val(pfOptionsList.key);
+					$("#close").val(pfOptionsList.close).trigger("change");
+					$("#value").val(pfOptionsList.value);
+				}
+			});
+	 	},
+	 	delPfOptions:function(id){	
+	 		if(confirm("您确定要删除此条记录吗?")){
+				 $.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/pfoptions/delPfOptions', 
+					dataType:'json', 
+					data: {"id":id},				
+					success:function(data){
+						mgr.getListPage(1,18);					
+					}
+				});
+			}
+	 	},
+	 	savePfOptions: function(form){
+	 		var psOptions={};
+			var formObject = {};
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			 });
+			psOptions = JSON.stringify(formObject);
+			//console.log(psOptions);
+			//return false;
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/pfoptions/savePfOptions', 
+				dataType:'json', 
+				contentType :"application/json;charset=UTF-8",
+				data: psOptions,					
+				success:function(data){
+					$("#editModal").modal("hide");
+					mgr.getListPage(1,18);
+ 				}
+			});
+		}
+}
+</script>
+</body>
+</html>

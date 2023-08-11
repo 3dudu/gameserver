@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.PfOptionsMapper">
+	<select id="getPfOptionsList" parameterType="pfOptions" resultType="pfOptions">
+	<![CDATA[
+		select `id`,`key`,`value`,`close` from pf_options
+		where `key` like concat("%",#{key},"%")
+	]]>
+	</select>
+
+	<select id="getPfOptionsById" parameterType="java.lang.Long" resultType="pfOptions">
+		select `id`,`key`,`value`,`close` from pf_options
+		where id = #{id}
+	</select>
+	
+	<select id="checkExistPfOptions" parameterType="userDto" resultType="userDto">
+		select `key` from pf_options where `key` =#{key}
+	</select>
+	
+	<select id="getPfOptionsAll" parameterType="pfOptions" resultType="pfOptions">
+		select `id`,`key`,`value`,`close` from pf_options
+	</select>
+	
+	<insert id="addPfOptions" parameterType="pfOptions">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO pf_options(`key`,`value`,`close`)
+		VALUES (#{key},#{value},#{close})
+	</insert>
+	
+	<insert id="addPfOptionsReturnId" parameterType="pfOptions">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO pf_options(`key`,`value`,`close`)
+		VALUES (#{key},#{value},#{close})
+	</insert>
+	
+	<delete id="delPfOptions" parameterType="java.lang.Long">
+		DELETE FROM pf_options
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updatePfOptions" parameterType="pfOptions">
+		UPDATE pf_options  set
+		   `key` = #{key},
+           `value` = #{value},
+           `close` = #{close}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

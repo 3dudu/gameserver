@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.SlaveNodesMapper">
+	<select id="getSlaveNodesList" parameterType="slaveNodes" resultType="slaveNodes">
+	<![CDATA[
+		select `id`,`name`,`ip`,`nip`,`port`,`limit` from slave_nodes
+		where `name` like concat("%",#{name},"%")
+	]]>
+	</select>
+	
+	<select id="getSlaveNodesListNoPage" parameterType="slaveNodes" resultType="slaveNodes">
+	<![CDATA[
+		select `id`,`name`,`ip`,`nip`,`port`,`limit` from slave_nodes
+	]]>
+	</select>
+
+	<select id="getSlaveNodesById" parameterType="java.lang.Long" resultType="slaveNodes">
+		select `id`,`name`,`ip`,`nip`,`port`,`limit` from slave_nodes
+		where id = #{id}
+	</select>
+	
+	<select id="checkExistSlaveNodeWithName" parameterType="slaveNodes" resultType="slaveNodes">
+		select `name` from slave_nodes where `name` =#{name}
+	</select>
+	
+	<select id="checkExistSlaveNodeWithIp" parameterType="slaveNodes" resultType="slaveNodes">
+		select `ip` from slave_nodes where `ip` =#{ip}
+	</select>
+	
+	<select id="getSlaveNodesByIP" parameterType="java.lang.String" resultType="slaveNodes">
+		select `id`,`name`,`ip`,`nip`,`port`,`limit` from slave_nodes
+		where ip = #{ip}
+	</select>
+	
+	<insert id="addSlaveNodes" parameterType="slaveNodes">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO slave_nodes(`name`,`ip`,`nip`,`port`,`limit`)
+		VALUES (#{name},#{ip},#{nip},#{port},#{limit})
+	</insert>
+	
+	<delete id="delSlaveNodes" parameterType="java.lang.Long">
+		DELETE FROM slave_nodes
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateSlaveNodes" parameterType="slaveNodes">
+		UPDATE slave_nodes  set
+           `name` = #{name},
+           `ip` = #{ip},
+           `nip` = #{nip},
+           `port` = #{port},
+           `limit` = #{limit}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

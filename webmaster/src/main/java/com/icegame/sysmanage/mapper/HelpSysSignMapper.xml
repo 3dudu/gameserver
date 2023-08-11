@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.HelpSysSignMapper">
+	<select id="getHelpSysSignList" parameterType="helpSysSign" resultType="helpSysSign">
+
+		select `id`,`sign_name`,`sign_type` from help_sys_sign
+		<where>
+			<if test="signName != null and signName != '' ">
+				and sign_name like concat("%",#{signName},"%")
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getHelpSysSignById" parameterType="java.lang.Long" resultType="helpSysSign">
+		select `id`,`sign_name`,`sign_type` from help_sys_sign
+		where id = #{id}
+	</select>
+
+	<select id="checkExistSignType" parameterType="helpSysSign" resultType="helpSysSign">
+		select `sign_type` from help_sys_sign
+		where `sign_type` = #{signType}
+	</select>
+	
+	<insert id="addHelpSysSign" parameterType="helpSysSign">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               select LAST_INSERT_ID() as id
+        </selectKey>
+		insert into help_sys_sign(`sign_name`,`sign_type`)
+		values (#{signName},#{signType})
+	</insert>
+	
+	<delete id="delHelpSysSign" parameterType="java.lang.Long">
+		delete from help_sys_sign
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+	
+	<update id="updateHelpSysSign" parameterType="helpSysSign">
+		update help_sys_sign
+		<set>
+			<if test="signName != null and signName != '' ">
+				`sign_name` = #{signName},
+			</if>
+			<if test="signType != null and signType != '' ">
+				`sign_type` = #{signType},
+			</if>
+		</set>
+		where id = #{id}
+ 	</update>
+</mapper>

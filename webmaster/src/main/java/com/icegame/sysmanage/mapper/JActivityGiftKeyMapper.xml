@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.JActivityGiftKeyMapper">
+	<select id="getGiftKeyList" parameterType="jActivityGiftKey" resultType="jActivityGiftKey">
+	<![CDATA[
+		select `id`, `targets` , `title`, `cdKey` , `channel`, `startTime` ,`passTime`, `disabled`,  `timesLimit`, `talkType`, `coin`, `dollar`, `merit`, `awardStr`, `selectedTargetsList` from jactivitygiftkey
+	]]>
+	</select>
+
+	<select id="getGiftKeyById" parameterType="java.lang.Long" resultType="jActivityGiftKey">
+		select `id`, `targets` , `title`, `cdKey` , `channel`, `startTime` ,`passTime`, `disabled`,  `timesLimit`, `talkType`, `coin`, `dollar`, `merit`, `awardStr`, `selectedTargetsList` from jactivitygiftkey
+		where id = #{id}
+	</select>
+
+	<select id="getGiftKeyByCDKey" parameterType="jActivityGiftKey" resultType="jActivityGiftKey">
+		select `id`, `targets` , `title`, `cdKey` , `channel`, `startTime` ,`passTime`, `disabled`,  `timesLimit`, `talkType`, `coin`, `dollar`, `merit`, `awardStr`, `selectedTargetsList` from jactivitygiftkey
+		where `cdKey` = #{cdKey}
+	</select>
+
+	<select id="checkExistCdKey" parameterType="jActivityGiftKey" resultType="jActivityGiftKey">
+		select `id`, `targets` , `title`, `cdKey` , `channel`, `startTime` ,`passTime`, `disabled`,  `timesLimit`, `talkType`, `coin`, `dollar`, `merit`, `awardStr`, `selectedTargetsList` from jactivitygiftkey
+		where `cdKey` = #{cdKey}
+	</select>
+	
+	<insert id="addGiftKey" parameterType="jActivityGiftKey">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO jactivitygiftkey(`targets`,`title`, `cdKey` , `channel`, `startTime` ,`passTime`, `disabled`,  `timesLimit`, `talkType`, `coin`, `dollar`, `merit`, `awardStr`, `selectedTargetsList`)
+		VALUES (#{targets},#{title},#{cdKey},#{channel},#{startTime},#{passTime},#{disabled},#{timesLimit},#{talkType},#{coin},#{dollar},#{merit},#{awardStr},#{selectedTargetsList})
+	</insert>
+	
+	<delete id="delGiftKey" parameterType="java.lang.Long">
+		DELETE FROM jactivitygiftkey
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateGiftKey" parameterType="jActivityGiftKey">
+		UPDATE jactivitygiftkey  set
+           `targets` = #{targets},
+           `title` = #{title},
+           `cdKey` = #{cdKey},
+           `channel` = #{channel},
+           `startTime` = #{startTime},
+           `passTime` = #{passTime},
+           `disabled` = #{disabled},
+           `timesLimit` = #{timesLimit},
+           `talkType` = #{talkType},
+           `coin` = #{coin},
+           `dollar` = #{dollar},
+           `merit` = #{merit},
+           `awardStr` = #{awardStr},
+           `selectedTargetsList` = #{selectedTargetsList}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

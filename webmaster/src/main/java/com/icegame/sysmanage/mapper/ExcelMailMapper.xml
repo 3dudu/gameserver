@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.ExcelMailMapper">
+
+    <select id="getExcelMailList" parameterType="excelMail" resultType="excelMail">
+		select t1.`id`,t1.`server_id`,t1.`player_id`,t1.`subject`,t1.`content`,t1.`awardStr`,t1.`create_time`
+				,t1.`sync_time`,t1.`status`,t2.`userName` as `userId` from excel_mail t1
+		left join `muser` t2 on t1.`userId` = t2.`userId`
+		<where>
+            <![CDATA[
+            `subject` like concat("%",#{subject},"%") and `awardStr` like concat("%",#{awardStr},"%")
+            and `create_time` >= #{startDate} and `create_time` < #{endDate}
+		    ]]>
+			<if test="serverId != null and serverId != '' and serverId != 0 ">
+				and `server_id`=#{serverId}
+			</if>
+			<if test="playerId != null and playerId != ''">
+				and `player_id`=#{playerId}
+			</if>
+            <if test="status != null and status != ''">
+                and `status`=#{status}
+            </if>
+		</where>
+		order by `create_time` desc
+	</select>
+
+
+    <select id="getExcelMailById" parameterType="java.lang.Long" resultType="excelMail">
+		select `id`,`server_id`,`player_id`,`subject`,`content`,`awardStr`,`create_time`,`sync_time`,`status`,`userId` from excel_mail
+		where id = #{id}
+	</select>
+
+    <insert id="addExcelMail" parameterType="excelMail">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER" >
+            SELECT LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO excel_mail(`server_id`,`player_id`,`subject`,`content`,`awardStr`,`create_time`,`sync_time`,`status`,`userId`)
+        VALUES (#{serverId},#{playerId},#{subject},#{content},#{awardStr},#{createTime},#{syncTime},#{status},#{userId})
+    </insert>
+
+
+        <update id="updateSuccessMail" parameterType="excelMail">
+    		UPDATE excel_mail set `sync_time` = #{syncTime}, `status` = #{status}
+            WHERE id = #{id}
+     	</update>
+
+</mapper>

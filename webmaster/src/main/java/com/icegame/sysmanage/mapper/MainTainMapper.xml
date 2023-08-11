@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.MainTainMapper">
+	<select id="getMainTainList" parameterType="mainTain" resultType="mainTain">
+	<![CDATA[
+		select `id`,`targets`,`title`,`closed`,`reason`,`selectedTargetsList`,`targetList`,`selectedChannel`,`selectedSlave`,`mainType` from main_tain
+		where `reason` like concat("%",#{reason},"%")
+	]]>
+	</select>
+	
+
+	<select id="getMainTainById" parameterType="java.lang.Long" resultType="mainTain">
+		select `id`,`targets`,`title`,`closed`,`reason`,`selectedTargetsList`,`targetList`,`selectedChannel`,`selectedSlave`,`mainType` from main_tain
+		where id = #{id}
+	</select>
+	
+	<insert id="addMainTain" parameterType="mainTain">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO main_tain(`targets`,`title`,`closed`,`reason`,`selectedTargetsList`,`targetList`,`selectedChannel`,`selectedSlave`,`mainType`)
+		VALUES (#{targets},#{title},#{closed},#{reason},#{selectedTargetsList},#{targetList},#{selectedChannel},#{selectedSlave},#{mainType})
+	</insert>
+	
+	<delete id="delMainTain" parameterType="java.lang.Long">
+		DELETE FROM main_tain
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateMainTain" parameterType="mainTain">
+		UPDATE main_tain  set
+           `targets` = #{targets},
+           `title` = #{title},
+           `closed` = #{closed},
+           `reason` = #{reason},
+           `selectedTargetsList` = #{selectedTargetsList},
+           `targetList` = #{targetList},
+           `selectedChannel` = #{selectedChannel},
+           `selectedSlave` = #{selectedSlave},
+           `mainType` = #{mainType}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

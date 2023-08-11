@@ -1,0 +1,1 @@
+ps -ef|grep -v grep |grep -e 'PayServer.jar' |awk '{print $2}'|xargs kill -TERM

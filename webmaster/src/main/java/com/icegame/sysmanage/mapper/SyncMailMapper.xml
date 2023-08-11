@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.SyncMailMapper">
+	
+	<select id="getSyncMailList" parameterType="syncMail" resultType="syncMail">
+	<![CDATA[
+		select `id`,`createTime`,`hosts`,`status`,`type`,`serverId`,`lastOperate` from sync_mail
+		where `status` like concat("%",#{status},"%") and `type` like concat("%",#{type},"%")
+		and createTime >= #{startDate} and createTime< #{endDate} order by `createTime` desc
+	]]>
+	</select>
+	
+	<select id="getStatusList" parameterType="syncMail" resultType="syncMail">
+		select distinct status from sync_mail
+	</select>
+	
+	<select id="getSyncMailById" parameterType="java.lang.Long" resultType="syncMail">
+		select `id`,`createTime`,`hosts`,`status`,`type`,`serverId`,`failed`,`lastOperate` from sync_mail
+		where `id`=#{id}
+	</select>
+
+	<insert id="addSyncMail" parameterType="syncMail">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO sync_mail(`createTime`,`hosts`,`status`,`type`,`serverId`,`failed`,`lastOperate`)
+		VALUES (#{createTime},#{hosts},#{status},#{type},#{serverId},#{failed},#{lastOperate})
+	</insert>
+	
+	
+	<update id="updateSyncMail" parameterType="syncMail">
+		UPDATE sync_mail  set
+           `createTime` = #{createTime},
+           `status` = #{status}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

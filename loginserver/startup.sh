@@ -1,0 +1,1 @@
+java -server -Duser.timezone=GMT+08 -Xms256M -Xmx1024M -XX:PermSize=128M -XX:MaxPermSize=256M -Djava.ext.dirs=lib:${JAVA_HOME}/jre/lib/ext -Dlog4j.configuration=file:config/log4j.xml -jar LoginServer.jar >> logs/out.log &

@@ -1,0 +1,365 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>用户查询页面</title>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit">
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">QQ列表</a></li>
+    <li><a href="javascript:mgr.editQQ(1);">添加QQ</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <label for="qqInput">QQ:</label>
+        <input id="qqInput" name="qqInput" class="input-medium" type="text" value="" />&emsp;
+<!--        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询当天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>-->
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,20);"/>
+    </div>
+
+</form>
+
+<!--<form id="statusForm" class="breadcrumb form-search" action="#" method="post">-->
+<!--    <div class="controls">-->
+<!--        <label for="status">VIP专属QQ :&emsp;  功能开关:</label>-->
+<!--        <select id="status" name="status" style="width:80px">-->
+<!--            <option value="1">开启</option>-->
+<!--            <option value="0">关闭</option>-->
+<!--        </select>-->
+<!--        &emsp;&emsp;&emsp;-->
+<!--        <label for="money">触发条件 :&emsp;  累计充值(RMB): </label>-->
+<!--        <input id="money" name="money" class="input-medium" type="text" value="" readonly="readonly" placeholder="请输入数字"/>-->
+<!--        &emsp;-->
+<!--        <input id="saveSubmit" class="btn btn-warning" type="button" value="保存" onclick = "mgr.saveStatusMoney();"/>-->
+<!--        <i class="layer-tips right" id="moneyTips" tips="双击充值金额输入框可以修改金额"></i>-->
+<!--    </div>-->
+<!--</form>-->
+<table id="qqTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">自增ID</th>
+        <th class="header">QQ</th>
+        <th class="header">渠道</th>
+        <th class="header">玩家数</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+</table>
+<div class = "modal fade modal" id = "editModal" style="display:none;width: 560px;margin-left: -320px;">
+    <div class = "modal-dialog">
+        <div class = "modal-content">
+            <div class ="modal-header">
+                <button type = "button" class = "close" data-dismiss = "modal">
+                    <span aria-hidden = "true">&times;</span>
+                    <span class = "sr-only"></span>
+                </button>
+                <h5 class = "modal-title">编辑QQ</h5>
+            </div>
+            <div class = "modal-body"  style="max-height: 585px;">
+                <form id="userEditForm" class="form-horizontal" action="#" method="post">
+                    <input id="id" name="id" type="hidden" value=""/>
+                    <div class="control-group">
+                        <label class="control-label">QQ:</label>
+                        <div class="controls">
+                            <input style="float:left" id="qq" name="qq" type="text" class="input-medium" value="" />
+                            <i class="layer-tips" id="qqTips" tips="相同的QQ只可以添加一次，不可以重复,并且qq号长度[5-13],总长度不能超过30"></i>
+                        </div>
+                    </div>
+                    <div class="control-group" id="sign">
+                        <label  class="control-label" for="channel">渠道:</label>
+                        <select id="channel" name="channel" class="input-medium" style="width:178px;margin-left: 20px;float: left;">
+
+                        </select>
+                    </div>
+                    <div class = "modal-footer model-bot">
+                        <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+                        <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+    <!--自定义QQ号表单验证-->
+    jQuery.validator.addMethod("regex", //addMethod第1个参数:方法名称
+        function(value,element,params){//addMethod第2个参数:验证方法，参数（被验证元素的值，被验证元素，参数）
+            //console.log(value);
+            var exp = new RegExp(params);//实例化正则对象，参数为传入的正则表达式
+            value = value.replace(/\s*/g,"");//去除空格
+            //console.log(value);
+            var values = value.split("");//分割
+            //console.log(values[0]);
+            var strNum = "";//
+            for (var i = 0; i < values.length; i++) {
+                if(/^[0-9]*$/.test(values[i])){
+                    //console.log(values[i]);
+                    strNum += values[i];
+                }
+                else {
+                    break;
+                }
+            }
+            console.log(strNum);
+            return exp.test(strNum);         //测试是否匹配
+        },"qq号格式错误");
+
+    $(document).ready(function(){
+        $("#qqTable").tablesorter();
+    });
+
+    $(function () {
+        mgr.getListPage(1,18);
+        mgr.getStatusMomey();
+        mgr.getAuthorizeChannelList();
+        $("#money").dblclick(function(){
+           $(this).attr("readonly",false);
+        });
+
+        $("#money").blur(function(){
+            $(this).attr("readonly",true);
+        })
+    });
+    var mgr ={
+        getStatusMomey : function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/vipqq/getMoneyStatus',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: {},
+                success:function(data){
+                    $("#money").val(data.money);
+                    $("#status").val(data.isOpen).trigger("change");
+                }
+            });
+        },
+        getAuthorizeChannelList:function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/group/getAuthorizeChannelList',
+                dataType:'json',
+                data: {},
+                success:function(data){
+                    var channel = data.hasChannel;
+
+                    if(channel != "" && channel.length != 0){
+                        var html = null;
+                        var channelList = data.hasChannel.split("\r\n");
+                        for(var i = 0 ; i < channelList.length ; i++){
+                            if(channelList[i] != "undefined"){
+                                html += '<option value="'+channelList[i]+'">'+channelList[i]+'</option>';
+                            }
+                        }
+                        $('#channel').html(html);
+                    }
+                }
+            });
+        },
+        getListPage : function(pageNo,pageSize){
+            var qq = $("#qqInput").val();
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/vipqq/getQQList',
+                dataType:'json',
+                data: {"qq":qq,"pageNo":pageNo,"pageSize":pageSize},
+                success:function(data){
+                    $("#qqTable").trigger("update");
+                    var qqList = data;
+
+                    if(qqList.length > 0){
+                        haveQQData = true;
+                    }
+
+                    if(qqList!=null&&qqList.length>1){
+                        var htmlTable = "";
+                        for(var i=1;i<qqList.length;i++){
+                            htmlTable = htmlTable+"<tr>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+qqList[i].id;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+qqList[i].qq;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+qqList[i].channel;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+qqList[i].times;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var editButton = "<a href='javascript:mgr.editQQ(2,"+qqList[i].id+")'>修改</a>";
+                            var delButton = "<a href='javascript:mgr.delQQ("+qqList[i].id+")'>删除</a>";
+                            var addButton = "<a href='javascript:mgr.editQQ(1)'>添加</a>";
+                            htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+                            htmlTable = htmlTable+"</tr>";
+                        }
+                        var pageStr = data[0];
+                        $('#qqTable').find('tbody').html(htmlTable);
+                        //取出分页条代码
+                        $('#pageInfo').html(pageStr);
+                    } else{
+                        $('#qqTable').find('tbody').html("<tr><td colspan='7' align='right'>没有查询到数据</td><tr>");
+                        $('#pageInfo').html("");
+                    }
+
+                }
+            });
+        },
+
+        editQQ : function(editFlag,id){
+
+            if(editFlag == 1){
+
+                $("#userEditForm").validate({
+                    rules: {
+                        qq: {
+                            required: true,
+                            maxlength: 30,
+                            regex:/^[1-9]\d{4,12}$/,
+                            // remote:{
+                            //     type:'post',
+                            //     url:''+$ctx+'/sysmgr/vipqq/checkExistQQ',
+                            //     dataType:'html',
+                            //     data: {"editFlag":"add"},
+                            //     dataFilter: function(data,type){
+                            //         return data == "0"?true:false;
+                            //     }
+                            // }
+                        }
+                    },
+                    messages: {
+                        qq: {
+                            required: "请输入QQ号",
+                            maxlength: "最大长度为30",
+                            regex: "QQ号格式错误",
+                            // remote: "QQ号重复"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveQQ(form);
+                    }
+                });
+            }else if(editFlag ==2 ){
+
+                $("#userEditForm").validate({
+                    rules: {
+                        qq: {
+                            required: true,
+                            maxlength: 30,
+                            regex:/^[1-9]\d{4,12}$/
+                        }
+                    },
+                    messages: {
+                        qq: {
+                            required: "请输入QQ号",
+                            maxlength: "最大长度为30",
+                            regex: "QQ号格式错误"
+                        }
+                    } ,
+                    submitHandler: function(form) {
+                        mgr.saveQQ(form);
+                    }
+                });
+            }
+
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/vipqq/gotoQQEdit',
+                dataType:'json',
+                data: {"editFlag":editFlag,"id":id},
+                success:function(data){
+                    //console.log(data);
+
+                    $("#editModal").modal("toggle");
+                    var qq = data;
+
+                    $("#id").val(qq.id);
+                    $("#qq").val(qq.qq);
+                    $("#channel").val(qq.channel).trigger("change");
+                }
+            });
+        },
+        delQQ:function(id){
+            if(confirm("您确定要删除此条记录吗?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/vipqq/delQQ',
+                    dataType:'json',
+                    data: {"id":id},
+                    success:function(data){
+                        mgr.getListPage(1,18);
+                    }
+                });
+            }
+        },
+        saveQQ: function(form){
+            var qq={};
+            var formObject = {};
+            var formArray =$("#userEditForm").serializeArray();
+            $.each(formArray, function(i, item){
+                formObject[item.name]=item.value;
+            });
+            qq = JSON.stringify(formObject);
+            // console.log(autoOpenServer);
+            // return false;
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/vipqq/saveQQ',
+                dataType:'json',
+                contentType :"application/json;charset=UTF-8",
+                data: qq,
+                success:function(data){
+                    $("#editModal").modal("hide");
+                    alert(data.result);
+                    mgr.getListPage(1,18);
+                }
+            });
+        },
+        saveStatusMoney: function(){
+            var status = $("#status").val();
+            var money = $("#money").val();
+            if(money == ""){
+                alert("请\"双击\"输入框，输入累计充值金额");
+                return false;
+            }
+
+            var qq={};
+            qq['isOpen'] = status;
+            qq['money'] = money;
+
+            var tips = "确定设置开关为" + (status == 1 ? "\"开启\"" : "\"关闭\"") + "状态，累计充值金额为\"" + money + "\"元吗？";
+            if(confirm(tips)){
+                if(confirm("确定真的要设置？此操作不可逆！")){
+                    $.ajax({
+                        type:'post',
+                        url:''+$ctx+'/sysmgr/vipqq/saveMoneyStatus',
+                        dataType:'json',
+                        contentType :"application/json;charset=UTF-8",
+                        data: JSON.stringify(qq),
+                        success:function(data){
+                            alert(data.result);
+                            mgr.getStatusMomey();
+                        }
+                    });
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

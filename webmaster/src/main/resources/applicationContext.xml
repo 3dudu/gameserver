@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx.xsd      
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+    
+	<context:component-scan base-package="com.icegame">
+		<!--过滤掉控制层的注解 （spring这边是不扫描Controller，因为Controller交给了springmvc配置） -->
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- spring自动代理 -->
+    <aop:aspectj-autoproxy proxy-target-class="true" />
+    
+    	
+	<!-- 引入数据库配置文件 -->
+    <bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="fileEncoding" value="UTF-8" />  
+        <property name="locations">
+            <list>
+                <value>classpath:config.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- 配置druid数据源 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClass}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<!-- 配置druid数据源slave -->
+	<bean id="dataSourceLoginPay" class="com.alibaba.druid.pool.DruidDataSource"
+		  init-method="init" destroy-method="close">
+		<property name="driverClassName" value="${jdbcLoginPay.driverClass}" />
+		<property name="url" value="${jdbcLoginPay.url}" />
+		<property name="username" value="${jdbcLoginPay.username}" />
+		<property name="password" value="${jdbcLoginPay.password}" />
+	</bean>
+
+	<bean id="multipleDataSource" class="com.icegame.datasources.MultipleDataSource">
+		<!-- 默认的dataSource -->
+		<property name="defaultTargetDataSource" ref="dataSource"></property>
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="dataSource" value-ref="dataSource"></entry>
+				<entry key="dataSourceLoginPay" value-ref="dataSourceLoginPay"></entry>
+			</map>
+		</property>
+	</bean>
+
+	
+	<!--注册jdbc访问数据的事务管理器 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="multipleDataSource"></property>
+	</bean>
+
+	<!--开启事务注解驱动 -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!--配置mybaits的SqlSessionFactory -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="multipleDataSource"></property>
+		<property name="configLocation"
+			value="classpath:mybatis-cfg.xml"></property>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--如果有多个报路径,用逗号分开即可 -->
+		<property name="basePackage" value="com.icegame.*.mapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<bean id="multipartResolver"
+		  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 默认编码 -->
+		<property name="defaultEncoding" value="utf-8" />
+		<!-- 文件大小最大值 -->
+		<property name="maxUploadSize" value="10485760000" />
+		<!-- 内存中的最大值 -->
+		<property name="maxInMemorySize" value="4096000" />
+	</bean>
+
+	<task:annotation-driven />
+
+	<beans default-lazy-init="true"></beans>
+
+</beans>

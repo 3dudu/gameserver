@@ -1,0 +1,710 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+	<style>
+
+		button.close {
+			-webkit-appearance: none;
+			padding: 0;
+			cursor: pointer;
+			background: transparent;
+			border: 0;
+		}
+		.modal-open {
+			overflow: hidden;
+		}
+
+
+
+		@keyframes fade {
+			from {
+				opacity: 1.0;
+			}
+			50% {
+				opacity: 0.4;
+			}
+			to {
+				opacity: 1.0;
+			}
+		}
+
+		@-webkit-keyframes fade {
+			from {
+				opacity: 1.0;
+			}
+			50% {
+				opacity: 0.4;
+			}
+			to {
+				opacity: 1.0;
+			}
+		}
+		.headerBox {
+			color: #fff;
+			/*padding: 10px;*/
+			font-size: 15px;
+			height: 60px;
+			animation: fade 600ms infinite;
+			-webkit-animation: fade 600ms infinite;
+		}
+		.size{
+			width: 15px;
+			height: 15px;
+			border-radius: 50%;
+			display: block;
+			float: left;
+			margin: 2px 5px 0 0;
+		}
+
+		.bgWait{
+			background: #999;
+		}
+
+		.bgProcessing{
+			background: #f0ad4e;
+		}
+
+		.bgSuccess{
+			background: #7CFC00;
+		}
+
+		.bgFailed{
+			background: #EE4000;
+		}
+
+		.text-bg {
+			color: #fff;
+			background: #109bd6;
+			padding: 3px 6px;
+			white-space: nowrap;
+			border-radius: 4px;
+		}
+
+		.textbg-1 {
+			background: #f34949;
+		}
+
+		.textbg-3 {
+			background: #2dc26c;
+		}
+
+
+	</style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">区服列表</a></li>
+    <li><a href="javascript:mgr.editServerList(1)">添加区服</a></li>
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="15"/>
+
+    <div class="controls">
+    	<label for="nameInput">区服名称:</label>
+        <input id="nameInput" name="nameInput" class="input-medium" type="text" value="" />&nbsp;
+		<label for="channelInput">渠道号:</label>
+        <input id="channelInput" name="channelInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="ipInput">slave节点:</label>
+        <!-- <input id="ipInput" name="ipInput" class="input-medium" type="text" value="" />&nbsp; -->
+        <select id="ipInput" name="ipInput" class="input-medium" style="width:220px">
+
+		</select>&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,20);"/>
+        &nbsp;&nbsp;
+       <!--  <input id="btnSubmitDel" class="btn btn-primary" type="button" value="删除" onclick = "mgr.delServerFromServerList()"/> -->
+	</div>
+
+</form>
+<table id="serverListTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+    	<!-- <th style="text-align:center;width:37px;"><input id="checkAll" type="checkbox" value="" /></th> -->
+    	<th class="header">区服ID</th>
+        <th class="header">区服名称</th>
+        <th class="header">IP地址</th>
+        <th class="header">端口号</th>
+        <th class="header">渠道</th>
+        <th class="header">跨服分组</th>
+		<th class="header">武道会分组</th>
+        <th class="header">关闭</th>
+        <th class="header">开始时间</th>
+        <th class="header">结束时间</th>
+        <th class="header">更新时间</th>
+        <th class="header">同步状态</th>
+        <th class="header">类型</th>
+		<th class="header">推荐服</th>
+        <th class="header">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    </tbody>
+</table>
+<div class = "modal fade modal default-model" id = "editModal" style="display:none;">
+        <div class = "modal-dialog">
+            <div class = "modal-content">
+                <div class ="modal-header">
+                    <button type = "button" class = "close" data-dismiss = "modal">
+                        <span aria-hidden = "true">&times;</span>
+                        <span class = "sr-only"></span>
+                    </button>
+                    <h5 class = "modal-title">编辑列表</h5>
+                </div>
+                <div class = "modal-body" style="max-height: 480px;">
+                   <form id="userEditForm" class="form-horizontal" action="#" method="post">
+						<input id="serverId" name="serverId" type="hidden" value=""/>
+						<input id="isAuto" name="isAuto" type="hidden" value="0"/>
+						<input id="slaveId" name="slaveId" type="hidden" value=""/>
+						<!-- <input id="close" name="close" type="hidden" value=""/> -->
+						<div class="control-group">
+							<label class="control-label" for="name">区服名称:</label>
+							<div class="controls">
+								<input id="name" name="name" type="text" value="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="ip">IP地址:</label>
+							<div class="controls">
+								<select id="ip" name="ip" class="input-medium" style="width:240px">
+
+		    					</select>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="port">端口号:</label>
+							<div class="controls">
+								<input style="float:left" id="port" name="port" type="text" value="" placeholder="不填写默认8081端口"/>
+								<i class="layer-tips" id="portTips" tips="不填写即为默认8081端口"></i>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="beginTime">开始时间:</label>
+							<div class="controls">
+								<input id="beginTime" name="beginTime" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="passTime">结束时间:</label>
+							<div class="controls">
+								<input id="passTime" name="passTime" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="channel">渠道号:</label>
+							<div class="controls">
+								<select id="channel" name="channel" class="input-medium" style="width:220px">
+
+								</select>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="group">跨服分组:</label>
+							<div class="controls">
+								<input id="group" name="group" type="text" value="" />
+							</div>
+						</div>
+					   <div class="control-group">
+						   <label class="control-label" for="wudaogroup">武道会分组:</label>
+						   <div class="controls">
+							   <input id="wudaogroup" name="wudaogroup" type="text" value="" />
+						   </div>
+					   </div>
+						<div class = "modal-footer model-bot">
+		                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+		                    <input id ="myBtnSubmit" class ="btn btn-primary" type="submit" value="保存">
+		                    <!-- <button class ="btn btn-primary" type="button" onclick="mgr.saveServerList()">保存</button> -->
+		                </div>
+					</form>
+                </div>
+
+            </div>
+        </div>
+</div>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){
+    $("#serverListTable").tablesorter();
+});
+</script>
+<script type="text/javascript">
+$(function () {
+	mgr.getSlaveNodesList();
+	mgr.getAuthorizeChannelList();
+	mgr.getListPage(1,20);
+	$('#checkAll').click(function(){
+		 $(":checkbox[name='delServerIds']").is(":checked")?$(":checkbox[name='delServerIds']").attr("checked",false):$(":checkbox[name='delServerIds']").attr("checked",true);
+	});
+	$("#myBtnSubmit").click(function(){
+ 		$("#editModal").modal("hide");
+ 	});
+});
+var mgr ={
+		getSlaveNodesList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/slavenodes/getSlaveNodesListNoPage',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					var slaveNodesList = data;
+					var html = '<option value="">选择节点</option>';
+					for(var i = 0 ; i < slaveNodesList.length ; i++){
+						html += '<option value="'+slaveNodesList[i].id+'" ip="'+slaveNodesList[i].ip+'" slaveId="'+slaveNodesList[i].id+'">'+slaveNodesList[i].ip+'.'+slaveNodesList[i].name+'</option>';
+					}
+					$('#ipInput').html(html);
+                    $('#ip').html(html);
+				}
+			});
+	 	},
+		getAuthorizeChannelList:function(){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/group/getAuthorizeChannelList',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					var channel = data.hasChannel;
+
+					if(channel != "" && channel.length != 0){
+						var html = null;
+						var channelList = data.hasChannel.split("\r\n");
+						for(var i = 0 ; i < channelList.length ; i++){
+							if(channelList[i] != "undefined"){
+								html += '<option value="'+channelList[i]+'">'+channelList[i]+'</option>';
+							}
+						}
+						$('#channel').html(html);
+					}
+				}
+			});
+		},
+	 	getListPage : function(pageNo,pageSize){
+			var channel = $("#channelInput").val();
+			var name = $("#nameInput").val();
+			var slaveId = $("#ipInput").find("option:selected").attr("slaveId");
+			if(undefined == slaveId){
+                slaveId = 0;
+			}
+	 			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getServerList',
+				dataType:'json',
+				data: {"channel":channel,"name":name,"slaveId":slaveId,"pageNo":pageNo,"pageSize":pageSize},
+				success:function(data){
+					$("#serverListTable").trigger("update");
+					$("#checkAll").attr("checked",false);
+					var serverList = data;
+					if(serverList!=null&&serverList.length>1){
+						var htmlTable = "";
+						for(var i=1;i<serverList.length;i++){
+							htmlTable = htmlTable+"<tr>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].serverId;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].name;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].ip;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].port;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].channel;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].group;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].wudaogroup;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							if(serverList[i].close == 0){
+								htmlTable = htmlTable+"false";
+							}else if(serverList[i].close == 1){
+								htmlTable = htmlTable+"true";
+							}else if(serverList[i].close == 2){
+								htmlTable = htmlTable+"白名单";
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].beginTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].passTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							htmlTable = htmlTable+serverList[i].updateTime;
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							switch(serverList[i].isSuccess){
+								case 0 :
+									htmlTable = htmlTable+"<span class='headerBox size bgFailed'>";
+									htmlTable = htmlTable+"</span>";
+									htmlTable = htmlTable+"失败";
+									break;
+								case 1 :
+									htmlTable = htmlTable+"<span class='headerBox size bgSuccess'>";
+									htmlTable = htmlTable+"</span>";
+									htmlTable = htmlTable+"成功";
+									break;
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							switch(serverList[i].isAuto){
+								case 0 :
+									htmlTable = htmlTable+"手动";
+									break;
+								case 1 :
+									htmlTable = htmlTable+"<span class='text-bg textbg-3'>自动</span>";
+									break;
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+							switch(serverList[i].isSuggest){
+								case 0 :
+									htmlTable = htmlTable+"否";
+									break;
+								case 1 :
+									htmlTable = htmlTable+"<span class='text-bg textbg-3'>是</span>";
+									break;
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"<td>";
+ 			    			var editButton = "<a href='javascript:mgr.editServerList(2,"+serverList[i].serverId+")'>修改</a>";
+							//var delButton = "<a href='javascript:mgr.delServerList("+serverList[i].serverId+")'>删除</a>";
+							var addButton = "<a href='javascript:mgr.editServerList(1)'>添加</a>";
+
+							var suggestButton = "<a href='javascript:mgr.suggest("+serverList[i].serverId+",1)'>设置推荐</a>";
+
+							var unsggestButton = "<a href='javascript:mgr.suggest("+serverList[i].serverId+",0)'>取消推荐</a>";
+							//htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+delButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton;
+
+							switch(serverList[i].isSuggest){
+								case 0 :
+									htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+suggestButton;
+									break;
+								case 1 :
+									htmlTable = htmlTable+editButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+addButton+"&nbsp;&nbsp;&nbsp;&nbsp;"+unsggestButton;
+									break;
+							}
+							htmlTable = htmlTable+"</td>";
+							htmlTable = htmlTable+"</tr>";
+						}
+						var pageStr = data[0];
+						$('#serverListTable').find('tbody').html(htmlTable);
+						//取出分页条代码
+						$('#pageInfo').html(pageStr);
+	 				} else{
+						$('#serverListTable').find('tbody').html("<tr><td colspan='14' align='right'>没有查询到数据</td><tr>");
+						$('#pageInfo').html("");
+	 				}
+				}
+			});
+	 	} ,
+	 	editServerList:function(editFlag,serverId){
+	 		if(editFlag == 1){
+				$("#ip").prop("disabled", false);
+	 			$("#userEditForm").validate({
+	 				rules: {
+	 					name: {
+	 						required: true,
+	 						maxlength: 20,
+	 						remote:{
+	 							type:'post',
+	 							url:''+$ctx+'/checkExistServerList',
+	 							dataType:'html',
+	 							data: {"editFlag":"add"},
+	 							dataFilter: function(data,type){
+	 								return data == "0"?true:false;
+	 							}
+	 						}
+	 					},
+	 			      	ip: "required",
+						port: {
+							digits: true,
+							maxlength: 5
+						},
+	 			      	beginTime: "required",
+	 			      	passTime: "required",
+	 			      	channel: {
+	 						required: true,
+	 						maxlength: 20
+	 					},
+						group: {
+	 						required: true,
+							digits: true
+						},
+						wudaogroup: {
+							required: true,
+							digits: true
+						}
+	 				},
+	 				messages: {
+	 					name: {
+	 						required: "请输入区服名称",
+	 						maxlength: "最大长度为20",
+	 						remote: "名称已存在"
+	 					},
+	 			      	ip: "请选择IP地址",
+						port: {
+							digits: "端口为正整数",
+							maxlength: "最大长度为5"
+						},
+	 			     	beginTime: "请选择开始时间 ",
+	 				    passTime: "请选择结束时间",
+	 				    channel: {
+	 						required: "请选择渠道号名称",
+	 						maxlength: 20
+	 					},
+						group: {
+							required: "请输入跨服分组",
+							digits: "跨服分组为正整数"
+						},
+						wudaogroup: {
+							required: "请输入武道会分组",
+							digits: "武道会分组为正整数"
+						}
+	 				} ,
+	 				submitHandler: function(form) {
+	 				    mgr.saveServerList(form);
+	 				}
+	 			});
+	 		}else{
+				$("#ip").prop("disabled", true);
+	 			$("#userEditForm").validate({
+	 				rules: {
+	 					name: {
+	 						required: true,
+	 						maxlength: 20
+	 					},
+	 			      	ip: "required",
+						port: {
+							digits: true,
+							maxlength: 5
+						},
+	 			      	beginTime: "required",
+	 			      	passTime: "required",
+	 			      	channel: {
+	 						required: true,
+	 						maxlength: 20
+	 					},
+						group: {
+							required: true,
+							digits: true
+						},
+						wudaogroup: {
+							required: true,
+							digits: true
+						}
+	 				},
+	 				messages: {
+	 					name: {
+	 						required: "请输入区服名称",
+	 						maxlength: "最大长度为20"
+	 					},
+	 			      	ip: "请选择IP地址",
+						port: {
+							digits: "端口为正整数",
+							maxlength: "最大长度为5"
+						},
+	 			     	beginTime: "请选择开始时间 ",
+	 				    passTime: "请选择结束时间",
+	 				    channel: {
+	 						required: "请选择渠道号名称",
+	 						maxlength: 20
+	 					},
+						group: {
+							required: "请输入跨服分组",
+							digits: "跨服分组为正整数"
+						},
+						wudaogroup: {
+							required: "请输入武道会分组",
+							digits: "武道会分组为正整数"
+						}
+	 				} ,
+	 				submitHandler: function(form) {
+	 				    mgr.saveServerList(form);
+	 				}
+	 			});
+	 		}
+
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/gotoServerListEdit',
+				dataType:'json',
+				data: {"editFlag":editFlag,"serverId":serverId},
+				success:function(data){
+					//console.log(data);
+					$("#editModal").modal("toggle");
+					var serverList = data;
+					$("#serverId").val(serverList.serverId);
+					$("#name").val(serverList.name);
+					$("#ip").val(serverList.slaveId).trigger("change");
+					$("#port").val(serverList.port);
+					if(JSON.stringify(serverList)=="{}"){
+						beginTime="2088-01-01 00:00:00";
+						updateTime="";
+						passTime="2099-12-31 23:59:59";
+					}else{
+						var beginTime = serverList.beginTime;
+						var updateTime = serverList.updateTime;
+						var passTime = serverList.passTime;
+					}
+					$("#beginTime").val(beginTime);
+					$("#updateTime").val(updateTime);
+					$("#passTime").val(passTime);
+					$("#channel").val(serverList.channel).trigger("change");
+					$("#group").val(serverList.group);
+					$("#wudaogroup").val(serverList.wudaogroup);
+				}
+			});
+	 	},
+		suggest:function(serverId,suggest){
+			var str = "";
+			if(suggest == 1){
+				str = "确定要设置推荐？\r\n设置推荐后，新玩家会优先看到此区服！";
+			} else if (suggest == 0) {
+				str = "确定要取消推荐？\r\n取消推荐后，新玩家会优先看到历史登陆区服！";
+			}
+			if(confirm(str)){
+				$.ajax({
+					type:'post',
+					url:''+$ctx+'/suggest',
+					dataType:'json',
+					data: {"serverId":serverId,"suggest":suggest},
+					success:function(data){
+						alert(data.msg);
+						mgr.getListPage(1,20);
+					}
+				});
+			}
+
+		},
+	 	// delServerList:function(serverId){
+	 	// 	if(confirm("您确定要删除此条记录吗?")){
+		// 		 $.ajax({
+		// 			type:'post',
+		// 			url:''+$ctx+'/delServerList',
+		// 			dataType:'json',
+		// 			data: {"serverId":serverId},
+		// 			success:function(data){
+        //                 if(data.result == "删除成功"){
+// 								alert(data.result);
+// 							} else {
+// 								alert(data.result + "\n\r" + data.details);
+// 							}
+		// 				mgr.getListPage(1,20);
+		// 			}
+		// 		});
+		// 	}
+	 	// },
+	 	/* delServerFromServerList:function(){
+	 		var server = {};
+	 		var serverCheckObj={};
+	 		var serverIdArray = $("input[name='delServerIds']:checked").serializeArray();
+ 			$.each(serverIdArray, function(i, item){
+ 				serverCheckObj[item.value]=item.value;
+			 });
+ 			server["serverIds"]=serverCheckObj;
+	 		if(JSON.stringify(server["serverIds"]) === "{}" ){
+	 			alert("请先选择需要删除的区服ID");
+	 			return;
+	 		}
+	 		console.log(JSON.stringify(server));
+	 		return false;
+	 		if(confirm("您确定要删除这些区服?")){
+		 		$.ajax({
+					type:'post',
+					url:''+$ctx+'/sysmgr/group/delUserFromGroup',
+					dataType:'json',
+					contentType :"application/json;charset=UTF-8",
+					data: JSON.stringify(group),
+					success:function(data){
+						alert("删除成功");
+						mgr.groupStatus(groupId,null,1,7);
+						//$("#groupDetailModel").modal("toggle");
+					}
+				});
+			}
+	 	}, */
+	 	saveServerList: function(form){
+	 		var serverList={};
+			var formObject = {};
+			$("#slaveId").val($("#ip").find("option:selected").attr('slaveId'));
+			var formArray =$("#userEditForm").serializeArray();
+			$.each(formArray, function(i, item){
+				formObject[item.name]=item.value;
+			});
+            formObject["ip"] = $("#ip").find("option:selected").attr("ip");
+
+            serverList = JSON.stringify(formObject);
+
+            var beginTimeStamp = new Date(formObject['beginTime']).getTime();
+            var passTimeStamp = new Date(formObject['passTime']).getTime();
+            var pbValue = passTimeStamp - beginTimeStamp;
+
+            // 两年毫秒数
+            var TWO_YEARS_MILL_SECONDS = 86400 * 1000 * 365 * 2;
+
+			//console.log(serverList);
+			//return false;
+
+            if(pbValue <= 0){
+                alert("添加失败。开始时间不能大于结束时间；还没开始就已经结束，这是我们不能接受的！");
+                return false;
+            } else if (pbValue <= TWO_YEARS_MILL_SECONDS){
+
+                alert("区服结束时间和开始时间 间隔小于两年，请斟酌是否添加，三思而行！");
+
+                if(confirm("区服 结束时间 和 开始时间 间隔小于【两年】，确认添加？")){
+                    $.ajax({
+                        type:'post',
+                        url:''+$ctx+'/saveServerList',
+                        dataType:'json',
+                        contentType :"application/json;charset=UTF-8",
+                        data: serverList,
+                        success:function(data){
+                            if(data.result == "操作成功"){
+                                alert(data.result);
+                            } else {
+                                alert(data.result + "\n\r" + data.details);
+                            }
+                            mgr.getListPage(1,20);
+                        }
+                    });
+                }
+
+            } else {
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/saveServerList',
+                    dataType:'json',
+                    contentType :"application/json;charset=UTF-8",
+                    data: serverList,
+                    success:function(data){
+                        if(data.result == "操作成功"){
+                            alert(data.result);
+                        } else {
+                            alert(data.result + "\n\r" + data.details);
+                        }
+                        mgr.getListPage(1,20);
+                    }
+                });
+            }
+		}
+	};
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace = "com.icegame.sysmanage.mapper.UserMapper">
+	<sql id = "all_user_columns">
+	 	userId,loginName,userName,password,isAdmin,isOnline
+	</sql>
+ 
+	<!--将通用的sql查询条件抽取出来,成为sql片段 ,给不同方法应用  -->
+	<sql id="query_user_sql_where">			
+		<if test="userName!=null"> 
+			AND userName like concat("%",#{userName},"%")
+		</if>
+		<if test="loginName!=null"> 
+			AND loginName= #{loginName}
+		</if>
+		<if test="password!=null"> 
+			AND password= #{password}
+		</if>
+		<if test="isAdmin!=null">
+			AND isAdmin= #{isAdmin}
+		</if>
+		<if test="isOnline!=null">
+			AND isOnline= #{isOnline}
+		</if>
+	</sql>
+	
+	<!--根据条件查询 用户列表   -->
+	<select id="getUserList" parameterType="user" resultType="user">
+		select
+		<include refid="all_user_columns"></include>
+		from muser
+		<where>
+			<include refid="query_user_sql_where"></include>		
+		</where>
+	</select> 
+	
+	<select id="getUserDtoList" parameterType="userDto" resultType="userDto">
+		select A.userId,A.userName,A.loginName,A.isAdmin,A.isOnline,B.groupId,B.groupName from muser A,mgroup B,musergroup C
+		where A.userId=C.userId AND B.groupId=C.groupId AND B.groupName like concat("%",#{groupName},"%")
+		AND A.userName like concat("%",#{userName},"%") AND A.isOnline like concat("%",#{isOnline},"%")
+		AND A.isAdmin like concat("%",#{isAdmin},"%")
+	</select>
+	
+	<select id="getCsList" parameterType="userDto" resultType="userDto">
+		select A.userId,A.loginName,A.userName,A.isAdmin,A.isOnline from muser A,musergroup B
+		where A.userId = B.userId and B.groupId = #{groupId} and A.isOnline = 'on'
+	</select>
+
+	<select id="getCsMgrList" parameterType="userDto" resultType="userDto">
+		select A.userId,A.loginName,A.userName,A.isAdmin,A.isOnline from muser A,musergroup B
+		where A.userId = B.userId and B.groupId = #{groupId} and A.isOnline = 'on' and A.isAdmin = 'on'
+	</select>
+	
+	<select id="checkExistUser" parameterType="userDto" resultType="userDto">
+		select loginName from muser where loginName=#{loginName}
+	</select>
+
+	<select id="isOnline" parameterType="userDto" resultType="userDto">
+		select isOnline from muser where userId=#{userId}
+	</select>
+	
+	<!--<select id="getUserDtoList" parameterType="userDto" resultType="userDto">
+		select A.userId,A.userName,A.loginName,B.groupId,B.groupName from muser A,mgroup B,musergroup C
+		<where>
+			A.userId=C.userId AND B.groupId=C.groupId
+		 	<if test="userName!=null"> 
+				AND A.userName like '%${userName}%'
+	 		</if>							
+		 </where>
+	</select>-->
+	
+	<!-- <select id="getUserDtoList" parameterType="userDto" resultType="userDto">
+		select A.userId,A.userName,A.loginName,B.groupId,B.groupName from muser A LEFT JOIN musergroup C
+		ON A.userId=C.userId LEFT JOIN mgroup B ON B.groupId=C.groupId AND A.userName like '%${userName}%'
+	</select> -->
+
+	
+	
+	<select id="getUserDtoListByGroupName" parameterType="userDto" resultType="userDto">
+		select A.userId,A.userName,A.loginName,B.groupId,B.groupName from muser A,mgroup B,musergroup C
+		<where>
+			A.userId=C.userId AND B.groupId=C.groupId
+		 	<if test="userName!=null"> 
+				AND B.groupName = #{groupName}
+	 		</if>							
+		 </where>
+	</select>
+	
+	
+	<!-- 根据用户ID查询用户明细 -->
+	<select id="getUserInfoById" parameterType="java.lang.Long" resultType="userDto">
+		select A.userId,A.userName,A.loginName,A.password,A.isAdmin,A.isOnline,B.groupId,B.groupName from muser A,mgroup B,musergroup C
+		where A.userId=C.userId AND B.groupId=C.groupId AND A.userId = #{userId}
+	</select>
+
+
+	<!-- 根据用户ID查询用户明细 -->
+	<select id="getOnlineCs" parameterType="java.lang.Long" resultType="user">
+		select userId,userName,loginName,password,isAdmin,isOnline,typeName from muser
+		where `isOnline` = 'on' and `typeName` = 'cs'
+	</select>
+	
+	<!-- 新增用户 -->
+	<insert id="addUser" parameterType="user">
+		<selectKey keyProperty="userId" resultType="long" order="AFTER" >
+               select LAST_insert_ID() as userId
+        </selectKey>
+		insert into muser(loginName,userName,password,isAdmin,isOnline,typeName)
+		values (#{loginName},#{userName},#{password},#{isAdmin},#{isOnline},#{typeName})
+	</insert>
+	
+	<!-- 删除用户 -->
+	<delete id="delUser" parameterType="java.lang.Long">
+		delete from muser
+		<where>
+			userId=#{userId}
+		</where>
+	</delete>
+	
+	<!-- 修改用户密码 -->
+	<update id="updateUserPassword">
+		update muser set password = #{1} where userId = #{0}
+	</update>
+	
+	<!--修改用户个人信息  -->
+	<update id="updateUser" parameterType="user">
+		update muser  
+		<set> 
+			<if test="loginName != null">
+	            loginName = #{loginName},
+	        </if>
+	        <if test="userName != null">
+	            userName = #{userName},
+	        </if>
+	        <if test="isAdmin != null">
+	            isAdmin = #{isAdmin},
+	        </if>	 
+		</set>
+		where userId = #{userId}
+ 	</update>
+
+	<!--上线  -->
+	<update id="online" parameterType="user">
+		update muser set isOnline = 'on'
+		where userId = #{userId}
+	</update>
+
+	<!--上线  -->
+	<update id="offline" parameterType="user">
+		update muser set isOnline = 'off'
+		where userId = #{userId}
+	</update>
+	
+</mapper>

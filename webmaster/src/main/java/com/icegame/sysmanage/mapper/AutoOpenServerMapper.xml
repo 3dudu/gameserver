@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.AutoOpenServerMapper">
+
+	<select id="getPlayerCount" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select count(distinct `pid`) as player, `sid` from `player`
+		where `sid`=#{serverId}
+	</select>
+
+	<!--  次数的判断逻辑是 查找符合当前渠道 并且 同步成功 并且时间大于当前时间的区服	-->
+	<select id="getMaxId" parameterType="autoOpenServer" resultType="autoOpenServer">
+		<![CDATA[
+		select max(`server_id`) as maxId from server_list
+		where channel = #{channel} and `is_success` = 1 and `beginTime` <= #{currentTime}
+		]]>
+	</select>
+
+
+	<!--  下面为自动更新任务的页面	-->
+	<select id="getAutoOpenServerList" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select `id`, `key`, `value`, `status`, `type` from auto_open_server
+		<where>
+			<if test="key!=null">
+				AND `key` like concat("%",#{key},"%")
+			</if>
+			and `type` = 1
+		</where>
+	</select>
+
+	<select id="getAutoOpenServerById" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select `id`, `key`, `value`, `status`  from auto_open_server
+		where `id` = #{id}
+	</select>
+
+	<select id="existsKey" parameterType="java.lang.String" resultType="autoOpenServer">
+		select `id`, `key`, `value`, `status`  from auto_open_server
+		where `key` = #{key}
+	</select>
+
+	<select id="existsEnableAutoOpenServer" parameterType="java.lang.String" resultType="autoOpenServer">
+		select `id`, `key`, `value`, `status`  from auto_open_server
+		where `status` = 1 and `key` = #{channel}
+	</select>
+
+	<select id="checkExistAutoOpenServer" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select `id`, `key`, `value`, `status`  from auto_open_server
+		where `key` = #{key}
+	</select>
+
+	<!--  自动开服告警开关  -->
+	<select id="getAutoOpenServerTipsStatus" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select `value` from mconfigure
+		where `key` = "auto.openserver.tips.status"
+	</select>
+
+	<!--  自动开服告警区服临界值  -->
+	<select id="getAutoOpenServerTipsSlimit" parameterType="autoOpenServer" resultType="autoOpenServer">
+		select `value` from mconfigure
+		where `key` = "auto.openserver.tips.slimit"
+	</select>
+
+	<insert id="addAutoOpenServer" parameterType="autoOpenServer">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into auto_open_server(`key`, `value`, `status`, `type`)
+		values (#{key},#{value},#{status},#{type})
+	</insert>
+
+	<delete id="delAutoOpenServer" parameterType="java.lang.Long">
+		delete from auto_open_server
+		<where>
+			`id` = #{id}
+		</where>
+	</delete>
+
+	<update id="updateAutoOpenServer" parameterType="autoOpenServer">
+		update auto_open_server
+		<set>
+			<if test="key != null and key != '' ">
+				`key` = #{key},
+			</if>
+			<if test="value != null and value != '' ">
+				`value` = #{value},
+			</if>
+			<if test="status != null and status != '' ">
+				`status` = #{status},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="changeStatus" parameterType="autoOpenServer">
+		update auto_open_server
+		<set>
+			<if test="status != null and status != '' ">
+				`status` = #{status},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<!--  打开或者关闭自动开服的告警  -->
+	<update id="changeAutoOpenServerTipsStatus" parameterType="autoOpenServer">
+		update mconfigure
+		set `value` = #{value}
+		where `key` = "auto.openserver.tips.status"
+	</update>
+
+	<!--  打开或者关闭自动开服的告警  -->
+	<update id="changeAutoOpenServerTipsSlimit" parameterType="autoOpenServer">
+		update mconfigure
+		set `value` = #{value}
+		where `key` = "auto.openserver.tips.slimit"
+	</update>
+
+</mapper>

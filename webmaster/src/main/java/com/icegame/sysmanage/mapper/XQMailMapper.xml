@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.XQMailMapper">
+
+	<sql id = "columns">
+		`id`,`issue_order_id`,`role_id`,`guid`,`server_id`,`server_name`,
+		`issue_time`,`mail_title`,`mail_content`,`test`,`issuedProps`
+	</sql>
+
+	<select id="findAll" parameterType="xQMail" resultType="xQMail">
+		select
+		<include refid="columns"/>
+		from xq_mail
+		<where>
+			<if test=" issueOrderId != null and issueOrderId != '' ">
+				issue_order_id=#{issueOrderId}
+			</if>
+			<if test=" roleId != null and roleId != '' ">
+				role_id=#{roleId}
+			</if>
+			<if test=" guid != null and guid != '' ">
+				guid=#{guid}
+			</if>
+			<if test=" serverId != null and serverId != '' ">
+				server_id=#{serverId}
+			</if>
+			<if test=" serverName != null and serverName != '' ">
+				server_name=#{serverName}
+			</if>
+			<if test=" mailTitle != null and mailTitle != '' ">
+				mail_title=#{mailTitle}
+			</if>
+		</where>
+		order by `id` desc
+	</select>
+
+	<select id="findById" parameterType="java.lang.Long" resultType="xQMail">
+		select
+		<include refid="columns"/>
+		from xq_mail
+		where `id` = #{id}
+	</select>
+
+	<select id="hasSameIssueOrderId" parameterType="java.lang.String" resultType="xQMail">
+		select
+		<include refid="columns"/>
+		from xq_mail
+		where `issue_order_id` = #{issueOrderId}
+	</select>
+
+	<insert id="addXQMail" parameterType="xQMail">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO xq_mail(`issue_order_id`,`role_id`,`guid`,`server_id`,`server_name`,`issue_time`,`mail_title`,`mail_content`,`test`,`issuedProps`)
+		VALUES (#{issueOrderId},#{roleId},#{guid},#{serverId},#{serverName},#{issueTime},#{mailTitle},#{mailContent},#{test},#{issuedProps})
+	</insert>
+
+	<update id="refreshStatus" parameterType="xQMail">
+		UPDATE xq_mail  set
+		`status` = #{status}
+		WHERE id = #{id}
+	</update>
+</mapper>

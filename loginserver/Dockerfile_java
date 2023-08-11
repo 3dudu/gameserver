@@ -1,0 +1,27 @@
+FROM ubuntu:16.04
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y ssh tzdata wget && apt-get autoclean && rm -rf /var/lib/apt/lists/*
+
+ENV TZ="Asia/Shanghai"
+ENV LANG="C.UTF-8"
+# 部署sshd服务,用于解决windows环境的cmd杂碎问题
+# ADD sshd_config /etc/ssh/sshd_config
+# RUN chmod 644 /etc/ssh/sshd_config 
+RUN echo "ALL:ALL" >>/etc/hosts.allow \
+&& echo 'root:123456' | chpasswd
+
+ENV JAVA_VERSION="1.8.0_231"
+
+ENV JAVA_HOME="/usr/local/jdk${JAVA_VERSION}"
+
+ENV PATH="${PATH}:${JAVA_HOME}/bin"
+
+RUN cd /usr/local && wget http://nas.good365.net:5088/jdk-8u231-linux-x64.tar
+
+RUN cd /usr/local && tar -xvf jdk-8u231-linux-x64.tar && rm -rf jdk-8u231-linux-x64.tar
+
+# 暴露开发常用的端口
+EXPOSE 22 
+CMD ["java","-version"]

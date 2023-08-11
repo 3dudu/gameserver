@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.gm.mapper.GmlogsMapper">
+	<select id="getGmlogsList" parameterType="gmlogs" resultType="gmlogs">
+	<![CDATA[
+		select `id`,`createTime`,`loginName`,`type`,`description` from gmlogs
+		where `loginName` like concat("%",#{loginName},"%") and createTime >= #{startDate} and createTime< #{endDate}
+		and `type` like concat("%",#{type},"%")
+	]]>
+	</select>
+	
+	<select id="getTypeList" parameterType="gmlogs" resultType="gmlogs">
+		select distinct type from gmlogs
+	</select>
+	
+	<select id="getGmlogsById" parameterType="java.lang.Long" resultType="log">
+		select `id`,`createTime`,`loginName`,`type`,`description` from gmlogs
+		where id = #{id}
+	</select>
+	
+	<insert id="addGmlogs" parameterType="gmlogs">
+		<selectKey keyProperty="id" resultType="long" order="AFTER" >
+               SELECT LAST_INSERT_ID() as id
+        </selectKey>
+		INSERT INTO gmlogs(`createTime`,`loginName`,`type`,`description`)
+		VALUES (#{createTime},#{loginName},#{type},#{description})
+	</insert>
+	
+	<delete id="delGmlogs" parameterType="java.lang.Long">
+		DELETE FROM gmlogs
+		<where>
+			`id`=#{id}
+		</where>
+	</delete>
+	
+	<update id="updateGmlogs" parameterType="gmlogs">
+		UPDATE gmlogs  set
+		   `createTime` = #{createTime},
+           `loginName` = #{loginName},
+           `type` = #{type},
+           `description` = #{description}
+		WHERE id = #{id}
+ 	</update>
+</mapper>

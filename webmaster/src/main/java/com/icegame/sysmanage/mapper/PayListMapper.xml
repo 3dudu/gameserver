@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.PayListMapper">
+
+	<sql id="query_paylist_sql_where">
+		<if test=" orderId != null and orderId != '' ">
+			and `order_id`=#{orderId}
+		</if>
+		<if test=" thirdTradeNo != null and thirdTradeNo != '' ">
+			and `third_trade_no`=#{thirdTradeNo}
+		</if>
+		<if test=" proIdx != null">
+			and `pro_idx`=#{proIdx}
+		</if>
+		<if test=" payPrice != null and payPrice != '' ">
+			and `pay_price`=#{payPrice}
+		</if>
+		<if test=" pid != null and pid != '' ">
+			and `pid`=#{pid}
+		</if>
+		<if test=" sid != null and sid != '' ">
+			and `sid`=#{sid}
+		</if>
+		<if test=" status != null">
+			and `status`=#{status}
+		</if>
+		<if test=" userId != null and userId != '' ">
+			and `user_id`=#{userId}
+		</if>
+		<if test=" platform != null and platform != '' ">
+			and `platform`=#{platform}
+		</if>
+		<if test=" channel != null and channel != '' ">
+			and `channel`=#{channel}
+		</if>
+		<if test=" source != null  and source != '' ">
+			and `source`=#{source}
+		</if>
+		<if test=" startTime != null  and startTime != '' ">
+			<![CDATA[ and `create_time` >= #{startTime} ]]>
+		</if>
+		<if test=" passTime != null  and passTime != '' ">
+			<![CDATA[ and `create_time` < #{passTime}  ]]>
+		</if>
+	</sql>
+
+	<sql id="query_paylist_sql_where_mult_serverId">
+		<if test=" orderId != null and orderId != '' ">
+			and `order_id`=#{orderId}
+		</if>
+		<if test=" thirdTradeNo != null and thirdTradeNo != '' ">
+			and `third_trade_no`=#{thirdTradeNo}
+		</if>
+		<if test=" proIdx != null">
+			and `pro_idx`=#{proIdx}
+		</if>
+		<if test=" payPrice != null and payPrice != '' ">
+			and `pay_price`=#{payPrice}
+		</if>
+		<if test=" pid != null and pid != '' ">
+			and `pid`=#{pid}
+		</if>
+		<if test=" multServerId != null and multServerId != '' ">
+			and `sid` in ${multServerId}
+		</if>
+		<if test=" status != null">
+			and `status`=#{status}
+		</if>
+		<if test=" userId != null and userId != '' ">
+			and `user_id`=#{userId}
+		</if>
+		<if test=" platform != null and platform != '' ">
+			and `platform`=#{platform}
+		</if>
+		<if test=" channel != null and channel != '' ">
+			and `channel`=#{channel}
+		</if>
+		<if test=" source != null  and source != '' ">
+			and `source`=#{source}
+		</if>
+		<if test=" startTime != null  and startTime != '' ">
+			<![CDATA[ and `create_time` >= #{startTime} ]]>
+		</if>
+		<if test=" passTime != null  and passTime != '' ">
+			<![CDATA[ and `create_time` < #{passTime}  ]]>
+		</if>
+	</sql>
+
+	<select id="getPayList" parameterType="payList" resultType="payList">
+
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order
+		<where>
+			<include refid="query_paylist_sql_where"></include>
+		</where>
+
+	</select>
+
+	<select id="getPayListMultServerId" parameterType="payList" resultType="payList">
+
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order
+		<where>
+			<include refid="query_paylist_sql_where_mult_serverId"></include>
+		</where>
+
+	</select>
+
+
+	<select id="exportAll" parameterType="payList" resultType="payList">
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order
+	</select>
+
+	<select id="getPayListByOrderId" parameterType="payList" resultType="payList">
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order where `order_id` = #{orderId}
+	</select>
+
+	<select id="getPayListByThirdTradeNo" parameterType="payList" resultType="payList">
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order where `third_trade_no` = #{thirdTradeNo}
+	</select>
+
+	<select id="exportSelected"  resultType="payList">
+		select `id`, `order_id` , `pay_price`, `units`, `pro_idx`, `sid`, `pid`, `status`, `platform`, `channel`, `source`,
+		`third_trade_no`, `create_time`, `finish_time`, `user_id` from pay_order where `id` in
+		<foreach collection="array" item="ids" index="index" open="(" close=")" separator=",">
+			#{ids}
+		</foreach>
+
+		<!--<include refid="query_paylist_sql_where"></include>-->
+
+	</select>
+
+
+	<select id="getJPlayer" parameterType="jPlayer" resultType="jPlayer">
+		select `id`, `uid` , `sid`, `pid`, `level`, `area`, `vip`, `money`, `diamond`, `battle_power`, `name`,
+		`date_create` from player
+		<where>
+			<if test="pid != null and pid != ''">
+				and `pid` = #{pid}
+			</if>
+			<if test="name != null and name != ''">
+				and `name` = #{name}
+			</if>
+			<if test="sid != null and sid != ''">
+				and `sid` = #{sid}
+			</if>
+			<if test="uid != null and uid != ''">
+				and `uid` = #{uid}
+			</if>
+		</where>
+	</select>
+
+	<select id="getJUserById" parameterType="jUser" resultType="jUser">
+		select `id`, `name` , `passwd`, `create_time`, `pf_user`, `pf`, `mail_user`, `bind_time`, `id` as strId from user
+		where `id`=#{id}
+	</select>
+
+	<select id="getJUserByName" parameterType="jUser" resultType="jUser">
+		select `id`, `name` , `passwd`, `create_time`, `pf_user`, `pf`, `mail_user`, `bind_time`, `id` as strId from user
+		where `name`=#{name}
+	</select>
+
+	<update id="resetJUserPwd" parameterType="jUser">
+		UPDATE user  set
+		`passwd` = #{passwd}
+		WHERE `id` = #{id} and `name` = #{name}
+	</update>
+
+</mapper>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>配置表邮件查询页面</title>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit">
+    <style>
+        button.close {
+            -webkit-appearance: none;
+            padding: 0;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+        }
+        .modal-open {
+            overflow: hidden;
+        }
+
+
+
+        @keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+
+        @-webkit-keyframes fade {
+            from {
+                opacity: 1.0;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            to {
+                opacity: 1.0;
+            }
+        }
+        .headerBox {
+            color: #fff;
+            /*padding: 10px;*/
+            font-size: 15px;
+            height: 60px;
+            animation: fade 600ms infinite;
+            -webkit-animation: fade 600ms infinite;
+        }
+        .size{
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: block;
+            float: left;
+            margin: 2px 5px 0 0;
+        }
+
+        .bgWait{
+            background: #999;
+        }
+
+        .bgProcessing{
+            background: #f0ad4e;
+        }
+
+        .bgSuccess{
+            background: #7CFC00;
+        }
+
+        .bgFailed{
+            background: #EE4000;
+        }
+        .text-bg {
+            color: #fff;
+            background: #109bd6;
+            padding: 3px 6px;
+            white-space: nowrap;
+            border-radius: 4px;
+        }
+
+        .textbg-1 {
+            background: #f34949;
+        }
+
+        .textbg-3 {
+            background: #2dc26c;
+        }
+
+        .textbg-4 {
+            background: #228B22;
+        }
+    </style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<script src="http://gamescom.xuegaogame.com/master/static/xlsx.core.min.js" type="text/javascript"></script>
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">配置表邮件</a></li>
+<!--    <li><a href="javascript:mgr.editRoleMail(1);">添加邮件</a></li>-->
+</ul>
+<form id="dictSearchForm" class="breadcrumb form-search" action="#" method="post">
+    <input id="pageNo" name="pageNo" type="hidden" value="1"/>
+    <input id="pageSize" name="pageSize" type="hidden" value="18"/>
+
+    <div class="controls">
+        <label>起始日期</label>
+        <input id="startDate" name="startDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <label>截止日期</label>
+        <input id="endDate" name="endDate" style="width:189px" class="required Wdate" type="text" value="" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss' ,isShowClear:false,readOnly:true})" readonly="" />
+        &nbsp;&nbsp;
+        <label for="slaveNodeInput">区服ID:</label>
+        <input id="slaveNodeInput" name="slaveNodeInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="playerIdInput">角色ID:</label>
+        <input id="playerIdInput" name="playerIdInput" class="input-medium" type="text" value="" />&nbsp;<br><br>
+        <label for="subjectInput">邮件标题:</label>
+        <input id="subjectInput" name="subjectInput" class="input-medium" type="text" value="" />&nbsp;
+        <label for="awardInput">奖励字段:</label>
+        <input id="awardInput" name="awardInput" class="input-medium" type="text" value="" />&nbsp;
+
+        <label for="statusSelect">邮件状态:</label>
+        <!-- <input id="ipInput" name="ipInput" class="input-medium" type="text" value="" />&nbsp; -->
+        <select id="statusSelect" name="statusSelect" class="input-medium" style="width:220px">
+            <option value="">---选择同步状态---</option>
+            <option value="0"><span class='text-bg textbg-3'></span>发送成功</option>
+            <option value="1"><span class='text-bg textbg-1'>发送失败,等待重新发送</span></option>
+            <option value="2"><span class='text-bg'>新加邮件,还没有发送</span></option>
+            <option value="3"><span class='text-bg textbg-4'>重新发送成功</span></option>
+        </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.getListPage(1,18);"/>
+        <i class="layer-tips right" id="hrefTips" tips="支持模糊查询。默认查询七天数据。如果只输入起始日期，查询起始日期后七天数据；只输入截止日期，查询截止日期前七天数据；起始日期和截止日期都输入，查询两个时间段之间的数据。"></i>
+    </div>
+
+</form>
+<table id="excelMailTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th class="header">ID</th>
+        <th class="header">区服ID</th>
+        <th class="header">角色ID</th>
+        <th class="header">邮件标题</th>
+        <th class="header">邮件内容</th>
+        <th class="header">奖励字段</th>
+        <th class="header">邮件创建时间</th>
+        <th class="header">邮件发送时间</th>
+        <th class="header">邮件状态</th>
+        <th class="header">用户</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td colspan='10' align='right'>没有查询到数据</td><tr>
+
+    </tbody>
+</table>
+<div class="pagination" id = "pageInfo">
+
+</div>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#excelMailTable").tablesorter();
+    });
+    Date.prototype.Format = function (fmt) { // author: meizz
+        var o = {
+            "M+": this.getMonth() + 1, // 月份
+            "d+": this.getDate(), // 日
+            "h+": this.getHours(), // 小时
+            "m+": this.getMinutes(), // 分
+            "s+": this.getSeconds(), // 秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), // 季度
+            "S": this.getMilliseconds() // 毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+    $(function () {
+        mgr.getListPage(1,18);
+    });
+    var mgr ={
+        getListPage : function(pageNo,pageSize){
+            var startDate = $("#startDate").val();
+            var endDate = $("#endDate").val();
+            var slaveNodeInput = $("#slaveNodeInput").val();
+            var playerIdInput = $("#playerIdInput").val();
+            var subjectInput = $("#subjectInput").val();
+            var awardInput = $("#awardInput").val();
+            var status = $("#statusSelect").find("option:selected").val();
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/sysmgr/excelmail/getExcelMailList',
+                dataType:'json',
+                data: {"startDate":startDate,"endDate":endDate,"serverId":slaveNodeInput,"playerId":playerIdInput,
+                    "subject":subjectInput,"awardStr":awardInput,"status":status,"pageNo":pageNo,"pageSize":pageSize},
+                success:function(result){
+                    var data = result.data;
+                    $("#excelMailTable").trigger("update");
+                    var excelMailList = data;
+                    if(excelMailList!=null&&excelMailList.length>1){
+                        var htmlTable = "";
+                        for(var i=1;i<excelMailList.length;i++){
+                            htmlTable = htmlTable+"<tr>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+ excelMailList[i].id;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].serverId;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].playerId;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].subject;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].content;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].awardStr;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var mailCreateTime = new Date(parseInt(excelMailList[i].createTime)).Format("yyyy-MM-dd hh:mm:ss");
+                            htmlTable = htmlTable+mailCreateTime;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            var mailSyncTime;
+                            if (excelMailList[i].syncTime==null){
+                                mailSyncTime = "";
+                            }else {
+                                mailSyncTime = new Date(parseInt(excelMailList[i].syncTime)).Format("yyyy-MM-dd hh:mm:ss");
+                            }
+                            htmlTable = htmlTable+mailSyncTime;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            switch(excelMailList[i].status){//0:发送成功,1:发送失败,等待重新发送,2:新加邮件,还没有发送,3:重新发送成功
+                                case "0" :
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-3'>";
+                                    htmlTable = htmlTable+"发送成功";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                                case "1" :
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-1'>";
+                                    htmlTable = htmlTable+"发送失败";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                                case "2" :
+                                    htmlTable = htmlTable+"<span class='text-bg'>";
+                                    htmlTable = htmlTable+"新加邮件";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                                case "3" :
+                                    htmlTable = htmlTable+"<span class='text-bg textbg-4'>";
+                                    htmlTable = htmlTable+"重新发送成功";
+                                    htmlTable = htmlTable+"</span>";
+                                    break;
+                            }
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"<td>";
+                            htmlTable = htmlTable+excelMailList[i].userId;
+                            htmlTable = htmlTable+"</td>";
+                            htmlTable = htmlTable+"</tr>";
+                        }
+                        var pageStr = data[0];
+                        $('#excelMailTable').find('tbody').html(htmlTable);
+                        //取出分页条代码
+                        $('#pageInfo').html(pageStr);
+                    } else{
+                        $('#excelMailTable').find('tbody').html("<tr><td colspan='10' align='right'>没有查询到数据</td><tr>");
+                        $('#pageInfo').html("");
+                    }
+
+                }
+            });
+        }
+    }
+</script>
+<script>
+
+    function getValueSidSelect(){
+        var o = document.getElementById("#sidSelect") ;
+        var intvalue="";
+        for(i=0;i<o.length;i++){
+            if(o.options[i].selected){
+                intvalue+=o.options[i].value+",";
+            }
+        }
+        $("#sidContext").html(intvalue);
+    }
+</script>
+</body>
+</html>

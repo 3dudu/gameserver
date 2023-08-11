@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!--开启spring组件扫描 (只包含Controller注解或者说，springmvc这边只开启对Controller的注解) -->
+	<context:component-scan base-package="com.icegame" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<mvc:annotation-driven></mvc:annotation-driven>
+
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<bean id="logAopAction" class="com.icegame.log.frameworks.SysLogAspect"></bean>
+
+
+	<!--配置视图解析器 这个是专门用于解析jsp的视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<property name="suffix" value=".html" />
+	</bean>
+
+	<!--对静态资源文件的访问 -->
+	<!-- <mvc:resources mapping="/WEB-INF/**" location="/pages/" /> -->
+
+	<!--配置拦截器 注意:拦截器的配置顺序决定了它们的执行顺序 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/serverlist/**" />
+			<mvc:exclude-mapping path="/serverlistSuggested/**" />
+			<mvc:exclude-mapping path="/announcements/**" />
+			<mvc:exclude-mapping path="/getAllChannelServerList" />
+			<mvc:exclude-mapping path="/getAllChannelServerListNoPage" />
+			<mvc:exclude-mapping path="/getCookie" />
+			<mvc:exclude-mapping path="/WEB-INF/pages/login.html"/>
+	 		<mvc:exclude-mapping path="/login.do"/>
+	 		<mvc:exclude-mapping path="/getpfOptions" />
+			<mvc:exclude-mapping path="/checkImg" />
+			<mvc:exclude-mapping path="/api/**" />
+			<mvc:exclude-mapping path="/gotoHelpInfo" />
+			<mvc:exclude-mapping path="/getProjectName" />
+			<mvc:exclude-mapping path="/sysmgr/slavenodes/getSlaveNodesListNoPage" />
+			<mvc:exclude-mapping path="/sysmgr/helpsys/getDiffTypeList" />
+			<mvc:exclude-mapping path="/sysmgr/group/getAuthorizeChannelList" />
+			<bean class="com.icegame.framework.interceptor.LoginInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<mvc:cors>
+		<mvc:mapping path="/sysmgr/ip/getWebIp" />
+		<mvc:mapping path="/serverlist/**" />
+		<mvc:mapping path="/serverlistSuggested/**" />
+		<mvc:mapping path="/announcements/**" />
+		<mvc:mapping path="/api/**" />
+	</mvc:cors>
+
+	<!--配置hibernate validator -->
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="providerClass"
+			value="org.hibernate.validator.HibernateValidator" />
+	</bean>
+</beans>

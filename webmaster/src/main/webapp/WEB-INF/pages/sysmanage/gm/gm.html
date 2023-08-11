@@ -1,0 +1,1903 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+<meta charset="utf-8" />
+<meta name="renderer" content="webkit">
+<style>
+.arr{
+	width:22%;
+	height:500px;
+	float:left;
+	border:1px solid #f5f5f5;
+	overflow: scroll;
+    overflow-x: hidden;
+    white-space:nowrap;
+}
+
+.form-gm h5{display: inline-block;}
+.modelInput{width: 90px;}
+.pointer{cursor:pointer}
+.mr1{
+	margin-right:8px !important;
+}
+.cen{
+	text-align:center;
+}
+.widthP50{
+	width:50%;
+}
+.form-search .ul-form li label{
+	width:82px !important;
+}
+.blue{
+	color:#2fa4e7;
+}
+.of-x{
+	/* overflow: scroll; */
+	min-width:1450px;
+	margin-bottom:8px;
+	height:518px;
+    /* overflow-y: hidden; */
+}
+
+</style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:void(0);">角色查询</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+    <div class="controls">
+    	<label for="serverIdInput">所在区:</label>
+    	<select id="serverIdInput" name="serverIdInput" style="width:190px">
+			<option value="">选择所在区</option>
+			<option value="10">十区</option>
+			<option value="13">十三区</option>
+			<option value="14">十四区</option>
+			<option value="15">十五区</option>
+			<option value="16">十六区</option>
+	    </select>
+		<label for="playerIdInput">角色ID:</label>
+        <input id="playerIdInput" name="playerIdInput" class="input-medium" type="text" value=""/>&nbsp;
+        <label for="playerNameInput">角色名:</label>
+        <input id="playerNameInput" name="playerNameInput" class="input-medium" type="text" value=""/>&nbsp;
+		<label for="playerGodNameInput">修仙名:</label>
+		<input id="playerGodNameInput" name="playerGodNameInput" class="input-medium" type="text" value=""/>&nbsp;
+        <input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.searchPlayerInfo();"/>
+        <i class="layer-tips right" id="hrefTips" tips="可以双击右侧的value单元格，可以进行修改。物品的删除每次操作只可以删除一类物品，比如要删除弟子，那就不能在选择了弟子的同时在选择其他的背包、装备、坐骑数据进行删除"></i>
+	</div>
+</form>
+
+<table id="infoTable"  class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	<tbody>
+	  	<tr>
+	  		<td class='blue'>所在区</td>
+		    <td id="_serverName"></td>
+		    <td class='blue'>角色名</td>
+		    <td id="playerName"></td>
+		    <td class='blue'>角色ID</td>
+		    <td id="_playerId"></td>
+		    <td class='blue'>真实玩家</td>
+		    <td id="_real"></td>
+		    <td class='blue'>角色等级</td>
+		    <td id="level"></td>
+		    <td class='blue'>角色经验</td>
+		    <td id="exp"></td>
+		    <td class='blue'>封禁天数</td>
+		    <td id="banDay"></td>
+		</tr>
+		<tr>
+		    <td class='blue'>体力</td>
+		    <td id="stamina"></td>
+		    <td class='blue'>神力</td>
+		    <td id="godStamina"></td>
+		    <td class='blue'>元气</td>
+		    <td id="qi"></td>
+		    <td class='blue'>VIP等级</td>
+		    <td id="vipLevel"></td>
+		    <td class='blue'>VIP经验</td>
+		    <td id="vipExp"></td>
+		    <td class='blue'>竞技场排名</td>
+		    <td id="areaRank"></td>
+		    <td class='blue'>队伍仙力</td>
+		    <td id="_battlePower"></td>
+		</tr>
+		<tr>
+		    <td class='blue'>金钱</td>
+		    <td id="coin"></td>
+		    <td class='blue'>元宝</td>
+		    <td id="dollar"></td>
+		    <td class='blue'>功德</td>
+		    <td id="merit"></td>
+		    <td class='blue'>神庙等级</td>
+		    <td id="templeLevel"></td>
+		    <td class='blue'>信徒数量</td>
+		    <td id="believerNumber"></td>
+		    <td class='blue'>副本进度</td>
+		    <td id="_levelName"></td>
+		    <td class='blue'>最后登录时间</td>
+		    <td id="_onlineTime"></td>
+		</tr>
+		<tr>
+			<td class='blue'>保卫长城历史最高积分</td>
+			<td id="lwMaxScore"></td>
+			<td class='blue'>保卫长城当前积分</td>
+			<td id="lwScore"></td>
+			<td class='blue'>保卫长城排名</td>
+			<td id="lwRank"></td>
+		    <td class='blue'>聊天禁言(分钟)</td>
+		    <td id="chattingBanTime"></td>
+		    <td class='blue'>邮件禁言(分钟)</td>
+		    <td id="mailBanTime"></td>
+			<td class='blue'>至尊等级</td>
+			<td id="xxVip"></td>
+			<td class='blue'>至尊经验</td>
+			<td id="xxVipExp"></td>
+		</tr>
+		<tr>
+			<td class='blue'>仙名</td>
+			<td id="xianMing"></td>
+			<td class='blue'>仙玉</td>
+			<td id="xianYu"></td>
+			<td class='blue'>灵石</td>
+			<td id="lingShi"></td>
+			<td class='blue'>境界</td>
+			<td id="levelId"></td>
+			<td class='blue'>修为值</td>
+			<td id="xiuWei"></td>
+			<td class='blue'>仙官</td>
+			<td id="godId"></td>
+			<td class='blue'>历练关卡进度</td>
+			<td id="hangLevel"></td>
+		</tr>
+		<tr>
+			<td class='blue'>仙力</td>
+			<td id="xxPower"></td>
+			<td class='blue'>宠物关卡进度</td>
+			<td id="petLevelId"></td>
+			<td class='blue'>兵书关卡进度</td>
+			<td id="bookLevelId"></td>
+			<td class='blue'>仙阶关卡进度</td>
+			<td id="campaignLevelId"></td>
+			<td class='blue'>命格关卡进度</td>
+			<td id="destinyLevelId"></td>
+			<td class='blue'></td>
+			<td ></td>
+			<td class='blue'></td>
+			<td ></td>
+		</tr>
+	</tbody>
+</table>
+<div class = "modal fade modal default-model" id = "mergeModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">编辑</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="mergeForm" class="form-horizontal form-gm" action="#" method="post">
+                 	<input id="mergeName" name="mergeName" type="hidden" value=""/>
+					<!-- <div class="control-group">
+						<h5 style="margin-left:180px">请输入修改值:</h5>
+					</div> -->
+					<div class="control-group">
+						<div class="controls">
+							<h5 id="indexName"></h5><input id="mergeValue" name="mergeValue" type="text" value="" class="modelInput"/>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="mergeSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class = "modal fade modal default-model" id = "mergeItemModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">编辑</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="mergeItemForm" class="form-horizontal form-gm" action="#" method="post">
+                 	<input id="mergeItemId" name="mergeItemId" type="hidden" value=""/>
+					<!-- <div class="control-group">
+						<h5 style="margin-left:180px">请输入修改值:</h5>
+					</div> -->
+					<div class="control-group">
+						<div class="controls">
+							<h5 id="indexNameItem"></h5><input id="mergeItemValue" name="mergeItemValue" type="text" class="modelInput" value="" class="required"/><h5>&emsp;个</h5>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myItemBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="mergeItemSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class = "modal fade modal default-model" id = "mergeLevelModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">编辑</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="mergeLevelForm" class="form-horizontal form-gm" action="#" method="post">
+                 	<input id="mergeLevelId" name="mergeItemId" type="hidden" value=""/>
+					<div class="control-group">
+						<h5 style="margin-left:150px">请选择关卡:</h5>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;margin-bottom:8px">
+							<label for="thisLevel">当前关卡:</label>
+							<input id="thisLevel" name="thisLevel" type="text" readonly = "readonly" value=""/>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;">
+							<label for="thisLevel">目标关卡:</label>
+							<select id="mergeLevel" name="mergeLevel" style="width:220px;">
+								<option value="">选择</option>
+						    </select>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myLevelBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="mergeLevelSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<!--用于修改修仙境界，仙官，官卡-->
+<div class = "modal fade modal default-model" id = "mergeGodModal" style="display:none">
+	<div class = "modal-dialog">
+		<div class = "modal-content">
+			<div class ="modal-header">
+				<button type = "button" class = "close" data-dismiss = "modal">
+					<span aria-hidden = "true">&times;</span>
+					<span class = "sr-only"></span>
+				</button>
+				<h5 class = "modal-title">编辑</h5>
+			</div>
+			<div class = "modal-body">
+				<form id="mergeGodForm" class="form-horizontal form-gm" action="#" method="post">
+					<input id="mergeGodId" name="mergeItemId" type="hidden" value=""/>
+					<div class="control-group">
+						<h5 id="editTitle" style="margin-left:150px">请选择:</h5>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;margin-bottom:8px">
+							<label id="originTitle" for="originValue">当前:</label>
+							<input id="propertyName" name="propertyName" type="hidden" value=""/>
+							<input id="originValue" name="mergeGodValue" type="text" readonly = "readonly" value=""/>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;">
+							<label id="targetTitle" for="mergeGod">目标:</label>
+							<select id="mergeGod" name="mergeGod" style="width:220px;">
+								<option selected="selected" value="">选择</option>
+							</select>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+						<button id ="mergeGodBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+						<input id ="mergeGodSubmit" class ="btn btn-primary" type="submit" value="保存">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!--用于奇物关卡修改进度-->
+<div class = "modal fade modal default-model" id = "mergeStrangeLevelModal" style="display:none">
+	<div class = "modal-dialog">
+		<div class = "modal-content">
+			<div class ="modal-header">
+				<button type = "button" class = "close" data-dismiss = "modal">
+					<span aria-hidden = "true">&times;</span>
+					<span class = "sr-only"></span>
+				</button>
+				<h5 class = "modal-title">编辑</h5>
+			</div>
+			<div class = "modal-body">
+				<form id="mergeStrangeLevelForm" class="form-horizontal form-gm" action="#" method="post">
+					<input id="mergeStrangeLevelId" name="mergeItemId" type="hidden" value=""/>
+					<div class="control-group">
+						<h5 style="margin-left:150px">请选择关卡:</h5>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;margin-bottom:8px">
+							<label for="thisStrangeLevel">当前关卡:</label>
+							<input id="thisStrangeLevelName" name="thisStrangeLevelName" type="hidden" value=""/>
+							<input id="thisStrangeLevel" name="thisLevel" type="text" readonly = "readonly" value=""/>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left: 150px;">
+							<label for="thisStrangeLevel">目标关卡:</label>
+							<select id="mergeStrangeLevel" name="mergeStrangeLevel" style="width:220px;">
+								<option value="">选择</option>
+							</select>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+						<button id ="myStrangeLevelBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+						<input id ="mergeStrangeLevelSubmit" class ="btn btn-primary" type="submit" value="保存">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class = "modal fade modal default-model" id = "addGoodsModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">添加物品</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="addGoodsForm" class="form-horizontal" action="#" method="post">
+                 	<div class="control-group">
+						<h5 class="cen">请输入添加物品编号[大类型(碎片为2)]:编号:数量:</h5>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left:170px;">
+							<select id="selectAddGoods" name="selectAddGoods" style="width:230px;margin-bottom:8px;">
+								<option value="">选择物品</option>
+						    </select>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left:170px;">
+							<input id="addGoods" name="addGoods" type="text" value="" style="width:216px" class="required"/>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="addGoodsSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class = "modal fade modal default-model" id = "sixDaoModal" style="display:none">
+       <div class = "modal-dialog">
+           <div class = "modal-content">
+               <div class ="modal-header">
+                   <button type = "button" class = "close" data-dismiss = "modal">
+                       <span aria-hidden = "true">&times;</span>
+                       <span class = "sr-only"></span>
+                   </button>
+                   <h5 class = "modal-title">千里单骑</h5>
+               </div>
+               <div class = "modal-body">
+                 <form id="sixDaoForm" class="form-horizontal" action="#" method="post">
+                 	<div class="control-group">
+						<h5 class="cen">请选择关卡</h5>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left:190px;">
+						<h5 style="float: left;margin-right: 7px;line-height: 26px;">第</h5>
+							<select id="sixDaoLevel" name="sixDaoLevel" style="width:150px;float:left;margin-bottom:8px;">
+								<optgroup label="千里关卡">
+								    <option value ="101">千里第一关</option>
+								    <option value ="102">千里第二关</option>
+								    <option value ="103">千里第三关</option>
+								    <option value ="104">千里第四关</option>
+								    <option value ="105">千里第五关</option>
+								    <option value ="106">千里第六关</option>
+								    <option value ="107">千里第七关</option>
+								    <option value ="108">千里第八关</option>
+								    <option value ="109">千里第九关</option>
+								    <option value ="110">千里第十关</option>
+								    <option value ="111">千里十一关</option>
+								    <option value ="112">千里十二关</option>
+								    <option value ="113">千里十三关</option>
+								    <option value ="114">千里十四关</option>
+								    <option value ="115">千里十五关</option>
+								    <option value ="116">千里十六关</option>
+								    <option value ="117">千里十七关</option>
+								    <option value ="118">千里十八关</option>
+								</optgroup>
+								<optgroup label="万里关卡">
+								    <option value ="119">万里第一关</option>
+								    <option value ="120">万里第二关</option>
+								    <option value ="121">万里第三关</option>
+								    <option value ="122">万里第四关</option>
+								    <option value ="123">万里第五关</option>
+								    <option value ="124">万里第六关</option>
+								    <option value ="125">万里第七关</option>
+								    <option value ="126">万里第八关</option>
+								    <option value ="127">万里第九关</option>
+								    <option value ="128">万里第十关</option>
+								    <option value ="129">万里十一关</option>
+								    <option value ="130">万里十二关</option>
+								    <option value ="131">万里十三关</option>
+								    <option value ="132">万里十四关</option>
+								    <option value ="133">万里十五关</option>
+								    <option value ="134">万里十六关</option>
+								    <option value ="135">万里十七关</option>
+								    <option value ="136">万里十八关</option>
+								</optgroup>
+								<optgroup label="独孤关卡">
+								    <option value ="137">独孤第一关</option>
+								    <option value ="138">独孤第二关</option>
+								    <option value ="139">独孤第三关</option>
+								    <option value ="140">独孤第四关</option>
+								    <option value ="141">独孤第五关</option>
+								    <option value ="142">独孤第六关</option>
+								    <option value ="143">独孤第七关</option>
+								    <option value ="144">独孤第八关</option>
+								    <option value ="145">独孤第九关</option>
+								    <option value ="146">独孤第十关</option>
+								    <option value ="147">独孤十一关</option>
+								    <option value ="148">独孤十二关</option>
+								    <option value ="149">独孤十三关</option>
+								    <option value ="150">独孤十四关</option>
+								    <option value ="151">独孤十五关</option>
+								    <option value ="152">独孤十六关</option>
+								    <option value ="153">独孤十七关</option>
+								    <option value ="154">独孤十八关</option>
+								</optgroup>
+								<optgroup label="天道关卡">
+								    <option value ="155">天道第一关</option>
+								    <option value ="156">天道第二关</option>
+								    <option value ="157">天道第三关</option>
+								    <option value ="158">天道第四关</option>
+								    <option value ="159">天道第五关</option>
+								    <option value ="160">天道第六关</option>
+								    <option value ="161">天道第七关</option>
+								    <option value ="162">天道第八关</option>
+								    <option value ="163">天道第九关</option>
+								    <option value ="164">天道第十关</option>
+								    <option value ="165">天道十一关</option>
+								    <option value ="166">天道十二关</option>
+								    <option value ="167">天道十三关</option>
+								    <option value ="168">天道十四关</option>
+								    <option value ="169">天道十五关</option>
+								    <option value ="170">天道十六关</option>
+								    <option value ="171">天道十七关</option>
+								    <option value ="172">天道十八关</option>
+								</optgroup>
+						    </select>
+						    <h5 style="float: left; margin-left: 7px;line-height: 26px;">关</h5>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" style="margin-left:190px;">
+							<h5 style="float: left;margin-right: 7px;line-height: 26px;">第</h5>
+							<select id="sixDaoCen" name="sixDaoCen" style="width:150px;float:left;margin-bottom:8px;">
+							    <option value ="1">1</option>
+							    <option value ="2">2</option>
+							    <option value ="3">3</option>
+							    <option value ="4">4</option>
+							    <option value ="5">5</option>
+							    <option value ="6">6</option>
+							    <option value ="7">7</option>
+							    <option value ="8">8</option>
+							    <option value ="9">9</option>
+							    <option value ="10">10</option>
+							    <option value ="11">11</option>
+							    <option value ="12">12</option>
+							    <option value ="13">13</option>
+							    <option value ="14">14</option>
+							    <option value ="15">15</option>
+							    <option value ="16">16</option>
+							    <option value ="17">17</option>
+							    <option value ="18">18</option>
+							    <option value ="19">19</option>
+							    <option value ="20">20</option>
+							    <option value ="21">21</option>
+							    <option value ="22">22</option>
+							    <option value ="23">23</option>
+							    <option value ="24">24</option>
+							    <option value ="25">25</option>
+							    <option value ="26">26</option>
+							    <option value ="27">27</option>
+							    <option value ="28">28</option>
+							    <option value ="29">29</option>
+							    <option value ="30">30</option>
+							    <option value ="31">31</option>
+							    <option value ="32">32</option>
+							    <option value ="33">33</option>
+							    <option value ="34">34</option>
+							    <option value ="35">35</option>
+							    <option value ="36">36</option>
+							    <option value ="37">37</option>
+							    <option value ="38">38</option>
+							    <option value ="39">39</option>
+							    <option value ="40">40</option>
+						    </select>
+						    <h5 style="float: left; margin-left: 7px;line-height: 26px;">层</h5>
+						</div>
+					</div>
+					<div class = "modal-footer model-bot">
+	                    <button id ="myBtnClose" class ="btn btn-primary" type="button" data-dismiss = "modal">退出</button>
+	                    <input id ="sixDaoSubmit" class ="btn btn-primary" type="submit" value="保存">
+	                 </div>
+				</form>
+               </div>
+           </div>
+       </div>
+</div>
+<div class="of-x">
+<form id="npcInfosForm" class="breadcrumb form-search arr mr1" action="#" method="post">
+	<h5 class="cen">弟子</h5>
+	<table id="npcInfosTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th style="text-align:center;width:20px;"><input id="checkAllNpc" type="checkbox" value="" /></th>
+			<th>弟子名称</th>
+			<th>品质</th>
+			<th>等级</th>
+			<th>是否上阵</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		</tbody>
+	</table>
+</form>
+<form id="magicInfosForm" class="breadcrumb form-search arr mr1" action="#" method="post">
+	<h5 class="cen">装备&法宝</h5>
+	<table id="magicInfosTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th style="text-align:center;width:20px;"><input id="checkAllMagic" type="checkbox" value="" /></th>
+			<th>装备名称</th>
+			<th>品质</th>
+			<th>等级</th>
+			<th>是否装备</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		</tbody>
+	</table>
+</form>
+<form id="itemInfosForm" class="breadcrumb form-search arr mr1" action="#" method="post">
+	<h5 class="cen">背包</h5>
+	<table id="itemInfosTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th style="text-align:center;width:20px;"><input id="checkAllItem" type="checkbox" value="" /></th>
+			<th>道具名称</th>
+			<th>数量</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		</tbody>
+	</table>
+</form>
+<form id="horseInfosForm" class="breadcrumb form-search arr" action="#" method="post">
+	<h5 class="cen">坐骑</h5>
+	<table id="horseInfosTable" class="table tablesorter table-hover table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th style="text-align:center;width:20px;"><input id="checkAllHorse" type="checkbox" value="" /></th>
+			<th>坐骑名称</th>
+			<th>品质</th>
+			<th>等级</th>
+			<th>是否装备</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		</tbody>
+	</table>
+</form>
+</div>
+
+
+<form id="buttonForm" class="breadcrumb form-search" action="#" method="post">
+    <div id="btnControls" class="controls">
+        <!-- <input id="btnAdd" class="btn btn-primary" type="button" value="添加" onclick = "mgr.addGoods();"/>&nbsp;
+        <input id="btnDel" class="btn btn-warning" type="button" value="删除" onclick = "mgr.delGoods();"/> -->
+	</div>
+</form>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+var mergeItemModalEdit = false;
+
+$(document).ready(function(){
+    $("#npcInfosTable").tablesorter({headers:{0:{sorter:false}}});
+    $("#magicInfosTable").tablesorter({headers:{0:{sorter:false}}});
+    $("#itemInfosTable").tablesorter({headers:{0:{sorter:false}}});
+    $("#horseInfosTable").tablesorter({headers:{0:{sorter:false}}});
+});
+$().ready(function() {
+	$("#addGoodsForm").validate({
+		rules: {
+			addGoods: {
+				required: true,
+				maxlength: 30
+			}
+		},
+		messages: {
+			addGoods: {
+				required: "请输入物品编号:数量",
+				maxlength: "最大长度为30"
+			}
+		} ,
+		submitHandler: function(form) {
+		    mgr.saveAddGoods(form);
+		}
+	});
+	$("#mergeForm").validate({
+		rules: {
+			mergeValue: {
+				required: true,
+				digits:true,
+				maxlength: 50
+			}
+		},
+		messages: {
+			mergeValue: {
+				required: "请输入修改值",
+				digits:"需要输入正整数",
+				maxlength: "最大长度为50"
+			}
+		} ,
+		submitHandler: function(form) {
+		    mgr.merge(form);
+		}
+	});
+	$("#mergeItemForm").validate({
+		rules: {
+			mergeItemValue: {
+				required: true,
+				maxlength: 50
+			}
+		},
+		messages: {
+			mergeItemValue: {
+				required: "请输入修改值",
+				maxlength: "最大长度为50"
+			}
+		} ,
+		submitHandler: function(form) {
+		    mgr.mergeItem(form);
+		}
+	});
+	$("#mergeLevelForm").validate({
+		rules: {
+			mergeLevelValue: {
+				required: true,
+				maxlength: 50
+			}
+		},
+		messages: {
+			mergeLevelValue: {
+				required: "请选择关卡名称",
+				maxlength: "最大长度为50"
+			}
+		} ,
+		submitHandler: function(form) {
+		    mgr.mergeLevel(form);
+		}
+	});
+	//修改修仙境界，仙官，关卡
+	$("#mergeGodForm").validate({
+		rules: {
+			mergeGodValue: {
+				required: true,
+				maxlength: 50
+			}
+		},
+		messages: {
+			mergeGodValue: {
+				required: "至少选择一项",
+				maxlength: "最大长度为50"
+			}
+		} ,
+		submitHandler: function(form) {
+			mgr.mergeGod(form);
+		}
+	});
+	//修改奇物关卡进度
+	$("#mergeStrangeLevelForm").validate({
+		rules: {
+			mergeLevelValue: {
+				required: true,
+				maxlength: 50
+			}
+		},
+		messages: {
+			mergeLevelValue: {
+				required: "请选择关卡名称",
+				maxlength: "最大长度为50"
+			}
+		} ,
+		submitHandler: function(form) {
+			mgr.mergeStrangeLevel(form);
+		}
+	});
+	$("#sixDaoForm").validate({
+		rules: {
+			sixDaoLevel: {
+				required: true,
+				maxlength: 50
+			},
+			sixDaoCen: {
+				required: true,
+				maxlength: 2
+			}
+		},
+		messages: {
+			sixDaoLevel: {
+				required: "请选择关卡",
+				maxlength: "最大长度为50"
+			},
+			sixDaoCen: {
+				required: "请选择层数",
+				maxlength: "最大长度为2"
+			}
+		} ,
+		submitHandler: function(form) {
+		    mgr.mergeSixDao(form);
+		}
+	});
+});
+var chk ={
+    /*开启npc选择*/
+    openNpcCheck : function(){
+        $(":checkbox[name='checkNpc']").each(function(){
+             $(this).removeAttr("disabled"); //解除禁用
+        });
+        $('#checkAllNpc').removeAttr("disabled");
+    },
+    /*关闭npc选择*/
+    closeNpcCheck : function(){
+        $(":checkbox[name='checkNpc']").each(function(){
+             $(this).attr("disabled","disabled"); //解除禁用
+        });
+        $('#checkAllNpc').attr("disabled","disabled");
+    },
+    /*开启装备选择*/
+    openMagicCheck : function(){
+        $(":checkbox[name='checkMagic']").each(function(){
+             $(this).removeAttr("disabled"); //解除禁用
+        });
+        $('#checkAllMagic').removeAttr("disabled");
+    },
+    /*关闭装备选择*/
+    closeMagicCheck : function(){
+        $(":checkbox[name='checkMagic']").each(function(){
+             $(this).attr("disabled","disabled"); //解除禁用
+        });
+        $('#checkAllMagic').attr("disabled","disabled");
+    },
+    /*开启背包选择*/
+    openItemCheck : function(){
+        $(":checkbox[name='checkItem']").each(function(){
+             $(this).removeAttr("disabled"); //解除禁用
+        });
+        $('#checkAllItem').removeAttr("disabled");
+    },
+    /*关闭背包选择*/
+    closeItemCheck : function(){
+        $(":checkbox[name='checkItem']").each(function(){
+             $(this).attr("disabled","disabled"); //解除禁用
+        });
+        $('#checkAllItem').attr("disabled","disabled");
+    },
+    /*开启坐骑选择*/
+    openHorseCheck : function(){
+        $(":checkbox[name='checkHorse']").each(function(){
+             $(this).removeAttr("disabled"); //解除禁用
+        });
+        $('#checkAllHorse').removeAttr("disabled");
+    },
+    /*关闭坐骑选择*/
+    closeHorseCheck : function(){
+        $(":checkbox[name='checkHorse']").each(function(){
+             $(this).attr("disabled","disabled"); //解除禁用
+        });
+        $('#checkAllHorse').attr("disabled","disabled");
+    },
+
+    /*
+     *  再次进行封装
+     *  1：弟子
+     *  2：装备&法宝
+     *  3：背包
+     *  4：坐骑
+     *  open234：表示 打开 装备&法宝、背包、坐骑 的checkbox选择
+     *  ···
+     *  ···
+     *  以此类推
+     */
+    open234 : function(){
+        this.openMagicCheck();
+        this.openItemCheck();
+        this.openHorseCheck();
+    },
+    close234 : function(){
+        this.closeMagicCheck();
+        this.closeItemCheck();
+        this.closeHorseCheck();
+    },
+    open134 : function(){
+        this.openNpcCheck();
+        this.openItemCheck();
+        this.openHorseCheck();
+    },
+    close134 : function(){
+        this.closeNpcCheck();
+        this.closeItemCheck();
+        this.closeHorseCheck();
+    },
+    open124 : function(){
+        this.openNpcCheck();
+        this.openMagicCheck();
+        this.openHorseCheck();
+    },
+    close124 : function(){
+        this.closeNpcCheck();
+        this.closeMagicCheck();
+        this.closeHorseCheck();
+    },
+    open123 : function(){
+        this.openNpcCheck();
+        this.openMagicCheck();
+        this.openItemCheck();
+    },
+    close123 : function(){
+        this.closeNpcCheck();
+        this.closeMagicCheck();
+        this.closeItemCheck();
+    }
+}
+$(function () {
+	mgr.getAllChannelServerList();
+	mgr.getButtonListByUserId();
+	$('#selectAddGoods').change(function(e){
+		var id = $("#selectAddGoods").find("option:selected").val();
+		$("#addGoods").val(id+":");
+		$("#addGoods").focus();
+		//alert(id);
+    });
+
+	/*单机改行中的位置，选中此行的checkbox*/
+	/* $('#npcInfosTable').on('click', 'tr', function (e) {
+		//alert(1);
+         // 获取table中所有的行
+         var trs = $(this).parent('tbody').find('tr');
+         // 取消所有行的选中
+        $.each(trs, function (index, item) {
+             // 如果在此使用的是attr()设置选中状态,取消后将不能设置为选中
+            $(item).find('td:eq(0) input').prop('checked', false);
+        });
+         // 选中当前点击的行
+        var isThisSelected = $(this).find('td:eq(0) input').is(':checked');
+        if(isThisSelected){
+        	$(this).find('td:eq(0) input').prop('checked', false);
+        }else{
+        	$(this).find('td:eq(0) input').prop('checked', true);
+        }
+    }); */
+	/* $('#magicInfosTable').on('click', 'tr', function (e) {
+        var isThisSelected = $(this).find('td:eq(0) input').is(':checked');
+        if(isThisSelected){
+        	$(this).find('td:eq(0) input').prop('checked', false);
+        }else{
+        	$(this).find('td:eq(0) input').prop('checked', true);
+        }
+    });
+    $('#itemInfosTable').on('click', 'tr', function (e) {
+        var isThisSelected = $(this).find('td:eq(0) input').is(':checked');
+        if(isThisSelected){
+        	$(this).find('td:eq(0) input').prop('checked', false);
+        }else{
+        	$(this).find('td:eq(0) input').prop('checked', true);
+        }
+    });
+    $('#horseInfosTable').on('click', 'tr', function (e) {
+        var isThisSelected = $(this).find('td:eq(0) input').is(':checked');
+        if(isThisSelected){
+        	$(this).find('td:eq(0) input').prop('checked', false);
+        }else{
+        	$(this).find('td:eq(0) input').prop('checked', true);
+        }
+    }) */
+});
+/* 每次刷新完页面数据之后执行此方法 */
+function reloadCheck(){
+	 /*选中一种类型时候其他的类型就禁止选择*/
+	 //console.log('reloadCheck');
+    $('#checkAllNpc').click(function(){
+        if($(":checkbox[name='checkNpc']").is(":checked")){
+            //点击的时候如果是选中状态  就把它设置为非选状态
+            $(":checkbox[name='checkNpc']").attr("checked",false);
+            chk.open234();
+        }else{
+            $(":checkbox[name='checkNpc']").attr("checked",true);
+            chk.close234();
+        }
+    });
+    $('#checkAllMagic').click(function(){
+        if($(":checkbox[name='checkMagic']").is(":checked")){
+            $(":checkbox[name='checkMagic']").attr("checked",false);
+            chk.open134();
+        }else{
+            $(":checkbox[name='checkMagic']").attr("checked",true);
+            chk.close134();
+        }
+    });
+    $('#checkAllItem').click(function(){
+        if($(":checkbox[name='checkItem']").is(":checked")){
+            $(":checkbox[name='checkItem']").attr("checked",false);
+            chk.open124();
+        }else{
+            $(":checkbox[name='checkItem']").attr("checked",true);
+            chk.close124();
+        }
+
+    });
+    $('#checkAllHorse').click(function(){
+        if($(":checkbox[name='checkHorse']").is(":checked")){
+            $(":checkbox[name='checkHorse']").attr("checked",false);
+            chk.open123();
+        }else{
+            $(":checkbox[name='checkHorse']").attr("checked",true);
+            chk.close123();
+        }
+    });
+
+    /*选中一种类型某一项的时候，父节点选中*/
+    $(":checkbox[name='checkNpc']").change(function(e) {
+        $('#checkAllNpc').prop("checked",true);
+        chk.close234();
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){ //说明是取消选中的操作，这时候就需要判断其他的选项是否有选中，如果有，那就不做任何操作，如果没有，那就给父级元素全选中
+            $(":checkbox[name='checkNpc']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAllNpc').prop("checked",false);
+                chk.open234();
+            }
+
+        }
+    });
+
+    $(":checkbox[name='checkMagic']").change(function(e) {
+        $('#checkAllMagic').prop("checked",true);
+        chk.close134();
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){
+            $(":checkbox[name='checkMagic']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAllMagic').prop("checked",false);
+                chk.open134();
+            }
+        }
+    });
+
+    $(":checkbox[name='checkItem']").change(function(e) {
+        $('#checkAllItem').prop("checked",true);
+        chk.close124();
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){
+            $(":checkbox[name='checkItem']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAllItem').prop("checked",false);
+                chk.open124();
+            }
+        }
+    });
+
+    $(":checkbox[name='checkHorse']").change(function(e) {
+        $('#checkAllHorse').prop("checked",true);
+        chk.close123();
+        var checked = $(this).prop("checked");
+        var flag = false;
+        if(!checked){
+            $(":checkbox[name='checkHorse']").each(function(){
+                if($(this).is(':checked'))flag = true;
+            });
+            if(!flag){
+                $('#checkAllHorse').prop("checked",false);
+                chk.open123();
+            }
+        }
+    });
+}
+
+/* 获取区服id和区服名称 */
+function getServerInfo(){
+	var serverInfo=$("#serverIdInput option:selected"); //获取选中的项
+	return serverInfo.val()+"-"+serverInfo.text();
+}
+
+function getServerId(){
+	var serverInfo=$("#serverIdInput option:selected"); //获取选中的项
+	return serverInfo.val();
+}
+
+function editInfotable(){
+	$("#infoTable tr>td").dblclick(function(){
+		var thisId = $(this).attr('id');
+		var thisValue = $(this).html();
+		var indexName = $(this).prev().text();
+		if(null == thisId) return;
+		if(thisId.length > 0 && thisValue.length > 0){
+			if(thisId == "_playerId" || thisId == "_real" || thisId == "_serverName" || thisId == "_username" || thisId == "_onlineTime" || thisId == "_battlePower" || thisId == "lwRank" || thisId == "xxPower"){
+				alert("此数据不可修改");
+			}else if(thisId == "_levelName"){ //修改关卡
+				mgr.getData(thisId);
+				$("#mergeLevelModal").modal("toggle");
+				$("#thisLevel").val($(this).html());
+			}else if(thisId == "hangLevel" || thisId == "levelId" || thisId == "godId"){
+				mgr.getData(thisId);
+				$("#mergeGodModal").modal("toggle");
+				$("#s2id_mergeGod a").children(".select2-chosen").empty();
+				$("#editTitle").html("请输入"+indexName+"&emsp;");
+				$("#originTitle").html("当前"+indexName+"&emsp;");
+				$("#targetTitle").html("目标"+indexName+"&emsp;");
+				$("#propertyName").val($(this).attr('id'));
+				$("#originValue").val($(this).html());
+			}else if (thisId == "petLevelId" || thisId == "bookLevelId" || thisId == "campaignLevelId" || thisId == "destinyLevelId"){
+				//修改奇物关卡
+				mgr.getData(thisId);
+				$("#mergeStrangeLevelModal").modal("toggle");//thisStrangeLevel
+				$("#thisStrangeLevelName").val(thisId);
+				$("#thisStrangeLevel").val($(this).html());
+			}else{
+				$("#mergeModal").modal("toggle");
+				$("#mergeName").val($(this).attr('id'));
+				$("#mergeValue").val($(this).html());
+				$("#indexName").html(indexName+"&emsp;");
+				$("#mergeValue").focus();
+
+			}
+		}
+	});
+}
+
+function editItemInfoTable(){
+	$("#itemInfosTable tr>td").dblclick(function(){
+		var thisId = $(this).attr('id');
+		var thisValue = $(this).html();
+		var indexName = $(this).prev().text();
+		if(null == thisId) return;
+		if(thisId.length > 0 && thisValue.length > 0){
+			$("#mergeItemModal").modal("toggle");
+			$("#mergeItemValue").focus();
+			$("#mergeItemId").val($(this).attr('id'));
+			$("#mergeItemValue").val($(this).html());
+			$("#indexNameItem").html(indexName+"&emsp;");
+		}
+	});
+}
+
+function getQualityName(value) {
+	var qulity = parseInt(value);
+	switch (qulity) {
+	case 0:
+		return "丁";
+	case 1:
+		return "丙";
+	case 2:
+		return "乙";
+	case 3:
+		return "甲";
+	case 4:
+		return "圣";
+	case 5:
+		return "神";
+	case 6:
+		return "主";
+	case 7:
+		return "仙";
+	default:
+		return "未知";
+	}
+}
+
+function getBanMinutes(banTime){
+	var curTime= new Date().getTime();
+	var temp = banTime-curTime;
+	var minutes = 0;
+	if(temp>0){
+		minutes = Math.ceil(temp/60000);
+	}
+	return minutes;
+}
+var mgr ={
+	getAllChannelServerList : function (){
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/getAllChannelServerListNoPage',
+			dataType:'json',
+			data: {},
+			success:function(data){
+				//console.log(data);
+				var serverList = data;
+				var array = new Array();
+				if(serverList!=null&&serverList.length>0){
+
+                    for(var i=0;i<serverList.length;i++){
+                        if(array.indexOf(serverList[i].channel) == -1){
+                            array.push(serverList[i].channel);
+                        }
+                    }
+
+                    var html = '<option value="">选择所在区</option>';
+                    var serverNum;
+
+                    for(var k = 0 ; k < array.length ; k++){
+                        html += "<optgroup label=" + array[k] + ">";
+                        serverNum = 0;
+                        for(var i = 0 ; i < serverList.length ; i++){
+                            if(serverList[i].channel == array[k]){
+                                serverNum++;
+                                html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+                            }
+                        }
+                        html += "</optgroup>";
+                    }
+
+
+					/*var html = '<option value="">选择所在区</option>';
+					for(var i=0;i<serverList.length;i++){
+                        if(serverList[i].channel != "company"){
+                            html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+                        }
+					}*/
+					$('#serverIdInput').html(html);
+				}
+			}
+		});
+	},
+	getGoods : function (){
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/getGoods',
+			dataType:'json',
+			data: {},
+			success:function(data){
+				//console.log(data);
+				var npc = data[0];
+				var magic = data[1];
+				var item = data[2];
+				var horse = data[3];
+				if(npc!=null&&npc.length>0){
+					var html = "";
+					html += "<optgroup label='弟子'>";
+					for(var i=0;i<npc.length;i++){
+						html += "<option value='"+npc[i].id+"'>["+npc[i].id+"]-"+npc[i].name+"</option>";
+					}
+					html += "</optgroup>";
+				}
+				if(magic!=null && magic.length>0){
+					html += "<optgroup label='装备&法宝'>";
+					for(var i=0;i<magic.length;i++){
+						html += "<option value='"+magic[i].id+"'>["+magic[i].id+"]-"+magic[i].name+"</option>";
+					}
+					html += "</optgroup>";
+				}
+				if(item!=null && item.length>0){
+					html += "<optgroup label='背包'>";
+					for(var i=0;i<item.length;i++){
+						html += "<option value='"+item[i].id+"'>["+item[i].id+"]-"+item[i].name+"</option>";
+					}
+					html += "</optgroup>";
+				}
+				if(magic!=null && magic.length>0){
+					html += "<optgroup label='坐骑'>";
+					for(var i=0;i<horse.length;i++){
+						html += "<option value='"+horse[i].id+"'>["+horse[i].id+"]-"+horse[i].name+"</option>";
+					}
+					html += "</optgroup>";
+				}
+				$('#selectAddGoods').html(html);
+			}
+		});
+	},
+	getData : function (thisId){
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/loadCSV',
+			dataType:'json',
+			data: {"thisId":thisId},
+			success:function(data){
+				//console.log(data);
+				var level = data[0];
+				if(level!=null&&level.length>0){
+					var html = "";
+					html += "<optgroup id='selectContent' label = '选项'>";
+					for(var i=0;i<level.length;i++){
+						html += "<option value='"+level[i].id+"'>["+level[i].id+"]-"+level[i].name+"</option>";
+					}
+					html += "</optgroup>";
+				}
+				if (thisId == "_levelName"){
+					$('#mergeLevel').html(html);
+				}else if (thisId == "petLevelId" || thisId == "bookLevelId"|| thisId == "campaignLevelId"|| thisId == "destinyLevelId"){
+					$('#mergeStrangeLevel').html(html);
+				}else {
+					$('#mergeGod').html(html);
+				}
+
+			}
+		});
+	},
+	getButtonListByUserId:function(){
+ 		var parentId = 26;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/getButtonListByUserId',
+			dataType:'json',
+			data: {"parentId":parentId},
+			success:function(data){
+				var btnList = data;
+				if(null != btnList && btnList.length > 0){
+					var html = "";
+					var isEditer = false;
+					for(var i = 0 ; i < btnList.length ; i++){
+						if(btnList[i].name == "编辑") {
+							isEditer=true;
+							continue;
+						}
+						html += "<input id='btn"+i+"' class='btn btn-primary' type='button' value='"+btnList[i].name+"' onclick = '"+btnList[i].todo+"'/>&nbsp;";
+					}
+					/*此处是对 表格是否有双击修改权限做的判断*/
+					if(isEditer){
+						mergeItemModalEdit = true;
+						editInfotable();
+					}
+					$("#btnControls").html(html);
+				}
+				//console.log(data);
+			}
+		});
+ 	},
+	searchPlayerInfo :function(){
+
+		var serverId = $("#serverIdInput").val();
+		var playerId = $("#playerIdInput").val();
+		var playerName = $("#playerNameInput").val();
+		var playerGodName = $("#playerGodNameInput").val();
+		var username = $("#usernameInput").val();
+		var serverInfo = getServerInfo();
+		if(serverId == ""){
+			alert("请先选择区服");
+			return false;
+		}
+		if(playerId == "" && playerName == "" && playerGodName == ""){
+			alert("请输入 角色ID 或者 角色名 或者 修仙名");
+			return false;
+		}
+		/**老接口 获取玩家信息*/
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/searchPlayerInfo',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"playerGodName":playerGodName,"username":username,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data);
+				if(data == "-2"){
+					alert("角色不存在");
+					return false;
+				}
+				/* 排序 */
+				$("#npcInfosTable").trigger("update");
+				$("#magicInfosTable").trigger("update");
+				$("#itemInfosTable").trigger("update");
+				$("#horseInfosTable").trigger("update");
+
+				$("#_serverName").html(data._serverName);
+				$("#_username").html(data._username);
+				$("#playerName").html(data.playerName);
+				$("#_playerId").html(data._playerId);
+				$("#_real").html(String(data._real));
+				$("#level").html(data.level);
+				$("#exp").html(data.exp);
+				$("#vipLevel").html(data.vipLevel);
+				$("#vipExp").html(data.vipExp);
+				$("#banDay").html(data.banDay);
+				$("#merit").html(data.merit);
+				$("#stamina").html(data.stamina);
+				$("#godStamina").html(data.godStamina);
+				$("#qi").html(data.qi);
+				$("#areaRank").html(data.areaRank);
+				$("#_onlineTime").html(data.lastOffline);
+				$("#_battlePower").html(data._battlePower);
+				$("#coin").html(data.coin);
+				$("#dollar").html(data.dollar);
+				$("#_levelName").html(data._levelName);
+				$("#templeLevel").html(data.templeLevel);
+				$("#believerNumber").html(data.believerNumber);
+				$("#lwMaxScore").html(data.lwMaxScore == null ? "" : data.lwMaxScore);
+				$("#lwScore").html(data.lwScore == null ? "" : data.lwScore);
+				$("#lwRank").html(data.lwRank == null ? "" : data.lwRank);
+				$("#chattingBanTime").html(getBanMinutes(data.chattingBanTime));
+				$("#mailBanTime").html(getBanMinutes(data.mailBanTime));
+				/*修仙添加*/
+				$("#xianMing").html(data.xianMing == null ? "" : data.xianMing)
+				$("#xianYu").html(data.xianYu == null ? "" : data.xianYu)
+				$("#lingShi").html(data.lingShi == null ? "" : data.lingShi)
+				$("#levelId").html(data.levelName == null ? "" : data.levelName)
+				$("#xiuWei").html(data.xiuWei == null ? "" : data.xiuWei)
+				$("#godId").html(data.godName == null ? "" : data.godName)
+				$("#xxVip").html(data.xxVip == null ? "" : data.xxVip)
+				$("#xxVipExp").html(data.xxVipExp == null ? "" : data.xxVipExp)
+				$("#hangLevel").html(data.hangLevelName == null ? "" : data.hangLevelName)
+				$("#xxPower").html(data.xxPower == null ? "" : data.xxPower)
+				$("#petLevelId").html(data.petLevelId == null ? "" : data.petLevelId)
+				$("#bookLevelId").html(data.bookLevelId == null ? "" : data.bookLevelId)
+				$("#campaignLevelId").html(data.campaignLevelId == null ? "" : data.campaignLevelId)
+				$("#destinyLevelId").html(data.destinyLevelId == null ? "" : data.destinyLevelId)
+				var horseInfos = data.horseInfos;
+				var itemInfos = data.itemInfos;
+				var magicInfos = data.magicInfos;
+				var npcInfos = data.npcInfos;
+
+				var horseArr = new Array();
+				var itemArr = new Array();
+				var magicArr = new Array();
+				var npcArr = new Array();
+
+				horseArr = horseInfos;
+				itemArr = itemInfos;
+				magicArr = magicInfos;
+				npcArr = npcInfos;
+
+				if(magicArr.length == 0 && itemArr.length == 0 && magicArr.length == 0 && npcArr.length == 0){
+					alert("没有查询到数据");
+					return false;
+				}
+
+				var npcHtml = "";
+				for(var i = 0 ; i < npcArr.length ; i=i+3){
+					//console.log()
+					npcHtml += "<tr>";
+					npcHtml += "<td>";
+					var delButton = "<input type='checkbox' name='checkNpc' value='"+npcArr[i][2]+"'/>";
+					npcHtml += delButton;
+					npcHtml += "</td>";
+					npcHtml += "<td>";
+					npcHtml += "<span class='blue'>"+npcArr[i][0]+"</span>";
+					npcHtml += "</td>";
+					npcHtml += "<td>";
+					npcHtml += getQualityName(npcArr[i+1][0]);
+					npcHtml += "</td>";
+					npcHtml += "<td>";
+					npcHtml += npcArr[i+2][0];
+					npcHtml += "</td>";
+					npcHtml += "<td>";
+					npcHtml += npcArr[i][1] > 0 ? "已上阵" : "";
+					npcHtml += "</td>";
+					npcHtml += "</tr>";
+
+				}
+				$('#npcInfosTable').find('tbody').html(npcHtml);
+
+				var magicHtml = "";
+				for(var i = 0 ; i < magicArr.length ; i=i+3){
+
+					magicHtml += "<tr>";
+					magicHtml += "<td>";
+					var delButton = "<input type='checkbox' name='checkMagic' value='"+magicArr[i][2]+"'/>";
+					magicHtml += delButton;
+					magicHtml += "</td>";
+					magicHtml += "<td>";
+					magicHtml += "<span class='blue'>"+magicArr[i][0]+"</span>";
+					magicHtml += "</td>";
+					magicHtml += "<td>";
+					magicHtml += getQualityName(magicArr[i+1][0]);
+					magicHtml += "</td>";
+					magicHtml += "<td>";
+					magicHtml += magicArr[i+2][0];
+					magicHtml += "</td>";
+					magicHtml += "<td>";
+					magicHtml += magicArr[i][1] > 0 ? "已装备" : "";
+					magicHtml += "</td>";
+					magicHtml += "</tr>";
+				}
+				$('#magicInfosTable').find('tbody').html(magicHtml);
+
+				var itemHtml = "";
+				for(var i = 0 ; i < itemArr.length ; i=i+2){
+					itemHtml += "<tr>";
+					itemHtml += "<td>";
+					var delButton = "<input type='checkbox' name='checkItem' value='"+itemArr[i][1]+"'/>";
+					itemHtml += delButton;
+					itemHtml += "</td>";
+					itemHtml += "<td>";
+					itemHtml += "<span class='blue'>"+itemArr[i][0]+"</span>";
+					itemHtml += "</td>";
+					itemHtml += "<td id="+itemArr[i][1]+" class='pointer'>";
+					itemHtml += itemArr[i+1][0];
+					itemHtml += "</td>";
+					itemHtml += "</tr>";
+				}
+				$('#itemInfosTable').find('tbody').html(itemHtml);
+
+				/*此处是对itemInfotable的权限校验*/
+				if(mergeItemModalEdit){
+					editItemInfoTable();
+				}
+
+				var horseHtml = "";
+				for(var i = 0 ; i < horseArr.length ; i=i+3){
+					horseHtml += "<tr>";
+					horseHtml += "<td>";
+					var delButton = "<input type='checkbox' name='checkHorse' value='"+horseArr[i][2]+"'/>";
+					horseHtml += delButton;
+					horseHtml += "</td>";
+					horseHtml += "<td>";
+					horseHtml += "<span class='blue'>"+horseArr[i][0]+"</span>";
+					horseHtml += "</td>";
+					horseHtml += "<td>";
+					horseHtml += getQualityName(horseArr[i+1][0]);
+					horseHtml += "</td>";
+					horseHtml += "<td>";
+					horseHtml += horseArr[i+2][0];
+					horseHtml += "</td>";
+					horseHtml += "<td>";
+					horseHtml += horseArr[i][1] > 0 ? "已装备" : "";
+					horseHtml += "</td>";
+					horseHtml += "</tr>";
+				}
+				/*删除操作执行成功之后就给父级的 checkbox 取消选中*/
+				$('#horseInfosTable').find('tbody').html(horseHtml);
+				$("#checkAllNpc").attr("checked",false);
+				$("#checkAllMagic").attr("checked",false);
+				$("#checkAllItem").attr("checked",false);
+				$("#checkAllHorse").attr("checked",false);
+				reloadCheck();
+
+			}
+		});
+
+
+
+ 	},
+ 	addGoods:function(){
+ 		$("#addGoodsModal").modal("toggle");
+ 		mgr.getGoods();
+ 	},
+ 	saveAddGoods:function(){
+ 		var goods = $("#addGoods").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		var typeNum=goods.split(":");
+ 		if(null == playerId || playerId == ""){
+ 			alert("请先选择玩家");
+ 			return false;
+ 		}
+ 		if(null == goods || goods == ""){
+ 			alert("请选择需要添加的物品");
+ 			return false;
+ 		}
+ 		if(typeNum[0] == null || typeNum[0] === ""){
+ 			alert("请输入物品ID");
+ 			return false;
+ 		}
+ 		if(typeNum[1] == null || typeNum[1] === ""){
+ 			alert("请输入数量");
+ 			$("#addGoods").focus();
+ 			return false;
+ 		}
+ 		//console.log(serverInfo);
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/addGoods',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"goods":goods,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				$("#addGoodsModal").modal("hide");
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+ 	merge:function(){
+ 		var name = $("#mergeName").val();
+ 		var value = $("#mergeValue").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/merge',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"name":name,"value":value,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				$("#mergeModal").modal("hide");
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+	//修改三界境界,仙官,关卡数据
+	mergeGod:function(){
+		var name = $("#propertyName").val();
+		var value = $("#mergeGod").val();
+		var serverId = getServerId();
+		var playerId = $("#_playerId").html();
+		var playerName = $("#playerName").html();
+		var serverInfo = getServerInfo();
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/merge',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"name":name,"value":value,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				$("#mergeGodModal").modal("hide");
+				mgr.searchPlayerInfo();
+			}
+		});
+	},
+ 	mergeItem:function(){
+ 		var id = $("#mergeItemId").val();
+ 		var value = $("#mergeItemValue").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		if(value == 0){
+ 			alert("数据不可以为0。如果需要置为0，请直接删除该物品即可");
+ 			return false;
+ 		}
+ 		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/mergeItem',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"id":id,"name":name,"value":value,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data);
+				$("#mergeItemModal").modal("hide");
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+ 	mergeLevel:function(){
+ 		var levelId = $("#mergeLevel").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/mergeLevel',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"levelId":levelId,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data);
+				$("#mergeLevelModal").modal("hide");
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+	mergeStrangeLevel:function(){
+		var name = $("#thisStrangeLevelName").val();
+		var value = $("#mergeStrangeLevel").val();
+		var serverId = getServerId();
+		var playerId = $("#_playerId").html();
+		var playerName = $("#playerName").html();
+		var serverInfo = getServerInfo();
+		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/merge',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"name":name,"value":value,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data);
+				$("#mergeStrangeLevelModal").modal("hide");
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+	},
+ 	editSixDao : function(){
+ 		$("#sixDaoModal").modal("toggle");
+ 	},
+ 	mergeSixDao:function(){
+ 		var sixDaoLevel = $("#sixDaoLevel").val();
+ 		var sixDaoCen = $("#sixDaoCen").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		if(serverId == '' || null == serverId){
+ 			alert("请先选择区服");
+ 			return false;
+ 		}
+ 		if(playerId == '' || null == playerId){
+ 			alert("请输入玩家ID");
+ 			return false;
+ 		}
+ 		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/mergeSixDao',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"sixDaoLevel":sixDaoLevel,"sixDaoCen":sixDaoCen,"playerName":playerName,"serverInfo":serverInfo,"type":1},
+			success:function(data){
+				//console.log(data);
+				$("#sixDaoModal").modal("hide");
+				if(parseInt(data.ret) == 1){
+					alert("重置成功");
+				}else{
+					alert("重置失败");
+				}
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+ 	sixDaoLast:function(){
+ 		var sixDaoLevel = $("#sixDaoLevel").val();
+ 		var sixDaoCen = $("#sixDaoCen").val();
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		if(serverId == '' || null == serverId){
+ 			alert("请先选择区服");
+ 			return false;
+ 		}
+ 		if(playerId == '' || null == playerId){
+ 			alert("请输入玩家ID");
+ 			return false;
+ 		}
+ 		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/mergeSixDao',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"sixDaoLevel":sixDaoLevel,"sixDaoCen":sixDaoCen,"playerName":playerName,"serverInfo":serverInfo,"type":2},
+			success:function(data){
+				//console.log(data);
+				$("#sixDaoModal").modal("hide");
+				if(parseInt(data.ret) == 1){
+					alert("重置成功");
+				}else{
+					alert("重置失败");
+				}
+				mgr.searchPlayerInfo();
+				//reloadCheck();
+			}
+		});
+ 	},
+    batchUnEquipNpc:function(){
+		var serverId = getServerId();
+		var playerId = $("#_playerId").html();
+		var playerName = $("#playerName").html();
+		var serverInfo = getServerInfo();
+		if(serverId == '' || null == serverId){
+			alert("请先选择区服");
+			return false;
+		}
+		if(playerId == '' || null == playerId){
+			alert("请输入玩家ID");
+			return false;
+		}
+		//return false;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/batchUnEquipNpc',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data);
+				$("#sixDaoModal").modal("hide");
+					if(parseInt(data.ret) == 1){
+						alert("下阵成功");
+					}else{
+						alert("下阵失败");
+				}
+                setTimeout(mgr.searchPlayerInfo(),500);
+				//reloadCheck();
+			}
+		});
+	},
+ 	delGoods:function(){
+ 		var serverId = getServerId();
+		var bd = {};
+
+ 		/*检查npc选中项*/
+ 		var npcCheckObj={};
+ 		var npcIdArray = $("input[name='checkNpc']:checked").serializeArray();
+		$.each(npcIdArray, function(i, item){
+			npcCheckObj[item.value]=item.value;
+		});
+		/*检查item选中项*/
+ 		var itemCheckObj={};
+ 		var itemIdArray = $("input[name='checkItem']:checked").serializeArray();
+		$.each(itemIdArray, function(i, item){
+			itemCheckObj[item.value]=item.value;
+		});
+		/*检查magic选中项*/
+ 		var magicCheckObj={};
+ 		var magicIdArray = $("input[name='checkMagic']:checked").serializeArray();
+		$.each(magicIdArray, function(i, item){
+			magicCheckObj[item.value]=item.value;
+		});
+		/*检查horse选中项*/
+ 		var horseCheckObj={};
+ 		var horseIdArray = $("input[name='checkHorse']:checked").serializeArray();
+		$.each(horseIdArray, function(i, item){
+			horseCheckObj[item.value]=item.value;
+		});
+
+		var playerId = $("#_playerId").html();
+		var playerName = $("#playerName").html();
+		var serverInfo = getServerInfo();
+		var type = null;
+		/*添加到goodIds Array*/
+		bd["npcIds"] = npcCheckObj;
+		bd["itemIds"] = itemCheckObj;
+		bd["magicIds"] = magicCheckObj;
+		bd["horseIds"] = horseCheckObj;
+		bd["playerId"] = playerId;
+		bd["playerName"] = playerName;
+		bd["serverInfo"] = serverInfo;
+		//console.log(bd);
+		//return false;
+ 		if(JSON.stringify(bd["npcIds"]) === "{}" && JSON.stringify(bd["magicIds"]) === "{}" && JSON.stringify(bd["itemIds"]) === "{}" && JSON.stringify(bd["horseIds"]) === "{}"){
+ 			alert("请先选择需要删除的物品");
+ 			return false;
+ 		}
+ 		if(JSON.stringify(bd["npcIds"]) != "{}"){
+ 			type = 1;
+ 		}
+ 		if(JSON.stringify(bd["magicIds"]) != "{}"){
+ 			type = 2;
+ 		}
+ 		if(JSON.stringify(bd["itemIds"]) != "{}"){
+ 			type = 3;
+ 		}
+ 		if(JSON.stringify(bd["horseIds"]) != "{}"){
+ 			type = 4;
+ 		}
+ 		bd["type"] = type;
+ 		bd["serverId"] = serverId;
+ 		if(confirm("确定删除?")){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gm/delGoods',
+				dataType:'json',
+				contentType :"application/json;charset=UTF-8",
+				data: JSON.stringify(bd),
+				success:function(data){
+					mgr.searchPlayerInfo();
+					//reloadCheck();
+				}
+			});
+ 		}
+ 	},
+ 	kickedOffOnePlayer:function(){
+ 		var serverId = getServerId();
+ 		if(serverId == null || serverId == ""){
+ 			alert("请先选择区服");
+ 			return false;
+ 		}
+ 		var playerId = $("#playerIdInput").val();
+ 		var playerName = $("#playerNameInput").val();
+ 		if(playerId == "" && playerName == ""){
+ 			alert("请输入角色ID或者角色名");
+ 			return false;
+ 		}
+ 		var serverInfo = getServerInfo();
+ 		var type = 2;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/kickedOffPlayer',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"serverInfo":serverInfo,"type":type},
+			success:function(data){
+				//console.log(data);
+				if(parseInt(data.ret) == 1){
+					alert("踢出成功");
+				}else{
+					alert("踢出失败");
+				}
+				mgr.searchPlayerInfo();
+			}
+		});
+ 	},
+ 	kickedOffAll:function(){
+ 		var serverId = getServerId();
+ 		if(serverId == null || serverId == ""){
+ 			alert("请先选择区服");
+ 			return false;
+ 		}
+ 		var playerId = $("#_playerId").html();
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+ 		var type = 1;
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/kickedOffPlayer',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"serverInfo":serverInfo,"type":type},
+			success:function(data){
+				//console.log(data);
+				if(parseInt(data.ret) == 1){
+					alert("踢出成功");
+				}else{
+					alert("踢出失败");
+				}
+				mgr.searchPlayerInfo();
+			}
+		});
+ 	},
+ 	nextDay:function(){
+ 		var serverId = getServerId();
+ 		var playerId = $("#_playerId").html();
+ 		if(null == playerId || playerId == ''){
+ 			alert("请输入角色ID");
+ 			return false;
+ 		}
+ 		var playerName = $("#playerName").html();
+ 		var serverInfo = getServerInfo();
+		$.ajax({
+			type:'post',
+			url:''+$ctx+'/sysmgr/gm/nextDay',
+			dataType:'json',
+			data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"serverInfo":serverInfo},
+			success:function(data){
+				//console.log(data.ret);
+				if(parseInt(data.ret) == 1){
+					alert("刷新成功");
+				}else{
+					alert("刷新失败");
+				}
+				mgr.searchPlayerInfo();
+			}
+		});
+ 	}
+}
+</script>
+</body>
+</html>

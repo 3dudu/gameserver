@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+<!--输出方式：输出到控制台-->  
+  <appender name="console" class="org.apache.log4j.ConsoleAppender"> 
+    <param name="Target" value="System.out"/> 
+    <layout class="org.apache.log4j.PatternLayout"> 
+      <param name="ConversionPattern" value="%d [%t] [%m] [%l] %n"/> 
+    </layout> 
+  </appender>
+
+  <!--输出方式是：每天一个日志文件-->  
+  <appender name="file" class="org.apache.log4j.DailyRollingFileAppender">  
+    <param name="File" value="./logs/info.log"/>  
+    <param name="Append" value="true"/>
+    <param name="DatePattern" value="'.'yyyy-MM-dd'.'"/>  
+    <layout class="org.apache.log4j.PatternLayout">  
+      <param name="ConversionPattern" value="%d [%t] [%m] [%l] %n"/>
+    </layout>
+  </appender>
+  	
+	<!-- elk logger -->
+	<appender name="elkAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="./logs/elk.log" />
+		<param name="Encoding" value="utf-8" />
+		<param name="DatePattern" value="yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="INFO" />
+			<param name="LevelMax" value="ERROR" />
+		</filter>
+	</appender>
+  
+  <appender name="async" class="org.apache.log4j.AsyncAppender">
+     <param name="BufferSize" value="512" />
+     <appender-ref ref="file" />    
+  </appender> 
+  
+  	<appender name="elkAsync" class="org.apache.log4j.AsyncAppender">
+     	<appender-ref ref="elkAppender" />    
+  	</appender>
+	
+	<logger name="elk" additivity="false">
+		<appender-ref ref="elkAsync" />
+	</logger>
+
+  <root>
+    <priority value ="info" /> 
+     <!--  -->
+     <appender-ref ref="console" /> 
+     <appender-ref ref="async" />
+  </root>
+  
+</log4j:configuration>

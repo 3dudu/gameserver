@@ -1,0 +1,453 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=0">
+    <title>官方助手</title>
+    <script src="http://gamescom.xuegaogame.com/master/static/request/request.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        *{font-weight:normal;}
+
+        @font-face {
+            font-family: WeCFont;//自定义字体名称
+            src: url("http://gamescom.xuegaogame.com/master/static/helpsys/fonts/WeCFont.ttf");
+        }
+
+        body{
+            background-image:url(http://gamescom.xuegaogame.com/master/static/helpsys/images/bg_zhushou_003.png);
+            background-repeat: repeat;
+            font-family: WeCFont;
+        }
+
+        .navbar{min-height: 33px;background: url("http://gamescom.xuegaogame.com/master/static/helpsys/images/bg_zhushou_002.png")}
+
+        .libg{background: url("http://gamescom.xuegaogame.com/master/static/helpsys/images/bt_zhushou_normal_02.png");letter-spacing: 2px;background-size: cover;}
+
+        .navbar-nav{margin: 0;height: 33px;}
+
+        .navbar-default,.panel{border: none !important;}
+
+        .panel-heading{padding: 20px 10px;}
+
+        .panel-info ,.panel-heading{border:none !important;background: none !important;}
+
+        .panel-heading:before{content: "";
+            display: none;
+            width: 34px;
+            height: 25px;
+            background: url(http://gamescom.xuegaogame.com/master/static/helpsys/images/bt_zhushou_normal_03.png);
+            position: absolute;
+            left: 50%;
+            margin-left: -17px;
+            margin-top: 57px;
+            background-size: cover;
+            z-index:9999;}
+
+        .panel-heading.show:before{content: "";
+            display: block;
+            width: 34px;
+            height: 25px;
+            background: url(http://gamescom.xuegaogame.com/master/static/helpsys/images/bt_zhushou_normal_03.png);
+            position: absolute;
+            left: 50%;
+            margin-left: -17px;
+            margin-top: 57px;
+            background-size: cover;
+            z-index:9999;}
+
+        .navbar-nav > li > a {height: 33px;background: none;line-height:14px;color:rgb(168,175,183) !important;font-size: 20px}
+
+        .navbar-nav > .active > a {background-image: none;color:rgb(228,242,245)!important;}
+
+        .container-fluid{padding: 0;}
+
+        .panel-title > p{margin: 0;padding: 9px 0 0 10px;}
+
+        .line{height: 1px;width: 96%;margin-left:2%;background:rgb(44,53,70);}
+
+        .panel-title a{color: rgb(237,210,155); font-size: 18px; white-space: nowrap;}
+
+        .panel-title p{color: rgb(249,249,249); font-size: 18px; white-space: nowrap;}
+
+        .panel-group {margin-bottom: 0}
+
+        .panel-info>.panel-heading+.panel-collapse>.panel-body{
+
+        }
+
+        .panel-group .panel-heading+.panel-collapse>.list-group, .panel-group .panel-heading+.panel-collapse>.panel-body{
+            border-top: 1px solid rgb(44,53,70);
+        }
+
+        a:link{text-decoration:none;} /*指正常的未被访问过的链接*/
+
+        a:visited{text-decoration:none;} /*指已经访问过的链接*/
+
+        a:hover{text-decoration:none;} /*指鼠标在链接*/
+
+        a:active{text-decoration:none;} /*指正在点的链接*/
+
+        a {background: none !important;}
+
+        .left-context{width: 85%;float: left;}
+
+        /* 注释点赞样式 */
+        /*.right-zan{width: 15%;background:url("http://gamescom.xuegaogame.com/master/static/helpsys/images/bt_zhushou_normal_003.png") center top ;height: 47px;display: inline-block;color: #fff;background-repeat: no-repeat;text-align: center;line-height: 78px;*/
+            /*z-index: 99;}*/
+
+        /*.right-zan-click{background:url("http://gamescom.xuegaogame.com/master/static/helpsys/images/bt_zhushou_down_003.png") center top ;background-repeat: no-repeat;}*/
+
+        /* 标签样式 */
+        .hot-strategy{width: 15%;background:url("http://gamescom.xuegaogame.com/master/static/helpsys/images/ic_zhushou_001.png") center top ;height: 47px;display: inline-block;color: #fff;background-repeat: no-repeat;text-align: center;line-height: 78px;
+            z-index: 99;background-size: contain;}
+
+        .newer-recommend{width: 15%;background:url("http://gamescom.xuegaogame.com/master/static/helpsys/images/ic_zhushou_002.png") center top ;height: 47px;display: inline-block;color: #fff;background-repeat: no-repeat;text-align: center;line-height: 78px;
+            z-index: 99;background-size: contain;}
+
+        .senior-strategy{width: 15%;background:url("http://gamescom.xuegaogame.com/master/static/helpsys/images/ic_zhushou_003.png") center top ;height: 47px;display: inline-block;color: #fff;background-repeat: no-repeat;text-align: center;line-height: 78px;
+            z-index: 99;background-size: contain;}
+
+
+
+        @media only screen and (max-width:768px ) {
+            .nav > li{float: left;text-align: center;}
+            #accordion {margin-top: 33px;}
+        }
+
+        @media only screen and (max-width:330px ) {
+            .nav > li{width: 37%;float: left;text-align: center;}
+        }
+
+
+        @media only screen and (min-width:768px ) {
+            #accordion {margin-top: 60px;}
+            .nav > li > a {line-height: 5px;}
+        }
+
+
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div>
+            <ul class="nav navbar-nav" id="nav-ul">
+                <li class="active libg" id="offical"><a href="javascript:void(0);">官方</a></li>
+                <li id="strategy"><a href="javascript:mgr.active(2);">攻略</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="panel-group" id="accordion">
+
+</div>
+<script>
+    $("#nav-ul li").click(function(){                //给所有的二级菜单加一个点击事件
+        $.each($("#nav-ul li"),function(i){          //循环遍历所以的二级菜单
+            //移除所有二级菜单的.active以及下面i标签的.icon-white
+            $(this).removeClass("active").removeClass("libg");
+        });
+        $(this).addClass("active").addClass("libg");                  //给当前点击的菜单加一个.active(比如让背景变蓝)
+
+    });
+
+    function initClick() {
+        $("#accordion .panel-heading").click(function(){
+            var heading = $(this);
+            var context = $(this).next();
+
+            // 先把当前操作对象的状态记录下来
+            var isHeadingHasShow = heading.hasClass("show");
+            var isContextHasIn = context.hasClass("in");
+
+            // 然后遍历关闭所有的
+            $.each($("#accordion .panel-info"),function(i){
+                $(this).children("div:first-child").removeClass("show");
+                $(this).children("div:last-child").removeClass("in");
+            });
+
+            // 然后根据上面记录的状态进行操作
+            if(isHeadingHasShow){
+                heading.removeClass("show");
+            }else{
+                heading.addClass("show");
+            }
+
+            if(isContextHasIn){
+                context.removeClass("in");
+            }else{
+                context.addClass("in");
+            }
+        });
+    }
+
+    //  ===================================================
+    //                         原来的点赞逻辑去掉
+    //  ===================================================
+    // function initClick() {
+    //     $("#accordion .panel-heading").click(function(){
+    //         var heading = $(this);
+    //         var context = $(this).next();
+    //
+    //         // 先把当前操作对象的状态记录下来
+    //         var isHeadingHasShow = heading.hasClass("show");
+    //         var isContextHasIn = context.hasClass("in");
+    //
+    //         // 然后遍历关闭所有的
+    //         $.each($("#accordion .panel-info"),function(i){
+    //             $(this).children("div:first-child").removeClass("show");
+    //             $(this).children("div:last-child").removeClass("in");
+    //         });
+    //
+    //         // 然后根据上面记录的状态进行操作
+    //         if(isHeadingHasShow){
+    //             heading.removeClass("show");
+    //         }else{
+    //             heading.addClass("show");
+    //         }
+    //
+    //         if(isContextHasIn){
+    //             context.removeClass("in");
+    //         }else{
+    //             context.addClass("in");
+    //         }
+    //     });
+    // }
+
+    var PUB_OFFICAL_HTML = "",
+        PUB_STRATEGY_HTML = "";
+
+    var mgr= {
+
+        getHelpInfo:function(){
+            $.ajax({
+                type:'post',
+                url:''+$ctx+'/api/getHelpInfo',
+                dataType:'json',
+                data: {},
+                success:function(data){ // [{...}]
+                    var allHelpList = data[0];  // {officalList: Array(2), strategyList: Array(1)}
+                    var officalList = allHelpList.officalList;  // [{…}, {…}]
+                    var strategyList = allHelpList.strategyList;    // [{…}]
+
+                    // 对 officalList 进行遍历取值
+                    var officalHtml = '';
+                    if(officalList != null && officalList.length >= 1){
+                        for(var i = 0 ; i < officalList.length ; i++){
+                            officalHtml += '<div class="panel panel-info">';
+                            officalHtml += '<div class="panel-heading">';
+                            officalHtml += '<div class="left-context">';
+                            officalHtml += '<h4 class="panel-title">';
+                            officalHtml += '<a>' + officalList[i].title + '</a>';
+                            officalHtml += '<p>' + officalList[i].description + '</p>';
+                            officalHtml += '</h4>';
+                            officalHtml += '</div>';
+                            // 此处是原本的zan
+                            // officalHtml += '<div class="right-zan"  onclick="mgr.zan(' + officalList[i].id + ',this)">';
+                            // officalHtml += officalList[i].zan;
+                            // officalHtml += '</div>';
+
+                            // 这边再次进行修改 官方的话不显示标签
+                            // switch (officalList[i].signType){
+                            //     case 1 :
+                            //         officalHtml += '<div class="hot-strategy">'; break;
+                            //     case 2 :
+                            //         officalHtml += '<div class="newer-recommend">'; break;
+                            //     case 3 :
+                            //         officalHtml += '<div class="senior-strategy">'; break;
+                            //     default :
+                            //         officalHtml += '<div class="hot-strategy">';
+                            // }
+                            // officalHtml += '</div>';
+
+                            officalHtml += '<div style="height: 47px;">';
+                            officalHtml += '</div>';
+
+                            officalHtml += '</div>';
+                            officalHtml += '<div id="collapse' + officalList[i].id + '" class="panel-collapse collapse">';
+                            officalHtml += '<div class="panel-body">';
+                            officalHtml += officalList[i].context;
+                            officalHtml += '</div>';
+                            officalHtml += '</div>';
+                            officalHtml += '</div>';
+                            officalHtml += '<div class="line">';
+                            officalHtml += '</div>';
+                        }
+                    }else{
+                        officalHtml += '<div class="panel panel-info">';
+                        officalHtml += '<div class="panel-heading">';
+                        officalHtml += '<div class="left-context">';
+                        officalHtml += '<h4 class="panel-title">';
+                        officalHtml += '<a>' + "【官方】查询为空" + '</a>';
+                        officalHtml += '<p>' + "无" + '</p>';
+                        officalHtml += '</h4>';
+                        officalHtml += '</div>';
+                        officalHtml += '<div style="height: 47px;">';
+                        officalHtml += '</div>';
+                        officalHtml += '</div>';
+                        officalHtml += '<div id="collapse1" class="panel-collapse collapse">';
+                        officalHtml += '<div class="panel-body" style="color: rgb(249,249,249)">';
+                        officalHtml += "暂时没有检索到【官方】消息，敬请期待！";
+                        officalHtml += '</div>';
+                        officalHtml += '</div>';
+                        officalHtml += '</div>';
+                    }
+
+                    // 默认显示 官方 文档
+                    $("#accordion").html(officalHtml);
+
+                    // 这边把 officalHtml 放到公共变量 以在 tab切换的时候调用
+                    PUB_OFFICAL_HTML = officalHtml;
+
+                    // 对 strategyList 进行遍历取值
+                    var strategyHtml = '';
+                    if(strategyList != null && strategyList.length >= 1){
+                        for(var i = 0 ; i < strategyList.length ; i++){
+                            strategyHtml += '<div class="panel panel-info">';
+                            strategyHtml += '<div class="panel-heading">';
+                            strategyHtml += '<div class="left-context">';
+                            strategyHtml += '<h4 class="panel-title">';
+                            strategyHtml += '<a>' + strategyList[i].title + '</a>';
+                            strategyHtml += '<p>' + strategyList[i].description + '</p>';
+                            strategyHtml += '</h4>';
+                            strategyHtml += '</div>';
+                            // strategyHtml += '<div class="right-zan"  onclick="mgr.zan(' + strategyList[i].id + ',this)">';
+                            // strategyHtml += strategyList[i].zan;
+                            // strategyHtml += '</div>';
+
+                            switch (strategyList[i].signType){
+                                case 1 :
+                                    strategyHtml += '<div class="hot-strategy">'; break;
+                                case 2 :
+                                    strategyHtml += '<div class="newer-recommend">'; break;
+                                case 3 :
+                                    strategyHtml += '<div class="senior-strategy">'; break;
+                                default :
+                                    strategyHtml += '<div class="hot-strategy">';
+                            }
+                            strategyHtml += '</div>';
+
+                            strategyHtml += '</div>';
+                            strategyHtml += '<div id="collapse' + strategyList[i].id + '" class="panel-collapse collapse">';
+                            strategyHtml += '<div class="panel-body">';
+                            strategyHtml += strategyList[i].context;
+                            strategyHtml += '</div>';
+                            strategyHtml += '</div>';
+                            strategyHtml += '</div>';
+                            strategyHtml += '<div class="line">';
+                            strategyHtml += '</div>';
+                        }
+                    }else{
+                        strategyHtml += '<div class="panel panel-info">';
+                        strategyHtml += '<div class="panel-heading">';
+                        strategyHtml += '<div class="left-context">';
+                        strategyHtml += '<h4 class="panel-title">';
+                        strategyHtml += '<a>' + "【攻略】查询为空" + '</a>';
+                        strategyHtml += '<p>' + "无" + '</p>';
+                        strategyHtml += '</h4>';
+                        strategyHtml += '</div>';
+                        strategyHtml += '<div  style="height: 47px;">';
+                        strategyHtml += '</div>';
+                        strategyHtml += '</div>';
+                        strategyHtml += '<div id="collapse2" class="panel-collapse collapse">';
+                        strategyHtml += '<div class="panel-body" style="color: rgb(249,249,249)">';
+                        strategyHtml += "暂时没有检索到【攻略】消息，快去投稿吧！";
+                        strategyHtml += '</div>';
+                        strategyHtml += '</div>';
+                        strategyHtml += '</div>';
+                    }
+                    // 这边把 officalHtml 放到公共变量 以在 tab切换的时候调用
+                    PUB_STRATEGY_HTML = strategyHtml;
+
+                    // 数据加载完成之后刷新点击事件
+                    initClick();
+                }
+            });
+        },
+
+        // index 1:官方  2:攻略
+        active : function (index) {
+            switch (index){
+                // 官方
+                case 1 :
+                    // 替换显示内容
+                    $("#accordion").html(PUB_OFFICAL_HTML);
+
+                    // 替换按钮连接
+                    $("#strategy a").attr("href","javascript:mgr.active(2);");
+                    break;
+
+                // 攻略
+                case 2 :
+                    // 替换显示内容
+                    $("#accordion").html(PUB_STRATEGY_HTML);
+
+                    // 替换按钮连接
+                    $("#offical a").attr("href","javascript:mgr.active(1);");
+                    break;
+            }
+
+            // 切换TAB完成之后刷新点击事件
+            initClick();
+        },
+
+        //点赞
+        zan : function (id,curObj) {
+            // $.ajax({
+            //     type:'post',
+            //     url:''+$ctx+'/api/clickZan',
+            //     dataType:'json',
+            //     data: {"id":id},
+            //     success:function(data){
+            //         //mgr.getHelpInfo();
+            //         console.log(data[0].msg);
+            //
+            //     }
+            // });
+            $(curObj).html(parseInt($(curObj).html()) + 1);
+            $(curObj).addClass("right-zan-click");
+            event.stopPropagation();
+        }
+    }
+
+
+    function getTabName () {
+        $.ajax({
+            type:'post',
+            url:''+$ctx+'/sysmgr/helpsys/getDiffTypeList',
+            dataType:'json',
+            data: {},
+            success:function(data){
+                console.log(data);
+                var typeList = data;
+                var offical = "";
+                var strategy = "";
+                for(var i = 0 ; i < typeList.length ; i++){
+                    if(typeList[i].diffType == 1){
+                        offical = typeList[i].diffName;
+                    }else if(typeList[i].diffType == 2){
+                        strategy = typeList[i].diffName;
+                    }
+                }
+                $('#offical a').html(offical);
+                $('#strategy a').html(strategy);
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        getTabName();
+        mgr.getHelpInfo();
+        $(".right-zan").click(function(){
+            console.log($(this).html());
+        });
+    });
+</script>
+</body>
+</html>

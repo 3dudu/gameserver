@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icegame.sysmanage.mapper.MailMaxIdMapper">
+
+	<!-- 返回 all_srv_mail、srvMailId、roleMailId三张表的最大ID-->
+	<select id="getMailMaxId" parameterType="mailMaxId" resultType="mailMaxId">
+		select
+		(select max(id) from all_srv_mail) allSrvMailId,
+		(select max(id) from sel_srv_mail) srvMailId,
+		(select max(id) from role_mail) roleMailId
+	</select>
+	
+</mapper>

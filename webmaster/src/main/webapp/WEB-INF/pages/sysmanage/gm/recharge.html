@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>用户查询页面</title>
+	<meta charset="utf-8" />
+	<meta name="renderer" content="webkit">
+	<style>
+		h5{text-indent: 10px;}
+		.blue{
+			color:#2fa4e7;
+		}
+		.wi55{width:55px}
+	</style>
+</head>
+<script src="http://gamescom.xuegaogame.com/master/static/header.js" type="text/javascript"></script>
+<link href="http://gamescom.xuegaogame.com/master/static/jquery-dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+
+<body>
+
+<ul class="nav nav-tabs">
+	<li class="active"><a href="javascript:void(0);">充值</a></li>
+</ul>
+<form id="searchForm" class="breadcrumb form-search" action="#" method="post">
+	<div class="controls">
+		<label for="serverIdInput">所在区:</label>
+		<select id="serverIdInput" name="serverIdInput" style="width:190px">
+			<option value="">选择所在区</option>
+			<option value="10">十区</option>
+			<option value="14">十四区</option>
+			<option value="15">十五区</option>
+		</select>
+		<label for="playerIdInput">角色ID:</label>
+		<input id="playerIdInput" name="playerIdInput" class="input-medium" type="text" value=""/>&nbsp;
+		<label for="playerNameInput">角色名:</label>
+		<input id="playerNameInput" name="playerNameInput" class="input-medium" type="text" value=""/>&nbsp;
+		<label for="playerGodNameInput">修仙名:</label>
+		<input id="playerGodNameInput" name="playerGodNameInput" class="input-medium" type="text" value=""/>&nbsp;
+		<input id="btnSubmit" class="btn btn-primary" type="button" value="查询" onclick = "mgr.searchPlayerInfo();"/>
+	</div>
+</form>
+<table id="infoTable"  class="table tablesorter table-hover table-striped table-bordered table-condensed">
+	<tbody>
+	<tr>
+		<td class='blue wi55'>角色名</td>
+		<td id="playerName"></td>
+		<td class='blue wi55'>角色ID</td>
+		<td id="_playerId"></td>
+		<td class='blue wi55'>元宝数量</td>
+		<td id="dollar"></td>
+		<td class='blue wi55'>VIP等级</td>
+		<td id="vipLevel"></td>
+		<td class='blue wi55'>VIP经验</td>
+		<td id="vipExp"></td>
+		<td class='blue wi55'>平台标识</td>
+		<td id="platTag"></td>
+	</tr>
+	</tbody>
+</table>
+<form id="searchForm3" class="breadcrumb form-search" action="#" method="post">
+	<h5>礼包充值</h5>
+	<div class="controls">
+		<label for="noIndexGift">礼包编号:</label>
+		<input id="noIndexGift" name="noIndexDollar" class="input-medium" type="text" value=""/>&nbsp;
+		<input id="noIndexGiftSubmit" class="btn btn-primary" type="button" value="发货" onclick = "mgr.rechargeGift();"/>
+		<i class="layer-tips right" id="giftRechargeTips" tips="礼包充值：填写对应充值表的编号。例如：填写：appBuyItem_101，表示充值月卡；填写：appBuyItem_102，表示充值终生卡；"></i>
+	</div>
+</form>
+<script src="http://gamescom.xuegaogame.com/master/static/footer.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function () {
+		mgr.getAllChannelServerList();
+	});
+	function getServerInfo(){
+		var serverInfo=$("#serverIdInput option:selected"); //获取选中的项
+		return serverInfo.val()+"-"+serverInfo.text();
+	}
+
+	function getServerId(){
+		var serverInfo=$("#serverIdInput option:selected"); //获取选中的项
+		return serverInfo.val();
+	}
+
+	function resetValue () {
+		$('#index').each(function (i, j) {
+			$(j).find("option:selected").attr("selected", false).change();
+			$(j).find("option").first().attr("selected", true).change();
+		})
+	}
+
+	function initIndex(platTag){
+		var androidOption = "<option value='0'>1档-10-100</option>";
+		androidOption += "<option value='1'>2档-30-300</option>";
+		androidOption += "<option value='2'>3档-50-500</option>";
+		androidOption += "<option value='3'>4档-100-1000</option>";
+		androidOption += "<option value='4'>5档-200-2000</option>";
+		androidOption += "<option value='5'>6档-500-5000</option>";
+		androidOption += "<option value='6'>7档-1000-10000</option>";
+		androidOption += "<option value='7'>8档-2000-20000</option>";
+
+		var iosOption = "<option value='0'>1档-6-60</option>";
+		iosOption += "<option value='1'>2档-18-180</option>";
+		iosOption += "<option value='2'>3档-30-300</option>";
+		iosOption += "<option value='3'>4档-98-980</option>";
+		iosOption += "<option value='4'>5档-198-1980</option>";
+		iosOption += "<option value='5'>6档-328-3280</option>";
+		iosOption += "<option value='6'>7档-548-5480</option>";
+		iosOption += "<option value='7'>8档-648-6480</option>";
+		iosOption += "<option value='8'>9档-1000-10000</option>";
+		iosOption += "<option value='9'>10档-2000-20000</option>";
+
+        var mycardOption = "<option value='0'>1档-6-60</option>";
+        mycardOption += "<option value='1'>2档-18-180</option>";
+        mycardOption += "<option value='2'>3档-30-300</option>";
+        mycardOption += "<option value='3'>4档-98-980</option>";
+        mycardOption += "<option value='4'>5档-198-1980</option>";
+        mycardOption += "<option value='5'>6档-328-3280</option>";
+        mycardOption += "<option value='6'>7档-548-5480</option>";
+        mycardOption += "<option value='7'>8档-648-6480</option>";
+
+
+        switch(platTag){
+			case 0 : $("#index").html(iosOption); break;
+			case 1 : $("#index").html(androidOption); break;
+			case 2 : $("#index").html(androidOption); break;
+			case 3 : $("#index").html(mycardOption); break;
+			default : $("#index").html(androidOption); break;
+		}
+        resetValue();
+		/*$("#platform").change(function(){
+			if($(this).val() == 'android'){
+				$("#index").html(androidOption);
+			}else{
+				$("#index").html(iosOption);
+			}
+			resetValue();
+		});*/
+
+	}
+
+
+	/*$(window).load(function(){
+		initIndex();
+	});*/
+
+	var mgr ={
+		getAllChannelServerList : function (){
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/getAllChannelServerListNoPage',
+				dataType:'json',
+				data: {},
+				success:function(data){
+					//console.log(data);
+					var serverList = data;
+					var array = new Array();
+					if(serverList!=null&&serverList.length>0){
+
+                        for(var i=0;i<serverList.length;i++){
+                            if(array.indexOf(serverList[i].channel) == -1){
+                                array.push(serverList[i].channel);
+                            }
+                        }
+
+                        var html = '<option value="">选择所在区</option>';
+                        var serverNum;
+
+					    for(var k = 0 ; k < array.length ; k++){
+					        html += "<optgroup label=" + array[k] + ">";
+                            serverNum = 0;
+							for(var i = 0 ; i < serverList.length ; i++){
+							    if(serverList[i].channel == array[k]){
+                                    serverNum++;
+							        html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverNum+")"+serverList[i].name+"</option>";
+								}
+							}
+                            html += "</optgroup>";
+						}
+
+
+						/*var html = '<option value="">选择所在区</option>';
+						for(var i=0;i<serverList.length;i++){
+							if(serverList[i].channel != "company"){
+								html += "<option value='"+serverList[i].serverId+"'>["+serverList[i].channel+"]("+serverList[i].serverId+")"+serverList[i].name+"</option>";
+							}
+						}*/
+						$('#serverIdInput').html(html);
+					}
+				}
+			});
+		},
+		searchPlayerInfo :function(){
+			var serverId = $("#serverIdInput").val();
+			var playerId = $("#playerIdInput").val();
+			var playerName = $("#playerNameInput").val();
+			var playerGodName = $("#playerGodNameInput").val();
+			var username = $("#usernameInput").val();
+
+			if(serverId == ""){
+				alert("请先选择区服");
+				return false;
+			}
+			if(playerId == "" && playerName == "" && playerGodName == ""){
+				alert("请输入 角色ID 或者 角色名 或者 修仙名");
+				return false;
+			}
+
+			$.ajax({
+				type:'post',
+				url:''+$ctx+'/sysmgr/gm/searchPlayerInfo',
+				dataType:'json',
+				data: {"playerId":playerId,"serverId":serverId,"playerName":playerName,"playerGodName":playerGodName,"username":username},
+				success:function(data){
+					if(data == "-2"){
+						alert("角色不存在");
+						return false;
+					}
+					$("#playerName").html(data.playerName);
+					$("#_playerId").html(data._playerId);
+					$("#dollar").html(data.dollar);
+					$("#vipLevel").html(data.vipLevel);
+					$("#vipExp").html(data.vipExp);
+					var platTagNum = data.platTag;
+					switch (platTagNum) {
+						case 0:
+							$("#platTag").html("ios");
+							break;
+						case 1:
+							$("#platTag").html("android");
+							break;
+						case 2:
+							$("#platTag").html("运营商充值表");
+							break;
+						case 3:
+							$("#platTag").html("mycrad");
+							break;
+						default:
+							$("#platTag").html("android");
+							break;
+					}
+                    initIndex(parseInt(data.platTag));
+				}
+			});
+		},
+		recharge : function(){
+			var serverInfo = getServerInfo();
+			var serverId = getServerId();
+			var playerId = $("#playerIdInput").val();
+			if(playerId == "" || null == playerId){
+				alert("请输入角色ID");
+				return false;
+			}
+			var playerName = $("#playerName").html();
+			var serverId = $("#serverIdInput").val();
+			if(serverId == "" || null == serverId){
+				alert("请先选择区服");
+				return false;
+			}
+			var dollar = $("#noIndexDollar").val();
+            if(confirm("友情提示：请在充值前仔细检查玩家的区服ID、玩家姓名、玩家ID、充值金额、档位等信息，确认无误再进行充值。\n是否确认充值?")) {
+                $.ajax({
+                    type: 'post',
+                    url: '' + $ctx + '/sysmgr/gm/recharge',
+                    dataType: 'json',
+                    data: {
+                        "playerId": playerId,
+                        "serverId": serverId,
+                        "index": null,
+                        "dollar": dollar,
+                        "playerName": playerName,
+                        "serverInfo": serverInfo
+                    },
+                    success: function (data) {
+                        if (parseInt(data.ret) == 1) {
+                            alert("充值成功");
+                        } else {
+                            alert("充值失败");
+                        }
+                        mgr.searchPlayerInfo();
+                    }
+                });
+            }
+		},
+		indexRecharge : function(){
+			var serverInfo = getServerInfo();
+			var playerId = $("#playerIdInput").val();
+			if(playerId == "" || null == playerId){
+				alert("请输入角色ID");
+				return false;
+			}
+			var serverId = getServerId();
+			var playerName = $("#playerName").html();
+			var serverId = $("#serverIdInput").val();
+			if(serverId == "" || null == serverId){
+				alert("请先选择区服");
+				return false;
+			}
+
+            //var platform = $("#platform").val();
+
+			var platTag = $("#platTag").html();
+
+			// platTag = parseInt(platTag);
+
+			var index = $("#index").val();
+
+            var dollar = null;
+
+			if(index == "" || null == index){
+				alert("请输入充值档位");
+				return false;
+			}
+                   // platTag = 1;
+			if(platTag == "android" || platTag == "运营商充值表"){
+			    switch(parseInt(index)){
+					case 0 : dollar = 10 ; break ;
+					case 1 : dollar = 30 ; break ;
+					case 2 : dollar = 50 ; break ;
+					case 3 : dollar = 100 ; break ;
+					case 4 : dollar = 200 ; break ;
+					case 5 : dollar = 500 ; break ;
+					case 6 : dollar = 1000 ; break ;
+					case 7 : dollar = 2000 ; break ;
+				}
+			}else if(platTag == "ios"){
+                switch(parseInt(index)){
+                    case 0 : dollar = 6 ; break ;
+                    case 1 : dollar = 18 ; break ;
+                    case 2 : dollar = 30 ; break ;
+                    case 3 : dollar = 98 ; break ;
+                    case 4 : dollar = 198 ; break ;
+                    case 5 : dollar = 328 ; break ;
+                    case 6 : dollar = 548 ; break ;
+                    case 7 : dollar = 648 ; break ;
+                    case 8 : dollar = 1000 ; break ;
+                    case 9 : dollar = 2000 ; break ;
+                }
+			}else if(platTag == "mycrad"){
+                switch(parseInt(index)){
+                    case 0 : dollar = 6 ; break ;
+                    case 1 : dollar = 18 ; break ;
+                    case 2 : dollar = 30 ; break ;
+                    case 3 : dollar = 98 ; break ;
+                    case 4 : dollar = 198 ; break ;
+                    case 5 : dollar = 328 ; break ;
+                    case 6 : dollar = 548 ; break ;
+                    case 7 : dollar = 648 ; break ;
+                }
+            }else{
+                switch(parseInt(index)){
+                    case 0 : dollar = 10 ; break ;
+                    case 1 : dollar = 30 ; break ;
+                    case 2 : dollar = 50 ; break ;
+                    case 3 : dollar = 100 ; break ;
+                    case 4 : dollar = 200 ; break ;
+                    case 5 : dollar = 500 ; break ;
+                    case 6 : dollar = 1000 ; break ;
+                    case 7 : dollar = 2000 ; break ;
+                }
+			}
+
+			//console.log(index);
+			//console.log(dollar);
+			//return false;
+			if(dollar == null || dollar < 6 || dollar > 2000){
+			    alert("档位不合法，充值失败");
+			    return false;
+			}
+
+            if(confirm("友情提示：请在充值前仔细检查玩家的区服ID、玩家姓名、玩家ID、充值金额、档位等信息，确认无误再进行充值。\n是否确认充值?")){
+                $.ajax({
+                    type:'post',
+                    url:''+$ctx+'/sysmgr/gm/recharge',
+                    dataType:'json',
+                    data: {"playerId":playerId,"serverId":serverId,"index":index,"dollar":dollar,"playerName":playerName,"serverInfo":serverInfo},
+                    success:function(data){
+                        if(parseInt(data.ret) == 1){
+                            alert("充值成功");
+                        }else{
+                            alert("充值失败");
+                        }
+                        mgr.searchPlayerInfo();
+                    }
+                });
+            }
+
+		},
+		rechargeGift : function(){
+
+            mgr.searchPlayerInfo();
+
+			var serverInfo = getServerInfo();
+			var serverId = getServerId();
+			var playerId = $("#playerIdInput").val();
+			if(playerId == "" || null == playerId){
+				alert("请输入角色ID");
+				return false;
+			}
+			var playerName = $("#playerName").html();
+			var serverId = $("#serverIdInput").val();
+			if(serverId == "" || null == serverId){
+				alert("请先选择区服");
+				return false;
+			}
+			var tplId = $("#noIndexGift").val().replace(/(^\s*)|(\s*$)/g,"");
+			var tplIdStrs= new Array(); //定义一数组
+			tplIdStrs=tplId.split("_");
+			if(!/^(appBuyItem_)/.test(tplId) || tplIdStrs[1].length > 10 || !/^\d{0,10}$/.test(tplIdStrs[1])){
+				alert("请输入正确的编号格式，[appBuyItem_xxx]，这边的 xxx 只能填写数字\n例如：输入 [appBuyItem_101]，表示充值月卡");
+				return false;
+			}
+
+            if(!checkExists()){
+                alert("玩家不存在");
+                return false;
+            }
+
+			if(confirm("友情提示：请在充值前仔细检查玩家的区服ID、玩家姓名、玩家ID、充值金额、档位等信息，确认无误再进行充值。\n是否确认充值?")) {
+				$.ajax({
+					type: 'post',
+					url: '' + $ctx + '/sysmgr/gm/giftRecharge',
+					dataType: 'json',
+					data: {
+						"playerId": playerId,
+						"serverId": serverId,
+						"tplId": tplId,
+						"playerName": playerName,
+						"serverInfo": serverInfo
+					},
+					success: function (data) {
+						alert(data.ret);
+						mgr.searchPlayerInfo();
+					}
+				});
+			}
+		},
+	}
+
+    function checkExists() {
+        var playerName = $("#playerName").html();
+        var playerId = $("#_playerId").html();
+
+        if(playerName == "" && playerId == ""){
+            return false;
+        }
+        return true;
+    }
+
+</script>
+</body>
+</html>
