@@ -12,7 +12,7 @@
 
   <!--输出方式是：每天一个日志文件-->  
   <appender name="file" class="org.apache.log4j.DailyRollingFileAppender">  
-    <param name="File" value="./logs/info.log"/>  
+    <param name="File" value="./logs/loginserver-info.log"/>  
     <param name="Append" value="true"/>
     <param name="DatePattern" value="'.'yyyy-MM-dd'.'"/>  
     <layout class="org.apache.log4j.PatternLayout">  
@@ -22,7 +22,7 @@
   	
 	<!-- elk logger -->
 	<appender name="elkAppender" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="./logs/elk.log" />
+		<param name="File" value="./logs/loginserver-elk.log" />
 		<param name="Encoding" value="utf-8" />
 		<param name="DatePattern" value="yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
